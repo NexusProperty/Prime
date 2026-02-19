@@ -1,0 +1,225 @@
+---
+description: API & Data Fetching Patterns - Supabase + Next.js App Router + Make.com webhooks
+globs: "**/lib/**", "**/hooks/**", "**/app/api/**", "**/queries/**"
+alwaysApply: false
+---
+
+# API & Data Fetching — United Trades Patterns
+
+> This project uses **Supabase** as the central database, **Next.js App Router** (server and client components), and **Make.com** webhooks for automation. TanStack Query is planned for client-side server state.
+
+---
+
+## Supabase Client Setup
+
+### Server Components (App Router)
+```typescript
+// src/lib/supabase/server.ts
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+
+export function createClient() {
+  const cookieStore = cookies()
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll() },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+}
+```
+
+### Client Components (Browser)
+```typescript
+// src/lib/supabase/client.ts
+import { createBrowserClient } from '@supabase/ssr'
+
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
+```
+
+---
+
+## Data Fetching Patterns
+
+### Server Component — Direct Supabase Query
+```typescript
+// ✅ CORRECT — Server Component fetches directly
+import { createClient } from '@/lib/supabase/server'
+
+export default async function LeadsPage() {
+  const supabase = createClient()
+  const { data: leads, error } = await supabase
+    .from('leads')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Failed to fetch leads:', error)
+    return <p>Failed to load leads.</p>
+  }
+
+  return <LeadList leads={leads} />
+}
+```
+
+### Always Destructure { data, error }
+```typescript
+// ✅ CORRECT
+const { data, error } = await supabase.from('leads').select('*')
+if (error) throw new Error(error.message)
+
+// ❌ WRONG — never ignore the error
+const { data } = await supabase.from('leads').select('*')
+```
+
+### Client Component — TanStack Query (when installed)
+```typescript
+'use client'
+import { useQuery } from '@tanstack/react-query'
+import { createClient } from '@/lib/supabase/client'
+
+function useLeads() {
+  return useQuery({
+    queryKey: ['leads'],
+    queryFn: async () => {
+      const supabase = createClient()
+      const { data, error } = await supabase.from('leads').select('*')
+      if (error) throw new Error(error.message)
+      return data
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+}
+```
+
+---
+
+## API Routes (App Router)
+
+### Lead Submission Route Pattern
+```typescript
+// app/api/leads/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const supabase = createClient()
+
+    const { data, error } = await supabase
+      .from('leads')
+      .insert({
+        brand: body.brand,  // 'prime-electrical' | 'akf-construction' | 'cleanjet'
+        name: body.name,
+        email: body.email,
+        phone: body.phone,
+        message: body.message,
+        source: 'web-form',
+        status: 'new',
+      })
+      .select()
+      .single()
+
+    if (error) throw new Error(error.message)
+
+    // Trigger Make.com webhook for AI cross-sell analysis
+    await triggerMakeWebhook(data)
+
+    return NextResponse.json({ success: true, lead: data })
+  } catch (error) {
+    console.error('Lead submission failed:', error)
+    return NextResponse.json({ error: 'Submission failed' }, { status: 500 })
+  }
+}
+
+async function triggerMakeWebhook(lead: Record<string, unknown>) {
+  const webhookUrl = process.env.MAKE_WEBHOOK_URL
+  if (!webhookUrl) return
+  await fetch(webhookUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(lead),
+  })
+}
+```
+
+---
+
+## Cross-Sell Logic Pattern
+
+```typescript
+// src/lib/cross-sell.ts
+// AI cross-sell detection — called by Make.com, not directly in Next.js
+
+export type Brand = 'prime-electrical' | 'akf-construction' | 'cleanjet'
+
+export interface CrossSellSignal {
+  fromBrand: Brand
+  toBrand: Brand
+  reason: string
+  confidence: 'high' | 'medium' | 'low'
+}
+
+// Cross-sell rules (replicated from GPT-4o system prompt for reference)
+export const CROSS_SELL_RULES = {
+  'prime-electrical': {
+    toAkf: ['ceiling', 'wall', 'rough-in', 'framing', 'renovation'],
+    toCleanjet: ['dust', 'drilling', 'heat pump', 'installation', 'mess'],
+  },
+  'akf-construction': {
+    toPrime: ['electrical', 'power', 'wiring', 'lights', 'outlets'],
+    toCleanjet: ['completion', 'handover', 'clean up', 'post-build'],
+  },
+  'cleanjet': {
+    toPrime: ['inspection', 'safety', 'electrical check'],
+  },
+}
+```
+
+---
+
+## Environment Variables
+
+All API access requires these env vars in `.env.local` for each site:
+
+```bash
+# Supabase (central — same across all 3 sites)
+NEXT_PUBLIC_SUPABASE_URL=https://[project].supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=[anon-key]
+SUPABASE_SERVICE_ROLE_KEY=[service-role-key]
+
+# Make.com (webhook for cross-sell logic)
+MAKE_WEBHOOK_URL=https://hook.make.com/[webhook-id]
+
+# OpenAI (if calling AI directly from Next.js)
+OPENAI_API_KEY=sk-...
+
+# Twilio (if SMS is triggered from Next.js)
+TWILIO_ACCOUNT_SID=AC...
+TWILIO_AUTH_TOKEN=...
+```
+
+---
+
+## General Rules
+
+- NEVER mix server and client Supabase clients — use `@/lib/supabase/server` in Server Components, `@/lib/supabase/client` in Client Components
+- ALWAYS check `error` after every Supabase query
+- NEVER expose `SUPABASE_SERVICE_ROLE_KEY` to the client (no `NEXT_PUBLIC_` prefix)
+- ALWAYS use typed returns — generate types from Supabase CLI when schema is stable
+- Use `staleTime` in TanStack Query to prevent unnecessary refetches
+- Make.com webhook calls are fire-and-forget — do NOT await them in the critical path

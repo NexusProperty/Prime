@@ -1,0 +1,254 @@
+---
+description: Team coordination protocol for multi-subagent tasks
+alwaysApply: false
+---
+
+# Team Coordination Protocol
+
+> **Source:** CC-017 (ORION-011 Claude Code Integration)
+> **Design Document:** `memory-bank/creative/ORION-011/creative-ORION-011-team-coordination.md`
+
+This protocol ensures safe coordination when multiple subagents work on the same task. It prevents file conflicts, manages dependencies, and provides observability.
+
+---
+
+## 1. Phase Execution Model
+
+All multi-subagent tasks follow a 6-phase execution model. Phases are sequential; within each phase, parallelism is allowed where noted.
+
+| Phase | Subagent Types | Parallelism | File Operations |
+|-------|----------------|-------------|-----------------|
+| **1. Discovery** | explore, codebase-scanner-fast, memory-bank-specialist-fast | Parallel OK | Read-only |
+| **2. Analysis** | component-architecture-reviewer-fast, frontend-architect-fast, ui-ux-engineer-fast | Parallel OK | Read-only |
+| **3. Planning** | Main Agent only | N/A | None (orchestration) |
+| **4. Execution** | file-operations-fast, memory-bank-specialist-fast, type-system-guardian-fast | Sequential by scope | Write |
+| **5. Validation** | validation-specialist-fast, scientific-debugger-fast | Parallel OK | Read-only |
+| **6. Shutdown** | Main Agent coordination | N/A | None (cleanup only) |
+
+### Phase Transition Rules
+
+- Main Agent verifies all subagents in current phase complete before transitioning
+- Discovery and Analysis phases may run in parallel with each other
+- Planning phase is Main Agent only — no subagents
+- Execution phase subagents must have non-overlapping scopes
+- Validation phase runs after all Execution subagents complete
+- Shutdown phase runs after all Validation subagents complete
+
+### Phase 6: Shutdown
+
+**Purpose:** Graceful termination of multi-subagent coordination with cleanup and verification.
+
+**When to invoke:** After Phase 5 (Validation) completes and all subagent work is verified.
+
+**Shutdown Sequence:**
+
+1. **Signal** — Main Agent broadcasts shutdown signal to all active subagents
+   - Includes final status summary
+   - Specifies any pending cleanup tasks
+   - Sets timeout for acknowledgment (default: 30 seconds)
+
+2. **Acknowledge** — Each subagent acknowledges receipt of shutdown signal
+   - Confirms no operations in progress
+   - Reports final state (success/failure/partial)
+   - Releases any held resources
+
+3. **Cleanup** — Subagents perform final cleanup
+   - Close file handles
+   - Clear temporary state
+   - Update Memory Bank if needed
+   - Report cleanup completion
+
+4. **Verify** — Main Agent verifies shutdown completion
+   - All subagents acknowledged
+   - No orphaned processes
+   - Memory Bank consistent
+   - No uncommitted changes
+
+**Shutdown Checklist:**
+
+- [ ] All subagents acknowledged shutdown signal
+- [ ] All file operations completed or rolled back
+- [ ] Memory Bank files updated and consistent
+- [ ] No linting errors introduced
+- [ ] All temporary files cleaned up
+- [ ] Final status reported to user
+
+**Constraints:**
+
+- No new subagent spawns after shutdown signal
+- Subagents must acknowledge within timeout or be considered failed
+- Main Agent waits for all acknowledgments before proceeding
+- If shutdown fails, Main Agent reports incomplete state to user
+
+**Example:**
+
+```
+Main Agent: [Shutdown signal] All validation complete, initiating shutdown
+Subagent A: [Acknowledge] file-operations-fast shutdown complete
+Subagent B: [Acknowledge] memory-bank-specialist-fast shutdown complete
+Main Agent: [Verify] All 2 subagents acknowledged, shutdown complete
+```
+
+---
+
+## 2. Scope Manifest Format
+
+When spawning write-capable subagents in the Execution phase, include a **Coordination Scope** block in the prompt:
+
+```markdown
+## Coordination Scope
+- **Subagent ID:** [unique-id, e.g., exec-001]
+- **Phase:** Execution
+- **Allowed Paths:** [list of file patterns this subagent may modify]
+- **Forbidden Paths:** [list of paths reserved for other subagents]
+- **Predecessor:** [subagent ID that must complete first, or "none"]
+- **Successor:** [subagent ID that depends on this completing, or "none"]
+
+**CONSTRAINT:** Do NOT operate on files outside your Allowed Paths.
+If you need to access Forbidden Paths, STOP and report to Main Agent.
+```
+
+### Scope Assignment Guidelines
+
+1. **Non-overlapping paths** — No two Execution subagents share allowed paths
+2. **Specific over broad** — Prefer explicit file lists over wildcards
+3. **Memory Bank separation** — `memory-bank/*` updates should go to a dedicated subagent
+4. **Rule files separation** — `.cursor/rules/*` updates should go to a dedicated subagent
+
+---
+
+## 3. Coordination Rules
+
+### Rule 1: Phase Boundaries
+
+Main Agent must verify phase completion before proceeding:
+
+```markdown
+## Phase Completion Check
+- [ ] All subagents in [Phase Name] have returned
+- [ ] No subagent reported errors or blockers
+- [ ] Outputs from this phase are available for next phase
+```
+
+### Rule 2: Scope Non-Overlap
+
+Before spawning Execution subagents, Main Agent must verify:
+
+```markdown
+## Scope Assignment
+| Subagent | Allowed Paths | Forbidden Paths |
+|----------|---------------|-----------------|
+| exec-001 | .cursor/rules/*.mdc | memory-bank/* |
+| exec-002 | memory-bank/* | .cursor/rules/*.mdc |
+| exec-003 | .cursor/commands/*.md | memory-bank/*, .cursor/rules/* |
+```
+
+No path may appear in both an Allowed list and another Allowed list.
+
+### Rule 3: Dependency Order
+
+If subagent B depends on subagent A's output:
+1. Spawn A first
+2. Wait for A to complete
+3. Verify A's output is correct
+4. Only then spawn B with A's output in context
+
+### Rule 4: Conflict Response
+
+If a conflict is detected (same file modified by multiple subagents):
+1. **STOP** — Do not proceed with further execution
+2. **IDENTIFY** — Determine which subagent caused the conflict
+3. **ROLLBACK** — If possible, undo the conflicting change
+4. **RETRY** — Reassign with narrower scopes and re-execute
+
+### Shutdown Protocol
+
+- Main Agent is responsible for initiating shutdown after Phase 5
+- Subagents must acknowledge shutdown within 30 seconds
+- No new subagent spawns are allowed after shutdown signal
+- Cleanup operations must complete within 60 seconds
+- Main Agent reports final status to user after verification
+
+---
+
+## 4. Command Integration
+
+Commands that use this protocol should include a phase mapping table:
+
+```markdown
+## Coordination Protocol
+
+This command follows the Team Coordination Protocol (`.cursor/rules/team-coordination.mdc`).
+
+### Phase Mapping
+| Protocol Phase | This Command's Step |
+|----------------|---------------------|
+| Discovery | Phase 1: Discovery |
+| Analysis | Phase 2: Review (parallel analysis) |
+| Planning | Phase 2: Review (Main Agent synthesis) |
+| Execution | Phase 3: Execution |
+| Validation | Phase 3: Execution (verification loop) |
+```
+
+---
+
+## 5. Observability
+
+### Tracking Coordination State
+
+Main Agent tracks coordination state in its working context:
+
+```markdown
+## Coordination State
+- Current Phase: [phase name]
+- Active Subagents: [count]
+- Completed Subagents: [list]
+- Pending Subagents: [list]
+- Conflicts Detected: [yes/no]
+```
+
+### Logging Requirements
+
+For debugging, Main Agent should log:
+1. Phase transitions with timestamps
+2. Subagent spawns with scope assignments
+3. Subagent completions with success/failure status
+4. Any conflicts or retries
+
+---
+
+## 6. When to Apply This Protocol
+
+Apply the Team Coordination Protocol when:
+- Task requires 2+ subagents in the Execution phase
+- Subagents will modify different files in the same task
+- Task involves updates to Memory Bank AND rule/command files
+
+Do NOT apply (keep simple) when:
+- Single subagent is sufficient
+- All modifications are to a single file
+- Task is read-only (Discovery/Analysis only)
+
+---
+
+## 7. Example: Multi-File Update Task
+
+```markdown
+## Coordination for CC-CREATIVE Implementation
+
+### Scope Assignment
+| Subagent ID | Type | Allowed Paths |
+|-------------|------|---------------|
+| exec-001 | file-operations-fast | .cursor/rules/team-coordination.mdc |
+| exec-002 | file-operations-fast | .cursor/commands/skillify.md, .cursor/skills/* |
+| exec-003 | memory-bank-specialist-fast | memory-bank/learnings.md, memory-bank/tasks.md |
+
+### Execution Order
+1. exec-001 (no dependencies)
+2. exec-002 (no dependencies, parallel with exec-001)
+3. exec-003 (after exec-001 and exec-002 complete, to record their outputs)
+```
+
+---
+
+*This rule is loaded on-demand via command files that reference it. It is not always-applied to minimize overhead for simple tasks.*

@@ -1,0 +1,277 @@
+---
+description: React Component Patterns and Anti-Patterns - United Trades (Next.js 15 App Router)
+globs: "**/*.tsx", "**/*.ts"
+alwaysApply: false
+---
+
+# React Component Patterns
+
+> These rules prevent common bugs during development. Applied to all 3 sites: Prime Electrical, AKF Construction, and CleanJet (Next.js 15 App Router + TypeScript + Tailwind CSS v4).
+
+## Project Context
+- **Sites:** Prime Electrical | AKF Construction | CleanJet
+- **Framework:** Next.js 15 App Router — use `'use client'` only when needed
+- **Auth guard:** Supabase Auth + middleware (see auth-patterns.mdc)
+- **Component style:** Named exports, PascalCase files, `@/` absolute imports
+- **No Radix UI** — use Headless UI (`@headlessui/react`) instead
+
+## 🚨 CRITICAL: React Hooks Order
+
+### Rule 1: Never Return Before Hooks
+
+All hooks must be called before any conditional returns. React requires hooks to be called in the same order on every render.
+
+```typescript
+// ❌ ANTI-PATTERN: Conditional return before hooks (causes crash!)
+function MyComponent() {
+  const { user } = useAuth();
+  
+  // THIS CRASHES! useState not called for non-admins
+  if (user?.role !== 'admin') {
+    return <Navigate to="/dashboard" />;
+  }
+  
+  const [state, setState] = useState(false); // Hook order violation!
+  
+  return <div>...</div>;
+}
+
+// ✅ CORRECT: All hooks before conditional returns
+function MyComponent() {
+  const { user } = useAuth();
+  const [state, setState] = useState(false); // All hooks first
+  
+  // Now safe to return early
+  if (user?.role !== 'admin') {
+    return <Navigate to="/dashboard" />;
+  }
+  
+  return <div>...</div>;
+}
+```
+
+**Error this prevents:**
+```
+Rendered more hooks than during the previous render.
+```
+
+## 🔄 Loading State Management
+
+### Rule 2: Always Resolve Loading States
+
+Async operations should ALWAYS resolve `isLoading` state, even on error. Use `finally` blocks.
+
+```typescript
+// ❌ ANTI-PATTERN: Loading state can hang forever
+async function fetchData() {
+  setIsLoading(true);
+  try {
+    const data = await fetch('/api/data');
+    setData(data);
+    setIsLoading(false); // Not called if fetch throws!
+  } catch (error) {
+    setError(error); // isLoading still true!
+  }
+}
+
+// ✅ CORRECT: Loading state always resolves
+async function fetchData() {
+  setIsLoading(true);
+  try {
+    const data = await fetch('/api/data');
+    setData(data);
+  } catch (error) {
+    setError(error);
+  } finally {
+    setIsLoading(false); // ALWAYS called
+  }
+}
+```
+
+### Rule 3: Add Timeout Protection to Async Operations
+
+Prevent infinite hangs with timeout protection.
+
+```typescript
+// ✅ CORRECT: Timeout protection
+const fetchWithTimeout = async <T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  fallback: T
+): Promise<T> => {
+  const timeoutPromise = new Promise<T>((resolve) => {
+    setTimeout(() => {
+      console.warn(`Operation timed out after ${timeoutMs}ms`);
+      resolve(fallback);
+    }, timeoutMs);
+  });
+  return Promise.race([promise, timeoutPromise]);
+};
+```
+
+## 🎯 Component Design
+
+### Rule 4: Add data-testid to Critical Elements
+
+Add `data-testid` attributes to elements that tests need to find reliably.
+
+```typescript
+// ❌ ANTI-PATTERN: No stable selectors
+<div className="dashboard-container">
+  <h1>Welcome Back</h1>
+</div>
+
+// ✅ CORRECT: Stable test selectors
+<div data-testid="main-dashboard" className="dashboard-container">
+  <h1 data-testid="welcome-heading">Welcome Back</h1>
+</div>
+```
+
+### Rule 5: Handle Missing Data Gracefully
+
+Components should render appropriately when data is loading, missing, or errored.
+
+```typescript
+// ❌ ANTI-PATTERN: Assumes data exists
+function UserCard({ profile }) {
+  return <div>{profile.name}</div>; // Crashes if profile is null!
+}
+
+// ✅ CORRECT: Handle all states
+function UserCard({ profile, isLoading, error }) {
+  if (isLoading) return <Skeleton className="h-20 w-full" />;
+  if (error) return <Alert variant="destructive">Failed to load</Alert>;
+  if (!profile) return <p className="text-muted-foreground">No data</p>;
+  return <div>{profile.name}</div>;
+}
+```
+
+## 🔐 Authentication Patterns
+
+### Rule 6: Use a Guard Component for Auth-Required Pages
+
+All authenticated routes must use your auth guard component.
+
+```typescript
+// ❌ ANTI-PATTERN: No route protection
+<Route path="/dashboard" element={<DashboardPage />} />
+
+// ✅ CORRECT: Protected route
+<Route 
+  path="/dashboard" 
+  element={
+    <AuthGuard>
+      <DashboardPage />
+    </AuthGuard>
+  } 
+/>
+```
+
+> **Customize:** Replace `AuthGuard` with your project's component name.
+
+### Rule 7: Expose Auth State for Testing
+
+In development/test environments, expose auth state on window for E2E tests.
+
+```typescript
+useEffect(() => {
+  if (process.env.NODE_ENV !== 'production') {
+    (window as any).__AUTH_STATE__ = {
+      isLoading,
+      isAuthenticated,
+      isReady: !isLoading && isAuthenticated,
+    };
+  }
+}, [isLoading, isAuthenticated]);
+```
+
+## 🎨 UI Component Patterns
+
+### Rule 8: Use Radix UI Correctly (if applicable)
+
+```typescript
+// ❌ ANTI-PATTERN: Expecting native select behavior
+<Select value={value} onChange={handleChange}> // No onChange prop!
+
+// ✅ CORRECT: Radix Select pattern
+<Select value={value} onValueChange={handleChange}>
+  <SelectTrigger>
+    <SelectValue placeholder="Select option" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="option1">Option 1</SelectItem>
+  </SelectContent>
+</Select>
+```
+
+### Rule 9: Form Input Types Matter
+
+```typescript
+// ✅ CORRECT: Appropriate input type
+<Input type="number" value={price} min={0} step={1} />
+```
+
+## 🔄 State Management
+
+### Rule 10: Avoid Prop Drilling for Global State
+
+Use context for state needed across many components.
+
+### Rule 11: Prefer React Query for Server State
+
+Use React Query for data fetching, not `useState + useEffect`.
+
+## ⚠️ JavaScript Safety
+
+### Rule 12: IIFE Safety — Always Prefix with `void` or `;`
+
+When using an IIFE after another statement, JavaScript's Automatic Semicolon Insertion (ASI) can chain the IIFE as a function call on the previous expression.
+
+```typescript
+// ❌ ANTI-PATTERN: ASI interprets this as someFunction()(...) → TypeError
+const sub = someObservable.subscribe(callback)
+(async () => { /* side effect */ })()
+
+// ✅ CORRECT: Prefix with void (preferred)
+const sub = someObservable.subscribe(callback)
+void (async () => { /* side effect */ })()
+```
+
+### Rule 13: data-testid Must Be Unique Per Viewport
+
+Every `data-testid` value MUST resolve to exactly ONE visible element at any given time. If the same action appears in multiple viewport layouts, use suffixed testids.
+
+```typescript
+// ❌ ANTI-PATTERN: Duplicate testid
+<Button data-testid="nav-logout" /> {/* mobile header */}
+<Button data-testid="nav-logout" /> {/* desktop sidebar */}
+
+// ✅ CORRECT: Unique per viewport
+<Button data-testid="nav-logout-mobile" />
+<Button data-testid="nav-logout" />
+```
+
+### Rule 14: Route-Dependent Behavior Must Check Route First
+
+```typescript
+// ❌ ANTI-PATTERN: Only checks role
+const persona = resolveFromRole(user?.role);
+
+// ✅ CORRECT: Route first, then role
+const persona = isMarketingPage(pathname)
+  ? 'default'
+  : resolveFromRole(user?.role);
+```
+
+## 📋 Component Checklist
+
+Before submitting a new component, verify:
+
+- [ ] All hooks are called before any conditional returns
+- [ ] Loading states always resolve (use `finally`)
+- [ ] Has `data-testid` on critical elements
+- [ ] `data-testid` values are unique across viewports
+- [ ] Handles loading, error, and empty states
+- [ ] Uses auth guard if auth-required
+- [ ] Uses appropriate input types
+- [ ] No bare IIFE after function calls — use `void` prefix

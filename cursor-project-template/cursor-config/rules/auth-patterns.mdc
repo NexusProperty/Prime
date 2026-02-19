@@ -1,0 +1,96 @@
+---
+description: Authentication and Protected Route Patterns
+globs: "**/auth/**", "**/Auth*", "**/ProtectedRoute*", "**/AuthGuard*", "**/routes/**", "**/contexts/Auth*"
+alwaysApply: false
+---
+
+# Authentication Patterns
+
+> Customize this rule for your project's auth provider (Supabase, Clerk, NextAuth, Auth0, etc.).
+
+## Protected Route Usage
+
+All authenticated routes must use a guard component.
+
+```typescript
+// Auth only
+<AuthGuard><Page /></AuthGuard>
+
+// With role requirement
+<AuthGuard requiredRole="admin"><AdminPage /></AuthGuard>
+```
+
+> **Project-specific:** Rename `AuthGuard` to match your implementation (`ProtectedRoute`, `RequireAuth`, `withAuth`, etc.)
+
+## Auth State Exposure (for testing)
+
+In non-production environments, expose auth state on `window` for E2E tests.
+
+```typescript
+// In your AuthContext or equivalent
+useEffect(() => {
+  if (process.env.NODE_ENV !== 'production') {
+    (window as any).__AUTH_STATE__ = {
+      isLoading,
+      isAuthenticated,
+      isReady: !isLoading && isAuthenticated,
+    };
+  }
+}, [isLoading, isAuthenticated]);
+```
+
+## Auth Flow
+
+1. User logs in via your auth provider
+2. Auth context fetches user profile/session asynchronously
+3. Guard component shows loading spinner while auth is resolving
+4. Once resolved, the protected page renders (or redirects to login)
+
+## Key Rules
+
+- Never assume auth state is ready immediately after navigation
+- Always wait for `isLoading` to be false before checking auth
+- Use generous timeouts in E2E tests to account for async profile fetches
+- Clear auth state properly for unauthenticated tests
+
+---
+
+## ⚠️ Common Auth Race Conditions (Universal Lessons)
+
+### localStorage.clear() Triggers Re-renders
+
+Calling `localStorage.clear()` removes session tokens, which triggers auth change events → React state update → full component tree re-render. DOM elements located before the clear are now detached.
+
+```typescript
+// ❌ DANGEROUS: Elements located before clear() are now detached
+await page.goto('/login');
+const emailInput = page.locator('input[type="email"]');
+await page.evaluate(() => localStorage.clear()); // Triggers re-render!
+await emailInput.fill(email); // ERROR: element detached from DOM
+
+// ✅ SAFE: Re-navigate after clearing to get a fresh, stable DOM
+await page.goto('/login');
+await page.evaluate(() => localStorage.clear());
+await page.goto('/login', { waitUntil: 'domcontentloaded' }); // Fresh page
+const emailInput = page.locator('input[type="email"]');
+await emailInput.waitFor({ state: 'visible', timeout: 15000 });
+await emailInput.fill(email);
+```
+
+### Profile Fetch Causes Layout Re-renders
+
+After successful auth, fetching the user profile asynchronously causes a re-render when the profile arrives. DOM elements inside profile-dependent components are destroyed and recreated.
+
+**Mitigation**: Wait for `networkidle` + a small buffer before interacting with profile-dependent elements.
+
+---
+
+## Project Customization Checklist
+
+After adding this template to your project, update:
+
+- [ ] Replace `AuthGuard` with your actual guard component name
+- [ ] Add your auth provider's session check logic
+- [ ] Add specific roles/permissions used in your app
+- [ ] Add any project-specific loading timeout values
+- [ ] Add your E2E test helper function for waiting for auth ready state

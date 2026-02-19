@@ -1,0 +1,342 @@
+---
+description: E2E Testing Rules - Preventing Flaky Tests and Race Conditions
+globs: "**/e2e/**", "**/*.spec.ts", "**/*.test.ts", "**/*.spec.js"
+alwaysApply: false
+---
+
+# E2E Testing Rules — Institutionalized Lessons
+
+> These rules are derived from real test failures analyzed and fixed in production. Following these patterns prevents the most common causes of flaky Playwright tests. They apply to any web application.
+
+## 🚨 CRITICAL: Authentication Race Conditions
+
+### Rule 1: Never Assume Auth State is Ready
+
+Authentication in web apps is asynchronous. Always wait explicitly for auth to complete.
+
+```typescript
+// ❌ ANTI-PATTERN: Assuming auth is ready immediately after navigation
+await page.goto('/dashboard');
+await expect(page.locator('[data-testid="welcome"]')).toBeVisible(); // FLAKY!
+
+// ✅ CORRECT: Wait for auth state to be ready
+await page.goto('/dashboard');
+await page.waitForFunction(() => {
+  const authState = (window as any).__AUTH_STATE__;
+  return authState && !authState.isLoading && authState.isAuthenticated;
+}, { timeout: 15000 });
+await expect(page.locator('[data-testid="welcome"]')).toBeVisible();
+```
+
+> **Customize:** Add your app's auth state mechanism to `window.__AUTH_STATE__` (see auth-patterns rule).
+
+### Rule 2: Wait for Loading States to Disappear
+
+Route guards and protected components show loading spinners while auth resolves. Always wait for them.
+
+```typescript
+// ❌ ANTI-PATTERN: Not waiting for loading state
+await page.goto('/dashboard');
+await expect(page.locator('h1')).toBeVisible(); // May see "Loading..." instead
+
+// ✅ CORRECT: Wait for loading to complete
+await page.goto('/dashboard');
+await page.waitForSelector('[data-testid="loading-spinner"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
+await expect(page.locator('h1')).toBeVisible();
+```
+
+### Rule 3: Use Generous Timeouts for Auth Operations
+
+Profile/session fetches can be slow. Tests should account for this.
+
+```typescript
+// ❌ ANTI-PATTERN: Short timeout
+await waitForAppReady(page, 5000); // Too short!
+
+// ✅ CORRECT: Allow buffer for async profile/session fetch
+await waitForAppReady(page, 15000);
+```
+
+## 🔐 Access Control Testing
+
+### Rule 4: Clear Auth State for Unauthenticated Tests
+
+Tests in authenticated projects have pre-authenticated `storageState`. Tests checking unauthenticated behavior MUST clear auth state first.
+
+```typescript
+// ✅ CORRECT: Clear auth state before testing unauthenticated behavior
+test('redirects unauthenticated users', async ({ page, context }) => {
+  await page.goto('/');
+  await context.clearCookies();
+  try {
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
+  } catch {
+    // Ignore SecurityError — cookies cleared is sufficient
+  }
+  
+  await page.goto('/protected');
+  await page.waitForSelector('[data-testid="loading-spinner"]', { state: 'hidden', timeout: 5000 }).catch(() => {});
+  await expect(page).toHaveURL(/login/, { timeout: 15000 });
+});
+```
+
+## 📝 Form Interaction Rules
+
+### Rule 5: Use Correct Methods for Input Types
+
+Different HTML input types require different Playwright methods.
+
+```typescript
+// ❌ ANTI-PATTERN: Using fill() on number inputs
+await page.locator('input[type="number"]').fill('5'); // May fail
+
+// ✅ CORRECT: Use type() for number inputs
+await page.locator('input[type="number"]').type('5');
+
+// ✅ CORRECT: Use fill() for text inputs
+await page.locator('input[type="text"]').fill('123 Main St');
+```
+
+### Rule 6: Check Visibility Before Interaction
+
+Elements may exist in DOM but not be visible or interactable.
+
+```typescript
+// ✅ CORRECT: Check visibility first
+const button = page.locator('button[data-testid="submit"]');
+const isVisible = await button.isVisible({ timeout: 5000 });
+if (isVisible) {
+  await button.click();
+}
+```
+
+### Rule 7: Handle Radix UI / Headless UI Components
+
+Custom UI components use button-based triggers, not native elements.
+
+```typescript
+// ❌ ANTI-PATTERN: Looking for native select
+await page.locator('select[name="category"]').selectOption('value');
+
+// ✅ CORRECT: Handle custom Select (button-based)
+const selectTrigger = page.locator('[data-testid="category-select"]')
+  .or(page.locator('button[aria-label*="category" i]'));
+
+await selectTrigger.click();
+await page.locator('[role="option"]:has-text("Value")').click();
+```
+
+## 🎯 Selector Best Practices
+
+### Rule 8: Use Flexible Selectors with Fallbacks
+
+UI text and structure can change. Use fallback patterns.
+
+```typescript
+// ❌ ANTI-PATTERN: Rigid text selector
+await expect(page.locator('text=Exact Page Title')).toBeVisible();
+
+// ✅ CORRECT: Flexible selectors with fallbacks
+const heading = page.locator('[data-testid="page-title"]')
+  .or(page.locator('h1'))
+  .or(page.locator('text=/page title|heading/i'));
+
+await expect(heading.first()).toBeVisible();
+```
+
+### Rule 9: Check URL First (Most Reliable)
+
+URL is the most reliable indicator of page state.
+
+```typescript
+// ✅ CORRECT: Check URL first, then elements
+await expect(page).toHaveURL(/\/dashboard/);
+const hasHeading = await page.locator('h1').isVisible().catch(() => false);
+const hasContent = await page.locator('main').isVisible().catch(() => false);
+expect(hasHeading || hasContent).toBeTruthy();
+```
+
+### Rule 10: Use data-testid for Critical Elements
+
+```typescript
+// In component:
+<div data-testid="main-dashboard" className="...">
+
+// In test:
+await expect(page.locator('[data-testid="main-dashboard"]')).toBeVisible();
+```
+
+## ⏱️ Timing and Timeouts
+
+### Rule 11: Use Appropriate Timeouts
+
+```typescript
+// Navigation with auth: 15s (includes auth hydration)
+await page.waitForURL(/dashboard/, { timeout: 15000 });
+
+// Element visibility: 10s (includes rendering)
+await expect(page.locator('[data-testid="content"]')).toBeVisible({ timeout: 10000 });
+
+// Auth ready state: 20s (includes async profile fetch)
+await waitForAppReady(page, 20000);
+
+// Quick visibility check: 5s
+const isVisible = await button.isVisible({ timeout: 5000 });
+```
+
+### Rule 12: Handle Async Operations with Promise.race
+
+```typescript
+// ✅ CORRECT: Use timeout protection
+const timeoutPromise = new Promise((_, reject) => 
+  setTimeout(() => reject(new Error('Timeout')), 10000)
+);
+const resultPromise = page.waitForFunction(() => someCondition());
+await Promise.race([resultPromise, timeoutPromise]);
+```
+
+## 🔄 Test Resilience
+
+### Rule 13: Use Flexible Assertions
+
+Accept multiple valid states when behavior can vary.
+
+```typescript
+// ✅ CORRECT: Multiple valid states
+const isRedirected = page.url().includes('/login');
+const hasError = await page.locator('text=/denied|error/i').isVisible().catch(() => false);
+const hasLimitedView = await page.locator('text=/upgrade|restricted/i').isVisible().catch(() => false);
+
+expect(isRedirected || hasError || hasLimitedView).toBeTruthy();
+```
+
+### Rule 14: Graceful Error Handling
+
+```typescript
+// ✅ CORRECT: Handle expected errors
+try {
+  await page.evaluate(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+  });
+} catch {
+  // SecurityError is expected in some contexts — continue
+}
+```
+
+## 🔍 Selector Verification Rules
+
+### Rule 15: Verify data-testid Exists in Source Before Using in Tests
+
+Before adding a `data-testid` selector to a test, search the source code to confirm the testid exists.
+
+```typescript
+// Before writing: page.locator('[data-testid="my-button"]')
+// Run: rg 'my-button' src/
+// If no results → the testid doesn't exist. Find the real one.
+
+// ❌ ANTI-PATTERN: Assume testid name from feature name
+'[data-testid="nav-sidebar-items"]', // Does NOT exist
+
+// ✅ CORRECT: Verify against source first
+'[data-testid="nav-sidebar-items-list"]', // Verified via rg
+```
+
+### Rule 16: Wait for Lazy-Loaded Components to Mount
+
+Apps using `React.lazy()` + `Suspense` show skeleton/fallback before the real component mounts.
+
+```typescript
+// ❌ ANTI-PATTERN: Page may still show Suspense fallback
+await page.goto('/items');
+await page.waitForLoadState('networkidle');
+const filter = page.locator('[data-testid="filter-input"]');
+// FAILS: skeleton is showing
+
+// ✅ CORRECT: Wait for a known element from the actual component
+await page.goto('/items', { waitUntil: 'domcontentloaded' });
+await page.locator('[data-testid="filter-input"]')
+  .waitFor({ state: 'visible', timeout: 15000 });
+```
+
+### Rule 17: Wait for DOM Stability Before Clicking
+
+Async state changes (auth, data fetches) cause re-renders that detach and reattach DOM elements.
+
+```typescript
+// ✅ CORRECT: Wait for stability before interacting
+await page.waitForLoadState('networkidle').catch(() => {});
+await page.waitForTimeout(300); // Let React settle after async state updates
+await button.click({ timeout: 10000 }); // Retry-aware click
+```
+
+### Rule 18: Re-Navigate After Clearing Auth State
+
+Clearing `localStorage` triggers auth change events → React re-renders → DOM remount.
+
+```typescript
+// ✅ CORRECT: Re-navigate after clearing to get a fresh, stable page
+await page.goto('/login', { waitUntil: 'domcontentloaded' });
+await page.evaluate(() => localStorage.clear());
+await page.goto('/login', { waitUntil: 'domcontentloaded' }); // Fresh page
+```
+
+### Rule 19: Handle Permission-Gated Components with Graceful Skips
+
+Components conditional on permissions will not render unless the test user has the correct access.
+
+```typescript
+// ✅ CORRECT: Check visibility and skip if permission-gated
+const createButton = page.locator('[data-testid="create-button"]');
+const isVisible = await createButton.isVisible({ timeout: 5000 }).catch(() => false);
+if (!isVisible) {
+  test.skip('Button not visible — user may lack required permissions');
+  return;
+}
+await createButton.click();
+```
+
+### Rule 20: toHaveURL Matches Full URL — Don't Anchor to Start
+
+Playwright's `toHaveURL()` compares against the FULL URL string, not just the pathname.
+
+```typescript
+// ❌ ANTI-PATTERN: Anchored regex can't match full URL
+await expect(page).toHaveURL(/^\/$/)         // FAILS on "http://localhost:3000/"
+await expect(page).toHaveURL(/^\/dashboard/) // FAILS on "http://localhost:3000/dashboard"
+
+// ✅ CORRECT: Unanchored patterns
+await expect(page).toHaveURL(/\/dashboard/)     // Matches anywhere in URL
+await expect(page).toHaveURL(/\/(dashboard)?$/) // Matches end of URL
+```
+
+### Rule 21: Use Cascading Selectors for Dashboard Ready State
+
+Don't wait for a single deeply-nested element — cascade from outermost to innermost.
+
+```typescript
+// ✅ CORRECT: Accept first match from cascade
+await page.waitForSelector(
+  '[data-testid="main-dashboard"], [data-testid="dashboard-container"], main, [role="main"]',
+  { state: 'visible', timeout: 20000 }
+);
+```
+
+## 📋 Checklist for New E2E Tests
+
+Before submitting a new E2E test:
+
+- [ ] Uses `waitForAppReady()` or equivalent after login
+- [ ] Waits for loading states to disappear
+- [ ] Uses correct input methods (`type()` vs `fill()`)
+- [ ] Checks visibility before interaction
+- [ ] Uses flexible selectors with fallbacks
+- [ ] Has appropriate timeouts (15s+ for auth operations)
+- [ ] Clears auth state for unauthenticated tests
+- [ ] Handles custom UI components (Radix, Headless UI, etc.) correctly
+- [ ] Uses flexible assertions for variable states
+- [ ] Has graceful error handling for expected errors
+- [ ] data-testid values verified against source code

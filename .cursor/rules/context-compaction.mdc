@@ -1,0 +1,91 @@
+---
+description: Context preservation and compaction protocol for long Cursor sessions
+alwaysApply: false
+---
+
+# Context Compaction Protocol
+
+This rule defines when and how to compact conversation context to preserve critical information across long sessions.
+
+---
+
+## When to Compact
+
+Trigger context compaction when:
+1. **Post-task completion** — After `/reflect` or `/archive` completes
+2. **Long conversations** — When exchange count exceeds ~50 messages
+3. **Pre-new-task** — Before starting a new task in the same session
+4. **Context pressure** — When the agent notices degraded recall of earlier conversation details
+
+---
+
+## Compaction Format
+
+When compacting, summarize the session into these 7 structured sections:
+
+### 1. Primary Objective
+What was the user trying to accomplish? State the goal in 1-2 sentences.
+
+### 2. Technical Context
+- Stack/frameworks involved
+- Patterns discovered or established
+- Constraints identified
+
+### 3. Files Modified
+| File | Change Type | Summary |
+|------|-------------|---------|
+| path/to/file | created/modified/deleted | Brief description |
+
+### 4. Decisions Made
+Key choices and their rationale:
+- **Decision:** [What was decided]
+- **Rationale:** [Why this choice]
+- **Alternatives rejected:** [What was not chosen and why]
+
+### 5. Errors Encountered
+| Error | Root Cause | Resolution |
+|-------|------------|------------|
+| Description | What caused it | How it was fixed |
+
+### 6. Pending Work
+- [ ] Items still to be done
+- [ ] Follow-up tasks identified
+- [ ] Blocked items with blockers noted
+
+### 7. Learned Patterns
+Reusable insights from this session:
+- [Pattern name]: [When to apply] — [Brief description]
+
+---
+
+## Compaction Process
+
+1. **Gather** — Review the conversation for key information in each of the 7 sections
+2. **Synthesize** — Combine related items; remove redundancy
+3. **Preserve** — Ensure critical technical details are retained (file paths, function names, error messages)
+4. **Discard** — Remove conversational filler, repeated explanations, and exploratory dead ends
+5. **Output** — Produce the structured summary in markdown format
+
+---
+
+## Usage
+
+This rule is not always-applied. It activates when:
+- The agent detects context pressure (recall degradation)
+- The user explicitly requests context compaction
+- A major task boundary is crossed (post-archive, pre-new-task)
+
+The compacted summary should be provided to the user and/or stored in `memory-bank/activeContext.md` for session continuity.
+
+---
+
+## Integration with Memory Bank
+
+After compaction:
+1. Update `memory-bank/activeContext.md` with the session summary
+2. If the session contained significant learnings, update `memory-bank/learnings.md`
+3. Ensure `memory-bank/tasks.md` reflects any pending work identified
+
+---
+
+*This rule complements the Update Quality Standards in `memory-bank-paths.mdc` and the Thinking Protocol in `.cursorrules`.*

@@ -1,0 +1,114 @@
+---
+description: UI/Styling Rules - Design System Conventions
+globs: ["**/*.tsx", "**/*.ts", "**/*.css"]
+alwaysApply: false
+---
+
+# UI / Styling — Design System Conventions
+
+> **CUSTOMIZE THIS FILE** for your project's design system. Replace `[DESIGN_SYSTEM]` placeholders below with your actual system (shadcn/ui, Material UI, Chakra, Ant Design, custom tokens, etc.).
+
+---
+
+## Project Design System
+
+**System:** `[DESIGN_SYSTEM]` (e.g., shadcn/ui + Tailwind, Material UI, Chakra UI)
+**Theme:** `[THEME]` (e.g., indigo, blue, custom brand color)
+**Mode:** `[MODE]` (e.g., dark-first, light-first, system)
+
+> Read `[YOUR_UI_STANDARDS_PATH]` for the full component architecture before any UI task.
+
+---
+
+## Universal Patterns (Keep for Any Project)
+
+### Use a Class Merging Utility
+
+```tsx
+// ✅ GOOD — Use cn() or clsx() for conditional classes
+import { cn } from '@/lib/utils'
+className={cn('base-classes', conditional && 'conditional-class', className)}
+```
+
+### Use forwardRef and displayName
+
+```tsx
+// ✅ GOOD
+const Component = React.forwardRef<HTMLDivElement, Props>(
+  ({ className, ...props }, ref) => {
+    return <div ref={ref} className={cn('...', className)} {...props} />
+  }
+)
+Component.displayName = "Component"
+```
+
+### Use Semantic Tokens Over Raw Colors
+
+```tsx
+// ✅ GOOD — Semantic tokens (customize for your system)
+// shadcn/ui tokens:
+bg-background, bg-card, bg-muted
+text-foreground, text-muted-foreground
+border, border-border
+
+// Material UI:
+color="primary", color="secondary"
+sx={{ bgcolor: 'background.paper' }}
+```
+
+---
+
+## Forbidden Patterns (Customize Per Project)
+
+Fill in what's forbidden for YOUR design system:
+
+```tsx
+// ❌ BAD — Add your project's forbidden patterns here
+// Example: if using shadcn, don't use raw Tailwind colors where semantic tokens exist
+// bg-white (use bg-background instead)
+// text-gray-900 (use text-foreground instead)
+```
+
+---
+
+## Forbidden Libraries (Customize Per Project)
+
+```tsx
+// ❌ NEVER import these (adjust for your project)
+// import { Dialog } from '@headlessui/react'  // Use [your-alternative] instead
+// import { ChevronDownIcon } from '@heroicons/react/...'  // Use [your-icon-lib] instead
+```
+
+---
+
+## Component Migration Guide (Customize Per Project)
+
+When adapting UI templates from external sources to your design system:
+
+| External Pattern | Your Project Replacement |
+|-----------------|--------------------------|
+| `[external-component]` | `[your-component]` |
+| Raw colors | Semantic tokens |
+
+---
+
+## Required File Comment
+
+When a component has been adapted to your design system, mark it:
+
+```tsx
+// [YOUR-SYSTEM]-ADAPTED
+```
+
+---
+
+## Customization Checklist
+
+After adding this template to your project:
+
+- [ ] Replace `[DESIGN_SYSTEM]` with your actual system
+- [ ] Fill in forbidden patterns for your design system
+- [ ] Fill in forbidden libraries for your design system
+- [ ] Add your semantic token reference table
+- [ ] Add the path to your UI standards documentation
+- [ ] Update the component migration guide with your specific mappings

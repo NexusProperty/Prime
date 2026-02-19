@@ -1,0 +1,80 @@
+---
+description: Anti-hallucination and mock data discipline rules to prevent AI from inventing non-existent code
+alwaysApply: true
+---
+
+# Anti-Hallucination & Mock Data Rules
+
+## 1. Context First
+
+Never assume the existence of a file, function, or variable unless you have read it in the current context.
+
+```typescript
+// ❌ BAD - Assuming a function exists
+import { processPayment } from '@/lib/payments'; // Haven't verified this exists
+
+// ✅ GOOD - Read the file first, then reference verified exports
+// After reading src/lib/payments.ts and confirming exports:
+import { createCheckoutSession } from '@/lib/payments';
+```
+
+## 2. Verify Imports
+
+When suggesting code, ensure all imports come from existing files in the project. Do not invent new paths.
+
+```typescript
+// ❌ BAD - Inventing paths
+import { useAuth } from '@/hooks/useAuthentication'; // Made-up path
+
+// ✅ GOOD - Use verified paths from codebase
+import { useAuth } from '@/hooks/useAuth'; // Verified in src/hooks/
+```
+
+## 3. Admit Ignorance
+
+If the user's request requires code you cannot see, explicitly state:
+
+> "I need to see [File Name] to answer this."
+
+Do NOT:
+- Guess at file contents
+- Assume function signatures
+- Invent API response shapes
+
+## 4. Mock Data Discipline
+
+This project uses local mock data (fixtures) as the source of truth.
+
+### DO:
+- Use existing mock data files for development and testing
+- Reference actual fixture files in `src/fixtures/` or similar directories
+- Keep mock data consistent with TypeScript interfaces
+
+### DO NOT:
+- Invent new fields in mock data to solve logic problems
+- Add properties to JSON objects without updating the TypeScript interface
+
+```typescript
+// ❌ BAD - Adding invented field to make filter work
+const activeUsers = users.filter(u => u.status === 'active'); // 'status' doesn't exist
+
+// ✅ GOOD - Use existing fields or update interface first
+// If status field needed: 1) Update User interface 2) Update mock data 3) Then use
+const activeUsers = users.filter(u => !u.deletedAt); // Using existing field
+```
+
+## 5. Real Logic Requirement
+
+Even though data is fake, write logic (filtering, sorting, rendering) as if it were production-ready.
+
+```typescript
+// ❌ BAD - Placeholder logic
+const sortedItems = items; // TODO: implement sorting
+
+// ✅ GOOD - Production-ready logic with mock data
+const sortedItems = [...items].sort((a, b) => 
+  new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+);
+```
+
+Do NOT leave "TODO" comments for business logic - implement it fully.

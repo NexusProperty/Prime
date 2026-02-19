@@ -1,0 +1,55 @@
+---
+description: Enforces Demo design system rules (@tailwind-plus-commit / @UI-Blocks) for UI generation.
+globs: "Demo/**/*.{tsx,ts,jsx,js,css}"
+---
+
+# Demo UI Standards
+
+## CRITICAL DIRECTIVE: Design System Strictness
+1.  **Source of Truth:** Always prioritize patterns, layouts, and tokens found in `@UI-Blocks` and `@tailwind-plus-commit`.
+2.  **No "Default" Tailwind:** Do NOT use generic Tailwind UI examples or arbitrary color palettes unless explicitly permitted by the tailwind-plus-commit system.
+3.  **Token Usage:** Use the CSS custom properties and Tailwind color tokens provided by tailwind-plus-commit (sky accent, gray scales, light/dark typography variables) rather than raw hex values or arbitrary utility classes.
+4.  **Reusability:** If a component exists in `Demo/tailwind-plus-commit/commit-ts/src/components/`, use it. Do not reinvent the wheel.
+
+## Design System Tokens (from tailwind-plus-commit)
+-   **Fonts:** `--font-sans` (Inter), `--font-display` (Mona Sans)
+-   **Typography variables:** `--typography-body`, `--typography-headings`, `--typography-links`, `--typography-bold`, etc. (see `src/styles/typography.css`)
+-   **Accent colors:** `sky-*` for links and highlights, `emerald-*` for code tokens, `gray-*` for neutral surfaces
+-   **Dark mode:** Uses `.dark` class variant; dark-mode values are defined in typography.css and component classes
+-   **Text size:** `--text-2xs` (0.6875rem) and standard Tailwind type scale
+
+## Visual & Interaction Design Principles
+-   **Hierarchy:** Use spacing and typography scales from `@tailwind-plus-commit` to establish clear visual hierarchy.
+-   **Typography:** Use relative units (`rem`, `em`) for font sizes. Follow the modular scale defined in the design system.
+-   **Touch Targets:** Ensure all interactive elements (buttons, inputs) are at least 44x44px for touch accessibility.
+-   **Motion:** Use animations judiciously. Prefer CSS transitions over JS animations for performance.
+-   **Feedback:** Ensure every interaction (hover, focus, active, loading) has a visible state.
+
+## Accessibility (WCAG 2.1 AA)
+-   **Semantic HTML:** Use proper tags (`<nav>`, `<main>`, `<article>`, `<button>`) instead of generic `<div>` soup.
+-   **Contrast:** Ensure strict color contrast ratios using the system's accessible color tokens.
+-   **ARIA:** Automatically include `aria-label`, `aria-expanded`, and `role` attributes for non-semantic interactive elements.
+-   **Images:** Always generate descriptive `alt` text for images; use `alt=""` for decorative elements.
+-   **Keyboard:** Ensure full keyboard navigability (focus rings must be visible).
+
+## Responsive & Fluid Layouts (Mobile-First)
+-   **Strategy:** Write mobile-first classes (e.g., `w-full md:w-auto`). Design for small screens first, then scale up.
+-   **Layouts:** Use CSS Grid and Flexbox exclusively. Avoid fixed widths in pixels.
+-   **Media:** Use `srcset` and `sizes` for responsive images.
+-   **Off-Canvas:** Implement hamburger menus or off-canvas drawers for mobile navigation patterns.
+
+## Performance Optimization
+-   **Loading:** Implement `loading="lazy"` for images/iframes below the fold.
+-   **Code Splitting:** Suggest dynamic imports for heavy components not needed for the Initial Paint.
+-   **CLS Prevention:** Always apply aspect-ratio or explicit height/width constraints to media containers to prevent layout shifts.
+
+## Code Generation Rules
+-   **Reference:** When generating code, add a comment indicating which `@tailwind-plus-commit` or `@UI-Blocks` pattern is being utilized.
+    *   *Example:* `// Implements @tailwind-plus-commit/Button pattern with gradient overlay`
+-   **Naming:** Adhere to the project's naming conventions for components and functions.
+-   **Fallback:** If a specific UI pattern is requested but not found in the libraries, explicitly state: *"This pattern is not in @tailwind-plus-commit. I am proposing a compatible alternative based on existing tokens."*
+
+## Prohibited Actions
+-   Do NOT use pixel values for structural layout/spacing (use `rem` or Tailwind spacing scale).
+-   Do NOT create ad-hoc class soups. Break complex UIs into smaller, composed components.
+-   Do NOT ignore the light/dark mode support defined by the tailwind-plus-commit typography system.

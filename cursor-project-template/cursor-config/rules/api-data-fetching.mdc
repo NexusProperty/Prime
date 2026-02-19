@@ -1,0 +1,103 @@
+---
+description: API & Data Fetching Patterns - React Query, data mutations, and server state
+globs: "**/hooks/**", "**/queries/**", "**/lib/api/**", "**/useQuery*", "**/useMutation*"
+alwaysApply: false
+---
+
+# API & Data Fetching Patterns
+
+> Customize this rule for your project's data fetching library and backend. Replace the examples below with your actual patterns.
+
+## React Query Patterns
+
+```typescript
+// Query with proper key structure
+useQuery({
+  queryKey: ['resource', id, { filters }],
+  queryFn: () => fetchResource(id, filters),
+  staleTime: 5 * 60 * 1000,
+});
+```
+
+## Mutation with Optimistic Updates
+
+Always provide `onMutate`, `onError`, and `onSettled` handlers.
+
+```typescript
+useMutation({
+  mutationFn: updateResource,
+  onMutate: async (newData) => {
+    await queryClient.cancelQueries({ queryKey: ['resource', id] });
+    const previous = queryClient.getQueryData(['resource', id]);
+    queryClient.setQueryData(['resource', id], newData);
+    return { previous };
+  },
+  onError: (_err, _newData, context) => {
+    queryClient.setQueryData(['resource', id], context?.previous);
+  },
+  onSettled: () => {
+    queryClient.invalidateQueries({ queryKey: ['resource', id] });
+  },
+});
+```
+
+## Query Key Conventions
+
+- Use arrays: `['entity', id]`, `['entity', id, { filters }]`
+- Be consistent — the same logical data should always use the same key shape
+- Avoid string-only keys; they can't be partially invalidated
+
+## Error Handling
+
+```typescript
+const { data, error, isLoading } = useQuery({
+  queryKey: ['resource', id],
+  queryFn: () => fetchResource(id),
+  retry: 2,
+  onError: (err) => {
+    console.error('Failed to fetch resource:', err);
+  },
+});
+```
+
+---
+
+## If Using Supabase
+
+```typescript
+// ✅ Use your project's typed client wrapper for RPC calls
+import { supabase } from '@/lib/supabase/client';
+
+const { data, error } = await supabase
+  .from('your_table')
+  .select('*')
+  .eq('id', resourceId)
+  .single();
+```
+
+> **Project-specific note:** If your project has a `typedRpc()` helper or similar wrapper, document it here and replace the generic example above.
+
+---
+
+## If Using REST API
+
+```typescript
+// ✅ Centralize your fetch logic
+const fetchResource = async (id: string) => {
+  const res = await fetch(`/api/resources/${id}`, {
+    headers: getAuthHeaders(),
+  });
+  if (!res.ok) throw new Error(`Failed to fetch resource: ${res.status}`);
+  return res.json();
+};
+```
+
+---
+
+## General Rules
+
+- Never mix server state (React Query) with client state (useState) for the same data
+- Always define query keys as constants or factory functions to avoid typos
+- Use `staleTime` to prevent unnecessary refetches
+- Invalidate related queries after mutations
+- Add types to all query functions — never use `any` for query responses

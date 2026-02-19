@@ -1,0 +1,202 @@
+---
+description: UI/Styling Rules - United Trades Design System (Tailwind CSS v4 + Headless UI + clsx)
+globs: ["**/*.tsx", "**/*.ts", "**/*.css"]
+alwaysApply: false
+---
+
+# UI / Styling — United Trades Design System
+
+> This project uses **Tailwind CSS v4** with **Headless UI** and **clsx**. There is NO tailwind.config.js — all theme customization is done in CSS via `@theme {}`.
+
+---
+
+## Project Design System
+
+**System:** Tailwind CSS v4 + Headless UI + clsx  
+**Template:** Tailwind Salient (`tailwind-plus-salient/salient-ts/`)  
+**Mode:** Light-first (customize per brand)  
+**Brands:** Prime Electrical | AKF Construction | CleanJet
+
+---
+
+## ⚠️ Tailwind v4 Critical Rules
+
+### NO tailwind.config.js
+Tailwind v4 does NOT use `tailwind.config.js`. Configuration lives in CSS:
+
+```css
+/* src/styles/tailwind.css */
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+
+@theme {
+  --color-brand-primary: oklch(0.55 0.22 250); /* customize per site */
+  --font-sans: 'Inter', ui-sans-serif, system-ui;
+}
+```
+
+```tsx
+// ❌ WRONG — tailwind.config.js does not exist in this project
+// ✅ CORRECT — edit src/styles/tailwind.css @theme block
+```
+
+### PostCSS Plugin
+```js
+// postcss.config.js — DO NOT CHANGE
+module.exports = {
+  plugins: {
+    '@tailwindcss/postcss': {},
+  },
+}
+```
+
+---
+
+## Class Merging with clsx
+
+```tsx
+// ✅ CORRECT — use clsx for conditional classes
+import clsx from 'clsx'
+
+function Button({ variant = 'solid', color = 'slate', className, ...props }) {
+  return (
+    <button
+      className={clsx(
+        'inline-flex items-center justify-center rounded-full py-2 px-4 text-sm font-semibold',
+        variant === 'solid' && color === 'blue' && 'bg-blue-600 text-white hover:bg-blue-500',
+        variant === 'outline' && 'border border-slate-300 text-slate-700 hover:bg-slate-50',
+        className
+      )}
+      {...props}
+    />
+  )
+}
+```
+
+---
+
+## Component Patterns (Salient Template Style)
+
+### Named Exports Only
+```tsx
+// ✅ CORRECT — named exports
+export function Hero() { ... }
+export function Button({ variant, color, className, ...props }) { ... }
+
+// ❌ WRONG — default exports
+export default function Hero() { ... }
+```
+
+### Container Pattern
+```tsx
+// Use Container component for consistent max-width
+import { Container } from '@/components/Container'
+
+export function MySection() {
+  return (
+    <section className="py-20 sm:py-32">
+      <Container>
+        <h2 className="text-3xl font-bold tracking-tight text-slate-900">...</h2>
+      </Container>
+    </section>
+  )
+}
+```
+
+### Images
+```tsx
+// ✅ CORRECT — always use next/image
+import Image from 'next/image'
+import logoImage from '@/images/logo.png'
+
+<Image src={logoImage} alt="Company Logo" className="h-10 w-auto" />
+
+// ❌ WRONG — never use <img> tag
+<img src="/logo.png" />
+```
+
+---
+
+## Headless UI Usage
+
+```tsx
+// ✅ CORRECT — Headless UI for accessible interactive components
+import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
+
+function FAQ({ question, answer }) {
+  return (
+    <Disclosure>
+      <DisclosureButton className="...">
+        {question}
+      </DisclosureButton>
+      <DisclosurePanel className="...">
+        {answer}
+      </DisclosurePanel>
+    </Disclosure>
+  )
+}
+
+// ❌ WRONG — do not build custom modal/disclosure from scratch when Headless UI component exists
+```
+
+---
+
+## Brand-Specific Color Conventions
+
+Each of the 3 sites has its own color identity defined in its `src/styles/tailwind.css`:
+
+| Brand | Primary Color | Accent | Tone |
+|-------|--------------|--------|------|
+| Prime Electrical | Electric blue | Yellow | Professional, technical |
+| AKF Construction | Earth/slate | Warm orange | Solid, trustworthy |
+| CleanJet | Sky blue | Fresh green | Clean, fresh |
+
+Define colors in the CSS `@theme` block, then use them as `bg-brand-primary`, `text-brand-accent` etc.
+
+---
+
+## Mobile-First Responsive
+
+```tsx
+// ✅ CORRECT — mobile-first, then sm/md/lg breakpoints
+<div className="flex flex-col gap-4 sm:flex-row sm:gap-8 lg:gap-12">
+
+// Mobile sticky CTA (Prime Electrical pattern)
+<div className="fixed bottom-0 left-0 right-0 z-50 flex sm:hidden">
+  <a href="tel:+64..." className="flex-1 bg-blue-600 py-4 text-center text-white font-semibold">
+    Call Now
+  </a>
+  <a href="/book" className="flex-1 bg-slate-900 py-4 text-center text-white font-semibold">
+    Book Online
+  </a>
+</div>
+```
+
+---
+
+## Forbidden Patterns
+
+```tsx
+// ❌ NEVER inline styles (use Tailwind classes instead)
+<div style={{ color: 'blue', marginTop: '20px' }}>
+
+// ❌ NEVER create tailwind.config.js (Tailwind v4 — doesn't exist)
+
+// ❌ NEVER use raw <img> (always next/image)
+<img src="..." />
+
+// ❌ NEVER hardcode hex colors in className (use @theme tokens)
+className="text-[#1a2b3c]"  // WRONG — define as @theme token instead
+```
+
+---
+
+## Checklist — Before Submitting UI Work
+
+- [ ] Classes use Tailwind utilities + clsx, not inline styles
+- [ ] Images use `next/image` with proper `alt`
+- [ ] Interactive components use Headless UI where applicable
+- [ ] Mobile-first breakpoints applied (sm: md: lg:)
+- [ ] Color customizations added to `src/styles/tailwind.css` `@theme` block
+- [ ] Named exports used (not default exports)
+- [ ] No tailwind.config.js created or modified

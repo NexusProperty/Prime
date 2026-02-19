@@ -1,0 +1,103 @@
+{
+  "version": "1.0",
+  "generatedBy": "/integrate",
+  "generatedAt": "2026-02-19",
+  "detected": {
+    "projectName": "United Trades — AI-Powered Multi-Brand Trade Services Ecosystem",
+    "projectType": "multi-site-monorepo",
+    "description": "Hub-and-spoke architecture connecting 3 trade companies (Prime Electrical, AKF Construction, CleanJet) via shared AI brain, Supabase database, and Make.com automation",
+    "sites": [
+      {
+        "name": "Prime Electrical",
+        "status": "existing — needs rescue and redesign",
+        "dir": "TBD (to be scaffolded)"
+      },
+      {
+        "name": "AKF Construction",
+        "status": "new build",
+        "dir": "TBD (to be scaffolded)"
+      },
+      {
+        "name": "CleanJet",
+        "status": "new build",
+        "dir": "TBD (to be scaffolded)"
+      }
+    ],
+    "framework": "nextjs-15-app-router",
+    "language": "typescript",
+    "packageManager": "npm",
+    "template": "tailwind-plus-salient",
+    "templateLocation": "tailwind-plus-salient/salient-ts/",
+    "uiLibrary": "headlessui",
+    "styling": "tailwindcss-v4",
+    "stylingNotes": "Tailwind v4 — config via CSS @theme, not tailwind.config.js. Uses @tailwindcss/postcss plugin.",
+    "stateManagement": "not-yet-configured",
+    "auth": "supabase-planned",
+    "database": "supabase-postgres",
+    "ai": {
+      "brain": "openai-gpt-4o",
+      "voice": "vapi-ai",
+      "telephony": "twilio"
+    },
+    "automation": "make-com",
+    "jobManagement": "simpro-or-fergus-tbc",
+    "testing": {
+      "unit": "not-configured",
+      "e2e": "not-configured"
+    },
+    "sourceDir": "src",
+    "router": "app-router",
+    "componentNaming": "PascalCase",
+    "importStyle": "@/ absolute paths",
+    "pathAlias": "@/* → ./src/*"
+  },
+  "confidence": {
+    "framework": "high",
+    "language": "high",
+    "packageManager": "high",
+    "styling": "high",
+    "uiLibrary": "high",
+    "componentNaming": "high",
+    "importStyle": "high",
+    "auth": "medium",
+    "database": "medium",
+    "stateManagement": "low",
+    "testing": "low",
+    "jobManagement": "low"
+  },
+  "manualReviewRequired": [
+    "stateManagement — not yet configured, recommend TanStack Query for server state once Supabase is added",
+    "auth.provider — Supabase Auth planned per Plan.md, needs @supabase/supabase-js installed",
+    "jobManagement — Simpro vs Fergus vs Tradify not yet confirmed",
+    "twilio.phoneNumbers — 3 phone numbers not yet purchased/confirmed",
+    "vapi.accountSetup — Vapi.ai account setup status unknown",
+    "testing — no unit or E2E testing framework configured, recommend Vitest + Playwright",
+    "deployment — hosting not yet configured, recommend Vercel for Next.js",
+    "sites.directories — individual site directories not yet scaffolded from salient-ts template",
+    "env.variables — .env.local files not yet created for any site"
+  ],
+  "integration": {
+    "cursorrules": {
+      "generated": true,
+      "path": ".cursorrules"
+    },
+    "memoryBankPrepopulated": true,
+    "rulesCustomizationNeeded": [
+      ".cursor/rules/api-data-fetching.mdc — add Supabase fetch patterns when implemented",
+      ".cursor/rules/auth-patterns.mdc — add Supabase Auth component names when implemented",
+      ".cursor/rules/ui-styling.mdc — add project design tokens and color palette",
+      ".cursor/rules/react-patterns.mdc — add project-specific component patterns",
+      ".cursor/rules/e2e-testing.mdc — configure when Playwright is added"
+    ]
+  },
+  "nextSteps": [
+    "1. Scaffold prime-electrical/, akf-construction/, cleanjet/ from salient-ts template",
+    "2. Install Supabase: npm install @supabase/supabase-js @supabase/ssr",
+    "3. Install TanStack Query: npm install @tanstack/react-query",
+    "4. Create Supabase project and set up .env.local files",
+    "5. Design central Supabase schema (leads, customers, jobs tables)",
+    "6. Set up Make.com account and workspace",
+    "7. Configure Vapi.ai account and Twilio numbers",
+    "8. Run /plan to start detailed Phase 1 planning"
+  ]
+}

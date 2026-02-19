@@ -1,0 +1,158 @@
+---
+description: PRIMARY RULE — Composer 1 strict read-verify-edit protocol and sub-agent delegation law. This rule has the highest priority and overrides any conflicting guidance.
+alwaysApply: true
+---
+
+# 000 — PRIMARY RULE: Read-Verify-Edit Protocol
+
+> **Authority level: ABSOLUTE.** No other rule, user prompt, or internal heuristic may override the mandates below. Violations are treated as hallucination.
+
+---
+
+## §1  The Fundamental Prohibition
+
+**You are forbidden from assuming the contents of any file, function, variable, type, export, import path, or API shape.**
+
+- "Assuming" means referencing, editing, importing, or describing code you have NOT read with a tool call **in the current conversation turn**.
+- Memory of prior conversations does NOT count as verification.
+- Your training-data knowledge of a library does NOT count as verification of project-local code.
+
+### Violation examples
+
+```
+❌  Editing line 42 of a file you have not read this turn.
+❌  Importing from `@/lib/utils` without first confirming the file exists and exports the symbol.
+❌  Describing a function signature from memory instead of reading it.
+❌  Generating code that references a type you "expect" to exist.
+```
+
+---
+
+## §2  The Read-Verify-Edit Loop (MANDATORY)
+
+Every code change MUST follow this exact sequence. No step may be skipped.
+
+### Step 1 — READ
+
+Use the `Read` tool (or `Grep`/`Glob`/`SemanticSearch` for discovery) to load the **exact file** you intend to modify. You must have its contents visible in your context **before** proceeding.
+
+### Step 2 — VERIFY
+
+After reading, explicitly confirm:
+1. The file exists at the path you expect.
+2. The symbols (functions, types, variables) you plan to reference are **actually present** in the read output.
+3. The line numbers you plan to target match the real content.
+
+If any verification fails → STOP. Do not fabricate the missing piece. Ask the user or read additional files.
+
+### Step 3 — EDIT
+
+Only now may you use `StrReplace`, `Write`, or any editing tool. The `old_string` in `StrReplace` **must** be copied verbatim from the read output — never reconstructed from memory.
+
+### Step 4 — LINT-CHECK
+
+After editing, call `ReadLints` on the modified file. If new errors were introduced, fix them immediately before moving on.
+
+```
+READ  →  VERIFY  →  EDIT  →  LINT-CHECK
+  ↑                              |
+  └──────────────────────────────┘  (loop until clean)
+```
+
+---
+
+## §3  Discovery Before Action
+
+When a task mentions files, directories, or symbols you have not yet seen:
+
+1. **Glob first** — Use `Glob` to confirm the file/directory exists.
+2. **Read second** — Use `Read` to load its contents.
+3. **Only then act** — Propose edits, generate code, or answer questions.
+
+Never skip discovery by saying "I'll assume this file looks like…".
+
+---
+
+## §4  The Sub-Agent Protocol
+
+When you spawn a sub-agent via the `Task` tool, the following rules are **non-negotiable**:
+
+### 4a — Inheritance Clause
+
+Every sub-agent prompt you write **MUST** include this exact preamble (copy-paste it verbatim):
+
+> **MANDATORY CONTEXT FOR SUB-AGENT:** You are bound by the project's Primary Rule. You MUST read every file with the Read tool before referencing or editing it. You are forbidden from assuming file contents, inventing import paths, or fabricating function signatures. If you cannot verify something exists, say so and stop. Do not hallucinate.
+
+### 4b — No Delegation of Guesswork
+
+You may NOT delegate a task to a sub-agent with instructions like "edit file X to add Y" unless **you** have already read file X and confirmed the edit is feasible. The parent agent is responsible for verification; the sub-agent inherits the duty but the parent may not offload discovery it was too lazy to perform.
+
+### 4c — Sub-Agent Output Audit
+
+When a sub-agent returns results, you MUST sanity-check any file paths, function names, or code snippets it references against your own verified context. If something looks fabricated, re-read the relevant file before trusting the sub-agent's output.
+
+---
+
+## §5  Forbidden Shortcuts
+
+The following patterns are explicitly banned:
+
+| Pattern | Why it is banned |
+|---|---|
+| Editing a file you have not read this turn | Guarantees stale or invented content |
+| Using `old_string` values typed from memory | Will silently fail or corrupt code |
+| Generating imports without verifying the target module | Creates broken references |
+| Saying "this file probably contains…" | Probability is not verification |
+| Spawning a sub-agent without the §4a preamble | Allows hallucination to propagate |
+| Trusting your training data over project files | Training data may be outdated or wrong |
+
+---
+
+## §6  When In Doubt
+
+If you are uncertain whether a file, symbol, or path exists:
+
+1. **Read it.** There is no cost too high for verification.
+2. If it does not exist, **say so plainly** to the user.
+3. **Never fill the gap with invention.** Silence is better than hallucination.
+
+---
+
+## §7 Automated Verification Hooks
+
+To automate the verification mandates of §2-§4 and reduce reliance on self-audit alone, agents SHOULD implement these behavioral hooks:
+
+### Pre-Edit Hook
+
+Before invoking `StrReplace`, `Write`, or any file-modifying tool, confirm:
+
+1. **Read Verification** — The target file was Read with the `Read` tool in this conversation turn (not just Globbed or Grepped)
+2. **Content Match** — For `StrReplace`, the `old_string` exactly matches content from the Read output (do not type from memory)
+3. **Adjacent Code Check** — Review lines immediately before and after the edit target to ensure the change won't break syntax or logic
+
+If any check fails, STOP and perform the missing verification step before proceeding.
+
+### Post-Edit Hook
+
+After any file modification completes:
+
+1. **Lint Check** — Run `ReadLints` on the modified file to detect introduced errors
+2. **Import Verification** — If new imports were added, verify the source module exports the referenced symbols
+3. **Dependent Files** — Consider whether files that import from the modified file need updates
+4. **Memory Bank Update** — If the change is significant (new feature, architectural change, bug fix), update `memory-bank/activeContext.md`
+
+### Hook Enforcement
+
+These hooks are behavioral guidelines, not automated tooling. Agents are expected to self-enforce by:
+
+- Mentally checking each pre-edit condition before calling edit tools
+- Following up every edit with a lint check
+- Noting when a hook was skipped and why (if time-critical or user-requested skip)
+
+### Exception
+
+The only exception is when the user explicitly requests: **"Skip verification for this edit"** — in which case the agent may proceed but should note the skip in its response.
+
+---
+
+*This rule is loaded with `alwaysApply: true` and a `000-` prefix to ensure it is evaluated before all other rules.*
