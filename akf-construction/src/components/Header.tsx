@@ -9,9 +9,6 @@ import {
 } from '@headlessui/react'
 import clsx from 'clsx'
 
-import { Button } from '@/components/Button'
-import { NavLink } from '@/components/NavLink'
-
 function MobileNavLink({
   href,
   children,
@@ -20,7 +17,7 @@ function MobileNavLink({
   children: React.ReactNode
 }) {
   return (
-    <PopoverButton as={Link} href={href} className="block w-full p-2">
+    <PopoverButton as={Link} href={href} className="block w-full p-4 border-b border-slate-800 text-sm font-bold uppercase tracking-widest text-slate-300 hover:text-white hover:bg-slate-800 transition-colors">
       {children}
     </PopoverButton>
   )
@@ -30,20 +27,20 @@ function MobileNavIcon({ open }: { open: boolean }) {
   return (
     <svg
       aria-hidden="true"
-      className="h-3.5 w-3.5 overflow-visible stroke-slate-700"
+      className="h-5 w-5 overflow-visible stroke-slate-900"
       fill="none"
       strokeWidth={2}
-      strokeLinecap="round"
+      strokeLinecap="square"
     >
       <path
-        d="M0 1H14M0 7H14M0 13H14"
+        d="M0 2H16M0 8H16M0 14H16"
         className={clsx(
           'origin-center transition',
           open && 'scale-90 opacity-0',
         )}
       />
       <path
-        d="M2 2L12 12M12 2L2 12"
+        d="M2 2L14 14M14 2L2 14"
         className={clsx(
           'origin-center transition',
           !open && 'scale-90 opacity-0',
@@ -57,51 +54,63 @@ function MobileNavigation() {
   return (
     <Popover>
       <PopoverButton
-        className="relative z-10 flex h-8 w-8 items-center justify-center focus:not-data-focus:outline-hidden"
+        className="relative z-10 flex h-10 w-10 items-center justify-center bg-slate-100 hover:bg-slate-200 transition-colors focus:outline-hidden rounded-none"
         aria-label="Toggle Navigation"
       >
         {({ open }) => <MobileNavIcon open={open} />}
       </PopoverButton>
       <PopoverBackdrop
         transition
-        className="fixed inset-0 bg-slate-300/50 duration-150 data-closed:opacity-0 data-enter:ease-out data-leave:ease-in"
+        className="fixed inset-0 z-40 bg-slate-950/90 backdrop-blur-sm duration-150 data-closed:opacity-0 data-enter:ease-out data-leave:ease-in"
       />
       <PopoverPanel
         transition
-        className="absolute inset-x-0 top-full mt-4 flex origin-top flex-col rounded-2xl bg-white p-4 text-lg tracking-tight text-slate-900 shadow-xl ring-1 ring-slate-900/5 data-closed:scale-95 data-closed:opacity-0 data-enter:duration-150 data-enter:ease-out data-leave:duration-100 data-leave:ease-in"
+        className="absolute inset-x-4 top-24 z-50 flex origin-top flex-col bg-slate-900 border-l-4 border-amber-500 shadow-2xl data-closed:scale-95 data-closed:opacity-0 data-enter:duration-150 data-enter:ease-out data-leave:duration-100 data-leave:ease-in rounded-none"
       >
-        <MobileNavLink href="#projects">Projects</MobileNavLink>
-        <MobileNavLink href="#services">Services</MobileNavLink>
-        <MobileNavLink href="#process">How We Work</MobileNavLink>
-        <MobileNavLink href="#testimonials">Reviews</MobileNavLink>
-        <MobileNavLink href="#faq">FAQ</MobileNavLink>
-        <hr className="m-2 border-slate-300/40" />
-        <MobileNavLink href="#contact">Get a Free Quote</MobileNavLink>
+        <div className="p-2">
+          <MobileNavLink href="#projects">Projects</MobileNavLink>
+          <MobileNavLink href="#services">Services</MobileNavLink>
+          <MobileNavLink href="#process">How We Work</MobileNavLink>
+          <MobileNavLink href="#testimonials">Reviews</MobileNavLink>
+          <MobileNavLink href="#faq">FAQ</MobileNavLink>
+          <div className="mt-4 p-4">
+            <PopoverButton as={Link} href="#contact" className="flex w-full h-12 items-center justify-center bg-amber-500 font-sans text-sm font-bold uppercase tracking-widest text-slate-950 transition-colors hover:bg-amber-400">
+              Get a Quote
+            </PopoverButton>
+          </div>
+        </div>
       </PopoverPanel>
     </Popover>
   )
 }
 
+function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="inline-block px-4 py-2 text-sm font-bold uppercase tracking-widest text-slate-600 transition-colors hover:text-slate-900"
+    >
+      {children}
+    </Link>
+  )
+}
+
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-sm">
-      {/* Utility bar */}
-      <div className="hidden border-b border-slate-100 bg-slate-50 sm:block">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-1.5 sm:px-6 lg:px-8">
-          <p className="text-xs text-slate-500">
-            2/41 Smales Road, East Tāmaki, Auckland &nbsp;·&nbsp; Mon–Fri
-            8:00am–5:00pm
-          </p>
+    <header className="sticky top-0 z-50 bg-white border-b-4 border-slate-900">
+      {/* High-Vis Utility bar */}
+      <div className="hidden bg-slate-900 sm:block">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:px-8">
+          <div className="flex gap-6 text-xs font-mono tracking-widest text-slate-400 uppercase">
+            <span>2/41 Smales Road, East Tāmaki</span>
+            <span className="text-slate-600">|</span>
+            <span>Mon–Fri 8:00am–5:00pm</span>
+          </div>
           <a
             href="tel:0995198763"
-            className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900"
+            className="flex items-center gap-2 text-xs font-mono font-bold tracking-widest text-amber-500 hover:text-amber-400 transition-colors"
           >
-            <svg
-              aria-hidden="true"
-              className="h-3 w-3"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
+            <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
               <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
             </svg>
             09-951-8763
@@ -112,67 +121,55 @@ export function Header() {
       {/* Main nav */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <nav
-          className="flex h-16 items-center justify-between"
+          className="flex h-20 items-center justify-between"
           aria-label="Main navigation"
         >
-          {/* Logo */}
+          {/* Logo - Structural block */}
           <Link
             href="/"
             aria-label="AKF Construction Home"
-            className="flex items-center gap-2.5"
+            className="flex items-center gap-3 group"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-slate-900">
+            <div className="flex h-12 w-12 items-center justify-center bg-slate-900 transition-transform group-hover:scale-105 rounded-none">
               <svg
                 aria-hidden="true"
-                className="h-5 w-5 text-amber-400"
+                className="h-6 w-6 text-amber-500"
                 viewBox="0 0 24 24"
                 fill="currentColor"
               >
                 <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
               </svg>
             </div>
-            <div>
-              <span className="font-display text-base font-semibold text-slate-900 leading-none">
+            <div className="flex flex-col">
+              <span className="font-display text-xl font-bold text-slate-900 uppercase tracking-tight leading-none">
                 AKF Construction
               </span>
-              <span className="block text-xs text-slate-400 leading-none mt-0.5">
-                Built on Trust. Driven by Quality.
+              <span className="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-[0.2em] mt-1">
+                Auckland Builders
               </span>
             </div>
           </Link>
 
           {/* Desktop links */}
-          <div className="hidden items-center gap-x-1 md:flex">
+          <div className="hidden items-center md:flex">
             <NavLink href="#projects">Projects</NavLink>
             <NavLink href="#services">Services</NavLink>
-            <NavLink href="#process">How We Work</NavLink>
+            <NavLink href="#process">Process</NavLink>
             <NavLink href="#testimonials">Reviews</NavLink>
-            <NavLink href="#faq">FAQ</NavLink>
           </div>
 
           {/* Desktop CTAs */}
-          <div className="hidden items-center gap-x-4 md:flex">
+          <div className="hidden items-center gap-x-6 md:flex">
             <a
-              href="tel:0995198763"
-              className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors"
+              href="#contact"
+              className="inline-flex h-10 items-center justify-center bg-slate-900 px-6 font-sans text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-slate-800 rounded-none border-b-2 border-amber-500"
             >
-              <svg
-                aria-hidden="true"
-                className="h-4 w-4"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
-              </svg>
-              09-951-8763
+              Request Quote
             </a>
-            <Button href="#contact" color="slate">
-              Get a Free Quote
-            </Button>
           </div>
 
           {/* Mobile hamburger */}
-          <div className="-mr-1 md:hidden">
+          <div className="md:hidden">
             <MobileNavigation />
           </div>
         </nav>

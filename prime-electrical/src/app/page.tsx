@@ -21,7 +21,6 @@ export default function Home() {
         <Faqs />
       </main>
       <Footer />
-      <MobileStickyBar phone="0993903620" bookingUrl="#contact" />
     </>
   )
 }

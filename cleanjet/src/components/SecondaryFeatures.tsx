@@ -2,124 +2,91 @@ import { Container } from '@/components/Container'
 
 const features = [
   {
-    name: 'Vetted & Fully Insured',
-    summary: 'Background-checked cleaners. Your home is in safe hands.',
+    name: 'Clinical Verification',
+    summary: 'Background-checked professionals.',
     description:
-      'Every CleanJet cleaner goes through a rigorous background check and is covered by full public liability insurance. We stand behind our team — and behind every clean.',
-    icon: function ShieldIcon() {
-      return (
-        <>
-          <path
-            opacity=".4"
-            d="M18 8 9 11.5v8c0 5 4.5 8.5 9 9.5 4.5-1 9-4.5 9-9.5v-8L18 8Z"
-            fill="#fff"
-          />
-          <path
-            d="M15 18.5l2 2 4-4"
-            stroke="#fff"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </>
-      )
-    },
+      'Every CleanJet technician undergoes rigorous background screening and maintains full public liability insurance. We deploy absolute professionals into your living space.',
+    icon: (
+      <svg aria-hidden="true" className="h-6 w-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+      </svg>
+    ),
   },
   {
-    name: 'Eco-Friendly Products',
-    summary: 'Non-toxic and safe for children, pets, and the planet.',
+    name: 'Eco-Sterile Solutions',
+    summary: 'Non-toxic, maximum efficacy.',
     description:
-      'We use eco-certified, non-toxic cleaning products on every visit. No harsh chemicals — just effective, safe cleaning that\'s good for your family and better for New Zealand.',
-    icon: function LeafIcon() {
-      return (
-        <>
-          <path
-            opacity=".4"
-            d="M10 26c2-6 6-10 14-12-1 6-4 11-9 13"
-            fill="#fff"
-          />
-          <path
-            d="M10 26c0-8 4-14 14-18 0 10-5 17-14 18Z"
-            fill="#fff"
-          />
-          <path
-            d="M10 26c2-3 3-6 3-8"
-            stroke="#6692F1"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            opacity=".7"
-          />
-        </>
-      )
-    },
+      'We utilize hospital-grade, eco-certified products. Zero harsh chemicals. Zero toxic residue. Safe for children, pets, and the environment while delivering a flawless clean.',
+    icon: (
+      <svg aria-hidden="true" className="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
   },
   {
-    name: '100% Satisfaction Guarantee',
-    summary: 'Not happy? We reclean for free — every single time.',
+    name: '100% Quality Assurance',
+    summary: 'Guaranteed pristine results.',
     description:
-      'If your clean doesn\'t meet our high standards, call us within 24 hours and we\'ll return to fix it at no charge. No arguments, no excuses. That\'s our promise.',
-    icon: function BadgeIcon() {
-      return (
-        <>
-          <path
-            opacity=".4"
-            d="M18 8c-5.5 0-10 4.5-10 10s4.5 10 10 10 10-4.5 10-10S23.5 8 18 8Z"
-            fill="#fff"
-          />
-          <path
-            d="M14 18l3 3 5-5"
-            stroke="#fff"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </>
-      )
-    },
+      'Our standard is perfection. If an area falls short of our clinical baseline, report it within 24 hours. A team will be dispatched to reclean the area at zero cost.',
+    icon: (
+      <svg aria-hidden="true" className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
   },
 ]
-
-function FeatureCard({
-  feature,
-}: {
-  feature: (typeof features)[number]
-}) {
-  return (
-    <div className="flex flex-col">
-      <div className="w-9 rounded-lg bg-sky-500">
-        <svg aria-hidden="true" className="h-9 w-9" fill="none">
-          <feature.icon />
-        </svg>
-      </div>
-      <h3 className="mt-6 text-sm font-medium text-sky-600">{feature.name}</h3>
-      <p className="mt-2 font-display text-xl text-slate-900">
-        {feature.summary}
-      </p>
-      <p className="mt-4 text-sm text-slate-600">{feature.description}</p>
-    </div>
-  )
-}
 
 export function SecondaryFeatures() {
   return (
     <section
       id="secondary-features"
       aria-label="Why choose CleanJet"
-      className="pt-20 pb-14 sm:pt-32 sm:pb-20 lg:pb-32"
+      className="relative overflow-hidden py-24 sm:py-32 bg-white border-b border-slate-200"
     >
       <Container>
-        <div className="mx-auto max-w-2xl md:text-center">
-          <h2 className="font-display text-3xl tracking-tight text-slate-900 sm:text-4xl">
-            Clean you can trust. Every single time.
+        <div className="mx-auto max-w-2xl text-center mb-16 sm:mb-24">
+          <div className="inline-flex items-center gap-2 px-4 py-1 rounded-none border border-sky-200 bg-sky-50 text-sky-700 text-xs font-bold uppercase tracking-widest mb-6">
+            <svg aria-hidden="true" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            Operating Standard
+          </div>
+          
+          <h2 className="font-display text-4xl tracking-tight text-slate-900 sm:text-5xl uppercase font-bold">
+            Uncompromising <br/> Cleanliness.
           </h2>
-          <p className="mt-4 text-lg tracking-tight text-slate-700">
-            We don&apos;t just clean homes — we give Auckland families back
-            their time. Here&apos;s why thousands choose CleanJet.
+          <p className="mt-6 text-lg font-medium text-slate-500 max-w-xl mx-auto">
+            We operate at the highest standard of residential hygiene. Vetted staff, eco-sterile products, and a zero-tolerance policy for dirt.
           </p>
         </div>
-        <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-12 sm:gap-y-16 lg:mt-20 lg:max-w-none lg:grid-cols-3">
-          {features.map((feature) => (
-            <FeatureCard key={feature.name} feature={feature} />
+        
+        <div className="mx-auto grid max-w-2xl grid-cols-1 gap-8 lg:max-w-none lg:grid-cols-3">
+          {features.map((feature, idx) => (
+            <div 
+              key={feature.name}
+              className="flex flex-col border border-slate-200 bg-slate-50 p-8 hover:border-sky-500 transition-colors"
+            >
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex h-12 w-12 items-center justify-center bg-white border border-slate-200 shadow-sm">
+                  {feature.icon}
+                </div>
+                <div className="font-mono text-sm font-bold text-slate-300">
+                  0{idx + 1}
+                </div>
+              </div>
+              
+              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">
+                {feature.name}
+              </h3>
+              
+              <p className="font-display text-xl font-bold text-slate-900 mb-4">
+                {feature.summary}
+              </p>
+              
+              <p className="text-sm font-medium text-slate-500 leading-relaxed mt-auto">
+                {feature.description}
+              </p>
+            </div>
           ))}
         </div>
       </Container>

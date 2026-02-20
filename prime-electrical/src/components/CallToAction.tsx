@@ -1,4 +1,3 @@
-import { Button } from '@/components/Button'
 import { Container } from '@/components/Container'
 
 const lenders = [
@@ -11,28 +10,42 @@ const lenders = [
 export function CallToAction() {
   return (
     <>
-      {/* Financing section */}
+      {/* Financing section - Technical Grid */}
       <section
         id="financing"
         aria-labelledby="financing-title"
-        className="bg-slate-900 py-20 sm:py-28"
+        className="bg-slate-950 py-20 sm:py-28 border-t border-slate-800 relative overflow-hidden"
       >
-        <Container>
+        {/* Subtle circuit lines */}
+        <div className="absolute inset-0 pointer-events-none opacity-5">
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="circuit" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 0 40 L 40 0 M 20 40 L 40 20 M 0 20 L 20 0" stroke="white" strokeWidth="0.5" fill="none" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#circuit)" />
+          </svg>
+        </div>
+
+        <Container className="relative z-10">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-amber-400">
-              Finance options
-            </p>
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="h-px w-8 bg-blue-500" />
+              <span className="font-mono text-xs font-bold uppercase tracking-widest text-blue-400">
+                Capital Allocation
+              </span>
+              <div className="h-px w-8 bg-blue-500" />
+            </div>
             <h2
               id="financing-title"
-              className="mt-3 font-display text-3xl tracking-tight text-white sm:text-4xl"
+              className="font-display text-3xl font-bold uppercase tracking-tight text-white sm:text-4xl"
             >
-              Solar & heat pumps from{' '}
-              <span className="text-amber-400">$0 upfront</span>
+              System Upgrades from{' '}
+              <span className="text-blue-500">$0 Upfront</span>
             </h2>
             <p className="mt-4 text-lg text-slate-400">
-              We work with Auckland&apos;s leading lenders to make energy
-              upgrades affordable. No complicated paperwork — we&apos;ll walk
-              you through every option.
+              We interface directly with Auckland&apos;s leading financial institutions to make energy upgrades accessible. Seamless processing, zero friction.
             </p>
           </div>
 
@@ -40,12 +53,12 @@ export function CallToAction() {
             {lenders.map((lender) => (
               <div
                 key={lender.name}
-                className="flex items-start gap-4 rounded-2xl bg-white/5 px-6 py-5 ring-1 ring-white/10"
+                className="flex items-start gap-4 bg-slate-900 border border-slate-800 px-6 py-5 hover:border-blue-500/50 transition-colors group"
               >
-                <div className="flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-amber-400/20 ring-1 ring-amber-400/30">
+                <div className="flex h-10 w-10 flex-none items-center justify-center bg-slate-950 border border-slate-800 group-hover:border-blue-500/50 transition-colors">
                   <svg
                     aria-hidden="true"
-                    className="h-5 w-5 text-amber-400"
+                    className="h-5 w-5 text-blue-500"
                     viewBox="0 0 24 24"
                     fill="currentColor"
                   >
@@ -53,10 +66,10 @@ export function CallToAction() {
                   </svg>
                 </div>
                 <div>
-                  <p className="font-display text-base font-semibold text-white">
+                  <p className="font-display text-base font-bold uppercase tracking-widest text-white">
                     {lender.name}
                   </p>
-                  <p className="mt-0.5 text-sm text-slate-400">
+                  <p className="mt-1 text-xs text-slate-400 font-mono">
                     {lender.detail}
                   </p>
                 </div>
@@ -64,51 +77,64 @@ export function CallToAction() {
             ))}
           </div>
 
-          <div className="mt-12 text-center">
-            <Button href="#contact" color="blue">
-              Talk to us about finance
-            </Button>
+          <div className="mt-12 flex justify-center">
+            <a 
+              href="#contact" 
+              className="inline-flex h-12 items-center justify-center border border-slate-700 bg-transparent px-8 font-mono text-xs font-bold uppercase tracking-widest text-slate-300 transition-colors hover:border-blue-500 hover:text-white"
+            >
+              Initialize Finance Request
+            </a>
           </div>
         </Container>
       </section>
 
-      {/* Final CTA section */}
+      {/* Final CTA section - Clinical Action */}
       <section
         id="contact"
-        className="relative overflow-hidden bg-blue-600 py-24 sm:py-32"
+        className="relative overflow-hidden bg-blue-950 py-24 sm:py-32 border-t-2 border-blue-500"
       >
-        {/* Decorative blur */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 overflow-hidden"
-        >
-          <div className="absolute -top-20 -right-20 h-80 w-80 rounded-full bg-blue-500/40 blur-3xl" />
-          <div className="absolute -bottom-20 -left-20 h-80 w-80 rounded-full bg-indigo-600/40 blur-3xl" />
-        </div>
+        <div 
+          className="absolute inset-0 opacity-10 pointer-events-none"
+          style={{
+            backgroundImage: `linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+            backgroundSize: '10vw 100%'
+          }}
+        />
 
-        <Container className="relative">
+        <Container className="relative z-10">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="font-display text-3xl tracking-tight text-white sm:text-4xl">
-              Ready to power up your home?
+            <h2 className="font-display text-4xl font-bold uppercase tracking-tight text-white sm:text-5xl">
+              Commence Operations.
             </h2>
-            <p className="mt-4 text-lg text-blue-100">
-              Get a free, no-obligation quote. We come to you, assess your home,
-              and give you a written proposal — usually within 24 hours.
+            <p className="mt-6 text-lg text-blue-200">
+              Engage our technical team for a site assessment. We deliver precise, fixed-price proposals within 24 hours of inspection.
             </p>
-            <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-x-6">
-              <Button href="tel:0993903620" color="white">
-                📞 Call 09-390-3620
-              </Button>
+            <div className="mt-12 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-x-6">
+              <a 
+                href="tel:0993903620"
+                className="inline-flex h-14 w-full sm:w-auto items-center justify-center bg-blue-600 px-10 font-sans text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-blue-500"
+              >
+                CALL [09] 390-3620
+              </a>
               <a
                 href="mailto:info@theprimeelectrical.co.nz"
-                className="flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30 hover:bg-white/10 transition"
+                className="inline-flex h-14 w-full sm:w-auto items-center justify-center border border-blue-400 bg-transparent px-10 font-sans text-sm font-bold uppercase tracking-widest text-blue-100 transition-colors hover:bg-blue-900"
               >
-                Email us instead
+                SUBMIT SCHEMATICS
               </a>
             </div>
-            <p className="mt-6 text-sm text-blue-200">
-              Mon–Fri 8:30am–5:00pm &nbsp;·&nbsp; Unit 2, 41 Smales Road, East Tāmaki, Auckland 2013
-            </p>
+            
+            <div className="mt-12 border-t border-blue-800/50 pt-8 flex justify-center">
+              <div className="inline-flex items-center gap-3 bg-slate-900/50 px-4 py-2 border border-slate-800">
+                <span className="flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <p className="font-mono text-xs uppercase tracking-widest text-slate-300">
+                  Dispatch Ready: Mon–Fri 8:30am–5:00pm
+                </p>
+              </div>
+            </div>
           </div>
         </Container>
       </section>

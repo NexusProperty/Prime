@@ -21,6 +21,15 @@ Here is the list of websites for construction, renovation, and landscaping compa
 * [https://www.precisionconstruction.co.nz/](https://www.precisionconstruction.co.nz/)  
 * [https://www.solidedgeconstruction.co.nz/](https://www.solidedgeconstruction.co.nz/)  
 * [https://www.lsconstruction.co.nz/](https://www.lsconstruction.co.nz/)
+* [https://dpr.com/](https://dpr.com/)
+* [https://solidbuild.co.nz/](https://solidbuild.co.nz/)
+* [https://rebath.com/](https://rebath.com/)
+* [https://brightstone.ca/](https://brightstone.ca/)
+* [https://www.refinementsolutions.co.nz/](https://www.refinementsolutions.co.nz/)
+* [https://www.buildcraft.co.nz/](https://www.buildcraft.co.nz/)
+* [https://www.buildernz.co.nz/](https://www.buildernz.co.nz/)
+* [https://www.buildersgroup.co.nz/](https://www.buildersgroup.co.nz/)
+* [https://www.buildersgroup.co.nz/](https://www.buildersgroup.co.nz/)
 
 Here is the list of websites for cleaning companies in the same region (Auckland, New Zealand), including residential, commercial, and specialized cleaning services:
 
@@ -42,6 +51,10 @@ Here is the list of websites for cleaning companies in the same region (Auckland
 * [https://jimscleaning.co.nz/](https://jimscleaning.co.nz/)  
 * [https://kiwicleanhome.co.nz/](https://kiwicleanhome.co.nz/)  
 * [https://cleanboss.co.nz/](https://cleanboss.co.nz/)
+* [https://sprucecleaning.nz/](https://sprucecleaning.nz/)
+* [https://myclean.com/](https://myclean.com/)
+* [https://cleanboss.co.nz/](https://cleanboss.co.nz/) (Current reference site for the CleanJet)
+* [https://handy.com/](https://handy.com/)
 
 Here is the list of websites for companies in the same industry (Electrical, Heat Pumps, Solar, and Automation) and region:
 
@@ -58,4 +71,10 @@ Here is the list of websites for companies in the same industry (Electrical, Hea
 * [https://purepower.nz/](https://purepower.nz/)  
 * [https://zenenergy.co.nz/](https://zenenergy.co.nz/)  
 * [https://totalsolar.co.nz/](https://www.google.com/search?q=https://totalsolar.co.nz/)
+* [https://grammarelectrical.co.nz/](https://grammarelectrical.co.nz/)
+* [https://mrelectric.com/](https://mrelectric.com/)
+* [https://mitsubishicomfort.com/](https://mitsubishicomfort.com/) (Current reference site for the Prime Electrical)
+* [https://varcoe.co.nz/](https://varcoe.co.nz/)
+* [https://blueravensolar.com/](https://blueravensolar.com/)
+* [https://harrisonssolar.co.nz/](https://harrisonssolar.co.nz/)
 

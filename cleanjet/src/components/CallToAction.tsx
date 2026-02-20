@@ -1,31 +1,30 @@
-import { Button } from '@/components/Button'
 import { Container } from '@/components/Container'
 
 const guarantees = [
   {
-    title: 'Great Clean Guarantee',
-    desc: 'Not happy? We\'ll reclean for free within 48 hours — no questions asked, every single time.',
+    title: 'Absolute Quality Guarantee',
+    desc: 'If our clinical standard is not met, notify us within 48 hours. A team will be dispatched immediately to rectify at zero cost.',
     icon: (
-      <svg aria-hidden="true" className="h-6 w-6 text-sky-400" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z" />
+      <svg aria-hidden="true" className="h-6 w-6 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
   },
   {
-    title: 'No Lock-In Contract',
-    desc: 'Skip, reschedule, or cancel any clean with 24 hours\' notice. No fees, no hassle.',
+    title: 'Zero Friction Flexibility',
+    desc: 'Modify, suspend, or cancel your service schedule with 24 hours notice. No cancellation fees, no contracts.',
     icon: (
-      <svg aria-hidden="true" className="h-6 w-6 text-sky-400" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+      <svg aria-hidden="true" className="h-6 w-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
       </svg>
     ),
   },
   {
-    title: 'Same Cleaner Every Time',
-    desc: 'We match you with a cleaner you love and stick with them — consistency you can count on.',
+    title: 'Dedicated Personnel',
+    desc: 'We assign a dedicated professional to your property to ensure absolute consistency and trust across every visit.',
     icon: (
-      <svg aria-hidden="true" className="h-6 w-6 text-sky-400" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+      <svg aria-hidden="true" className="h-6 w-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
       </svg>
     ),
   },
@@ -34,40 +33,37 @@ const guarantees = [
 export function CallToAction() {
   return (
     <>
-      {/* Why CleanJet — trust section (before final CTA) */}
+      {/* Why CleanJet — Clinical Standard Section */}
       <section
         id="why-cleanjet"
         aria-labelledby="why-cleanjet-title"
-        className="bg-slate-900 py-20 sm:py-28"
+        className="bg-white py-24 sm:py-32 border-b border-slate-200"
       >
         <Container>
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center lg:gap-20">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-widest text-sky-400">
-                Why CleanJet
-              </p>
+              <div className="inline-flex items-center gap-2 px-4 py-1 border border-slate-200 bg-white text-slate-600 text-xs font-bold uppercase tracking-widest mb-6">
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                Service Protocol
+              </div>
               <h2
                 id="why-cleanjet-title"
-                className="mt-3 font-display text-3xl tracking-tight text-white sm:text-4xl"
+                className="font-display text-4xl font-bold uppercase tracking-tight text-slate-900 sm:text-5xl"
               >
-                We clean. You relax.
+                Immaculate.
                 <br />
-                <span className="text-sky-400">That simple.</span>
+                <span className="text-slate-400">By Design.</span>
               </h2>
-              <p className="mt-5 text-lg leading-relaxed text-slate-400">
-                We started CleanJet because Auckland deserved a cleaning service
-                that actually respects both the cleaner and the client. Happy,
-                trained cleaners deliver better results — every time.
-              </p>
-              <p className="mt-4 text-base text-slate-400">
-                We hire, train, and background-check every cleaner. We use
-                eco-friendly products that are safe for your family and pets.
-                And we back every clean with our Great Clean Guarantee.
+              <p className="mt-6 text-lg font-medium text-slate-600 border-l-2 border-sky-500 pl-6">
+                CleanJet was engineered to replace the friction of traditional residential cleaning. We deploy rigorously vetted professionals armed with hospital-grade, eco-sterile solutions to ensure your environment is flawless.
               </p>
               <div className="mt-10">
-                <Button href="#booking" color="blue">
-                  Book Your First Clean
-                </Button>
+                <a 
+                  href="#booking" 
+                  className="inline-flex h-14 items-center justify-center bg-slate-900 px-8 font-sans text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-slate-800 focus:outline-hidden"
+                >
+                  Schedule Service
+                </a>
               </div>
             </div>
 
@@ -75,16 +71,16 @@ export function CallToAction() {
               {guarantees.map((g) => (
                 <div
                   key={g.title}
-                  className="flex items-start gap-5 rounded-2xl bg-white/5 px-6 py-5 ring-1 ring-white/10"
+                  className="flex items-start gap-6 bg-slate-50 border border-slate-200 px-6 py-6 transition-colors hover:border-sky-500"
                 >
-                  <div className="flex h-12 w-12 flex-none items-center justify-center rounded-xl bg-sky-500/20 ring-1 ring-sky-500/30">
+                  <div className="flex h-12 w-12 flex-none items-center justify-center bg-white border border-slate-200 shadow-sm">
                     {g.icon}
                   </div>
                   <div>
-                    <p className="font-display text-base font-semibold text-white">
+                    <p className="font-display text-lg font-bold uppercase tracking-tight text-slate-900">
                       {g.title}
                     </p>
-                    <p className="mt-1 text-sm leading-relaxed text-slate-400">
+                    <p className="mt-2 text-sm font-medium text-slate-600 leading-relaxed">
                       {g.desc}
                     </p>
                   </div>
@@ -95,49 +91,48 @@ export function CallToAction() {
         </Container>
       </section>
 
-      {/* Final booking CTA */}
+      {/* Final booking CTA - Sterile Brand Execution */}
       <section
         id="booking"
-        className="relative overflow-hidden bg-sky-600 py-24 sm:py-32"
+        className="relative overflow-hidden bg-sky-50 py-24 sm:py-32 border-b border-sky-100"
       >
-        {/* Decorative blobs */}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-sky-500/40 blur-3xl" />
-          <div className="absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-cyan-600/40 blur-3xl" />
-        </div>
-
         <Container className="relative">
-          <div className="mx-auto max-w-2xl text-center">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/20 px-4 py-1.5 ring-1 ring-white/30">
-              <span className="text-sm font-semibold text-white">
-                🎉 Limited offer — book before Friday
-              </span>
+          <div className="mx-auto max-w-2xl text-center bg-white p-12 sm:p-16 border border-slate-200 shadow-xl relative">
+            {/* Promo Banner Corner */}
+            <div className="absolute top-0 right-0 bg-sky-500 text-white text-[10px] font-bold uppercase tracking-widest py-1 px-8 rotate-45 translate-x-6 translate-y-4 shadow-sm">
+              20% Off Promotion
             </div>
-            <h2 className="mt-6 font-display text-4xl tracking-tight text-white sm:text-5xl">
-              First clean <span className="text-sky-200">20% off.</span>
+
+            <div className="flex justify-center mb-6">
+              <svg aria-hidden="true" className="h-10 w-10 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={1.5} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            
+            <h2 className="font-display text-4xl font-bold uppercase tracking-tight text-slate-900 sm:text-5xl">
+              Initiate <span className="text-sky-500">Service.</span>
             </h2>
-            <p className="mt-4 text-lg text-sky-100">
-              Try CleanJet risk-free. Not happy with your first clean? We&apos;ll
-              come back and reclean for free — no questions asked.
+            <p className="mt-6 text-lg font-medium text-slate-600 max-w-xl mx-auto">
+              Secure your first CleanJet visit today. Satisfaction guaranteed. If it's not perfect, we'll return to make it right.
             </p>
 
-            <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-x-5">
-              <Button href="#pricing" color="white">
-                Book My First Clean →
-              </Button>
+            <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+              <a 
+                href="#pricing" 
+                className="inline-flex w-full sm:w-auto h-14 items-center justify-center bg-sky-500 px-10 font-sans text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-sky-600 shadow-sm"
+              >
+                Confirm Appointment
+              </a>
               <a
                 href="tel:0800000000"
-                className="flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold text-white ring-1 ring-white/30 hover:bg-white/10 transition"
+                className="inline-flex w-full sm:w-auto h-14 items-center justify-center bg-white border-2 border-slate-200 px-10 font-sans text-xs font-bold uppercase tracking-widest text-slate-700 transition-colors hover:border-slate-300"
               >
-                <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
-                </svg>
-                0800 000 000
+                Call: 0800 000 000
               </a>
             </div>
 
-            <p className="mt-6 text-sm text-sky-200">
-              No lock-in contract · Cancel or reschedule any time · Auckland-wide service
+            <p className="mt-8 text-xs font-bold uppercase tracking-widest text-slate-400">
+              No long-term contracts. Auckland metropolitan area only.
             </p>
           </div>
         </Container>

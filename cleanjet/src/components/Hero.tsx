@@ -5,243 +5,179 @@ import { Button } from '@/components/Button'
 
 const PRICING = {
   'one-off': { '1-2': 99, '3-4': 149, '5+': 199 },
-  weekly: { '1-2': 79, '3-4': 119, '5+': 159 },
+  'weekly': { '1-2': 79, '3-4': 119, '5+': 159 },
+  'fortnightly': { '1-2': 89, '3-4': 129, '5+': 179 },
 } as const
 
 type BedroomKey = '1-2' | '3-4' | '5+'
-type FrequencyKey = 'one-off' | 'weekly'
-
-const trustBadges = [
-  {
-    icon: (
-      <svg aria-hidden="true" className="h-5 w-5 text-sky-600" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z" />
-      </svg>
-    ),
-    label: 'Vetted & insured',
-  },
-  {
-    icon: (
-      <svg aria-hidden="true" className="h-5 w-5 text-emerald-600" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 0 0 8 20c9 0 11-9 11-9s-3 3-8.01 4.02C12.39 13.6 12 12.84 12 12c0-2.21 2.24-4 5-4z" />
-      </svg>
-    ),
-    label: 'Eco-friendly products',
-  },
-  {
-    icon: (
-      <svg aria-hidden="true" className="h-5 w-5 text-amber-500" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-      </svg>
-    ),
-    label: '100% satisfaction guarantee',
-  },
-  {
-    icon: (
-      <svg aria-hidden="true" className="h-5 w-5 text-slate-600" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
-      </svg>
-    ),
-    label: 'No lock-in contracts',
-  },
-]
+type FrequencyKey = 'one-off' | 'weekly' | 'fortnightly'
 
 export function Hero() {
   const [bedrooms, setBedrooms] = useState<BedroomKey>('3-4')
-  const [frequency, setFrequency] = useState<FrequencyKey>('one-off')
-
+  const [frequency, setFrequency] = useState<FrequencyKey>('weekly')
+  
   const price = PRICING[frequency][bedrooms]
 
   return (
-    <section className="overflow-hidden bg-white py-16 sm:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-12 lg:flex-row lg:items-center lg:gap-16">
+    <section className="relative flex min-h-[90vh] items-center justify-center overflow-hidden bg-slate-50 border-b border-slate-200 pt-20 pb-16">
+      
+      {/* Pristine Architectural Background Image */}
+      <div 
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-40 mix-blend-multiply"
+        style={{
+          // Bright, sun-drenched living space placeholder
+          backgroundImage: 'url("https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=2070&auto=format&fit=crop")',
+        }}
+        aria-hidden="true"
+      />
 
-          {/* Left — headline + trust */}
-          <div className="flex-1">
-            {/* Review count — MyClean pattern */}
-            <div className="flex items-center gap-2">
-              <div className="flex -space-x-1">
-                {[
-                  'bg-sky-400',
-                  'bg-emerald-400',
-                  'bg-amber-400',
-                  'bg-violet-400',
-                  'bg-pink-400',
-                ].map((color, i) => (
-                  <div
-                    key={i}
-                    className={`h-7 w-7 rounded-full ${color} ring-2 ring-white flex items-center justify-center`}
-                  >
-                    <span className="text-xs font-bold text-white">
-                      {['S', 'J', 'M', 'A', 'P'][i]}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="flex text-amber-400">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-                <span className="text-sm font-semibold text-slate-900">5.0</span>
-                <span className="text-sm text-slate-500">· 200+ verified reviews</span>
-              </div>
+      {/* Subtle Medical/Clinical Grid */}
+      <div 
+        className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage: `
+            linear-gradient(to right, #000 1px, transparent 1px),
+            linear-gradient(to bottom, #000 1px, transparent 1px)
+          `,
+          backgroundSize: '24px 24px',
+        }}
+        aria-hidden="true"
+      />
+
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col lg:flex-row lg:items-center gap-12 lg:gap-20">
+          
+          {/* Left Text / Value Prop */}
+          <div className="flex-1 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 mb-6">
+              <span className="flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span className="text-xs font-bold uppercase tracking-widest text-emerald-600">
+                Auckland Coverage Active
+              </span>
             </div>
 
-            <h1 className="mt-6 font-display text-4xl font-medium tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-              Auckland home cleaning.{' '}
-              <span className="text-sky-600">Book in 60 seconds.</span>
+            <h1 className="font-display text-5xl font-bold tracking-tight text-slate-900 sm:text-7xl lg:text-[5rem] leading-[1.1]">
+              Pristine. <br />
+              <span className="text-sky-500">Professional.</span> <br />
+              Guaranteed.
             </h1>
-
-            <p className="mt-5 text-lg leading-relaxed text-slate-600">
-              We clean. You relax. Vetted, insured professionals delivering
-              sparkling results across Auckland — with a 100% satisfaction
-              guarantee or we reclean for free.
+            
+            <p className="mt-6 max-w-2xl text-lg font-medium text-slate-600 mx-auto lg:mx-0">
+              Meticulous residential cleaning by fully vetted professionals. We use clinical-grade, eco-friendly products for a flawless, sterile finish.
             </p>
 
-            {/* Trust badges grid */}
-            <div className="mt-8 grid grid-cols-2 gap-3">
-              {trustBadges.map((badge) => (
-                <div
-                  key={badge.label}
-                  className="flex items-center gap-2.5 rounded-xl bg-slate-50 px-4 py-3"
-                >
-                  {badge.icon}
-                  <span className="text-sm font-medium text-slate-700">
-                    {badge.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {/* Stats row — CleanBoss inspired */}
-            <div className="mt-10 grid grid-cols-3 divide-x divide-slate-200 border-t border-slate-200 pt-8">
+            <div className="mt-8 flex flex-wrap justify-center lg:justify-start gap-4">
               {[
-                { value: '200+', label: 'Homes cleaned' },
-                { value: '100%', label: 'Satisfaction rate' },
-                { value: '5★', label: 'Average rating' },
-              ].map((stat) => (
-                <div key={stat.label} className="px-4 first:pl-0 last:pr-0">
-                  <p className="font-display text-2xl font-semibold text-sky-600">
-                    {stat.value}
-                  </p>
-                  <p className="mt-0.5 text-xs text-slate-500">{stat.label}</p>
+                { label: 'Police Vetted Staff', icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z' },
+                { label: 'Eco-Certified Products', icon: 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z' },
+                { label: '100% Satisfaction', icon: 'M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.514' }
+              ].map((badge) => (
+                <div key={badge.label} className="flex items-center gap-2 bg-white px-4 py-2 rounded-none border border-slate-200 shadow-sm">
+                  <svg className="h-5 w-5 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={2} d={badge.icon} />
+                  </svg>
+                  <span className="text-xs font-bold uppercase tracking-widest text-slate-700">{badge.label}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Right — live pricing calculator card (MyClean booking widget pattern) */}
-          <div className="flex-1 lg:max-w-md">
-            <div className="rounded-3xl bg-white p-8 shadow-2xl ring-1 ring-slate-900/10">
-              {/* Promo badge */}
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-sky-50 px-4 py-1.5 ring-1 ring-sky-200">
-                <span className="h-1.5 w-1.5 rounded-full bg-sky-500" />
-                <span className="text-sm font-medium text-sky-700">
-                  🎉 First clean 20% off — book before Friday
-                </span>
-              </div>
+          {/* Right Clinical Booking Form */}
+          <div className="flex-1 w-full lg:max-w-md">
+            <div className="bg-white p-8 border-t-4 border-sky-500 shadow-2xl rounded-none relative overflow-hidden">
+              {/* Clinical accent top corner */}
+              <div className="absolute top-0 right-0 h-16 w-16 bg-sky-50/50 pointer-events-none" />
 
-              <h2 className="font-display text-xl font-semibold text-slate-900">
-                Get an instant price
+              <h2 className="font-display text-2xl font-bold uppercase tracking-tight text-slate-900 mb-2">
+                Service Request
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                No obligation. Takes 30 seconds.
+              <p className="text-sm font-medium text-slate-500 mb-8">
+                Configure your clean. Instant verified pricing.
               </p>
 
-              {/* Bedrooms */}
-              <div className="mt-6">
-                <p className="mb-2 text-sm font-semibold text-slate-700">
-                  How many bedrooms?
-                </p>
+              {/* Bedrooms Toggle */}
+              <div className="mb-6">
+                <label className="block text-xs font-bold uppercase tracking-widest text-slate-700 mb-3">
+                  Property Size (Bedrooms)
+                </label>
                 <div className="grid grid-cols-3 gap-2">
                   {(['1-2', '3-4', '5+'] as BedroomKey[]).map((opt) => (
                     <button
                       key={opt}
                       onClick={() => setBedrooms(opt)}
-                      className={`rounded-xl py-3 text-sm font-semibold transition-all ${
+                      className={`h-12 text-sm font-bold transition-colors border rounded-none ${
                         bedrooms === opt
-                          ? 'bg-sky-600 text-white shadow-sm shadow-sky-600/30'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          ? 'bg-sky-50 border-sky-500 text-sky-700'
+                          : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
                       }`}
                     >
-                      {opt} bed
+                      {opt}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Frequency */}
-              <div className="mt-5">
-                <p className="mb-2 text-sm font-semibold text-slate-700">
-                  How often?
-                </p>
-                <div className="grid grid-cols-2 gap-2">
+              {/* Frequency Toggle */}
+              <div className="mb-8">
+                <label className="block text-xs font-bold uppercase tracking-widest text-slate-700 mb-3">
+                  Service Interval
+                </label>
+                <div className="grid grid-cols-3 gap-2">
                   {(
                     [
-                      { key: 'one-off', label: 'One-off clean', sub: '' },
-                      { key: 'weekly', label: 'Weekly', sub: 'Save ~20%' },
-                    ] as { key: FrequencyKey; label: string; sub: string }[]
-                  ).map(({ key, label, sub }) => (
+                      { key: 'one-off', label: 'One-off' },
+                      { key: 'fortnightly', label: 'Bi-Weekly' },
+                      { key: 'weekly', label: 'Weekly' },
+                    ] as { key: FrequencyKey; label: string }[]
+                  ).map(({ key, label }) => (
                     <button
                       key={key}
                       onClick={() => setFrequency(key)}
-                      className={`rounded-xl py-3 text-sm font-semibold transition-all ${
+                      className={`h-12 text-xs font-bold uppercase tracking-wider transition-colors border rounded-none ${
                         frequency === key
-                          ? 'bg-sky-600 text-white shadow-sm shadow-sky-600/30'
-                          : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          ? 'bg-sky-50 border-sky-500 text-sky-700'
+                          : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
                       }`}
                     >
                       {label}
-                      {sub && (
-                        <span className="ml-1 block text-xs font-normal opacity-80">
-                          {sub}
-                        </span>
-                      )}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Price display */}
-              <div className="mt-6 flex items-end justify-between rounded-2xl bg-slate-50 px-5 py-4">
+              {/* Pricing Display */}
+              <div className="flex items-center justify-between border-t border-slate-200 pt-6 mb-8">
                 <div>
-                  <p className="text-xs font-medium text-slate-500 uppercase tracking-widest">
-                    Estimated price
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+                    Verified Estimate
                   </p>
-                  <p className="mt-1 font-display text-4xl font-semibold text-slate-900">
-                    ${price}
-                    <span className="ml-1 text-lg font-normal text-slate-500">
-                      NZD
+                  <div className="flex items-baseline gap-1 text-slate-900">
+                    <span className="text-4xl font-display font-bold tabular-nums tracking-tight">
+                      ${price}
                     </span>
-                  </p>
-                  <p className="mt-0.5 text-xs text-slate-500">
-                    Includes GST ·{' '}
-                    {frequency === 'weekly'
-                      ? 'billed fortnightly'
-                      : 'one-time payment'}
-                  </p>
+                    <span className="text-sm font-bold text-slate-500">NZD</span>
+                  </div>
                 </div>
                 <div className="text-right">
-                  <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">
-                    ✓ Eco products
-                  </span>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+                    Taxes
+                  </p>
+                  <p className="text-xs font-bold text-slate-600">GST Included</p>
                 </div>
               </div>
 
-              <Button href="#booking" color="blue" className="mt-4 w-full justify-center">
-                Book This Clean →
+              <Button href="#booking" color="blue" className="w-full h-14 !rounded-none !bg-sky-500 hover:!bg-sky-600 uppercase tracking-widest text-sm font-bold flex justify-center items-center gap-2">
+                Confirm Booking
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
               </Button>
-
-              <p className="mt-3 text-center text-xs text-slate-500">
-                Cancel or reschedule any time · No lock-in
-              </p>
             </div>
           </div>
+          
         </div>
       </div>
     </section>
