@@ -26,10 +26,7 @@ Here is the list of websites for construction, renovation, and landscaping compa
 * [https://rebath.com/](https://rebath.com/)
 * [https://brightstone.ca/](https://brightstone.ca/)
 * [https://www.refinementsolutions.co.nz/](https://www.refinementsolutions.co.nz/)
-* [https://www.buildcraft.co.nz/](https://www.buildcraft.co.nz/)
-* [https://www.buildernz.co.nz/](https://www.buildernz.co.nz/)
-* [https://www.buildersgroup.co.nz/](https://www.buildersgroup.co.nz/)
-* [https://www.buildersgroup.co.nz/](https://www.buildersgroup.co.nz/)
+
 
 Here is the list of websites for cleaning companies in the same region (Auckland, New Zealand), including residential, commercial, and specialized cleaning services:
 
