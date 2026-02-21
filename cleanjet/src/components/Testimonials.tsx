@@ -31,7 +31,7 @@ const testimonials = [
   [
     {
       content:
-        'We had CleanJet in after our AKF renovation — the post-build clean was incredible. Couldn\'t even tell the builders had been there. The bundle deal saved us money too. Definitely using them on a regular basis.',
+        'Had them in after our AKF renovation — the post-build clean was incredible. Couldn\'t even tell builders had been there. Highly recommend the bundle.',
       author: {
         name: 'Priya K.',
         role: 'Henderson, Auckland',

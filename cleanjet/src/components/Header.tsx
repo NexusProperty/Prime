@@ -70,11 +70,11 @@ function MobileNavigation() {
         <div className="p-2">
           <MobileNavLink href="#services">Services</MobileNavLink>
           <MobileNavLink href="#pricing">Pricing</MobileNavLink>
-          <MobileNavLink href="#how-it-works">Protocol</MobileNavLink>
-          <MobileNavLink href="#testimonials">Verification</MobileNavLink>
+          <MobileNavLink href="#how-it-works">How It Works</MobileNavLink>
+          <MobileNavLink href="#testimonials">Reviews</MobileNavLink>
           <div className="mt-4 p-4">
-            <PopoverButton as={Link} href="#booking" className="flex w-full h-12 items-center justify-center bg-sky-500 font-sans text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-sky-400 rounded-none">
-              Initiate Service
+            <PopoverButton as={Link} href="#booking" className="flex w-full h-12 items-center justify-center bg-sky-600 font-sans text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-sky-500 rounded-full">
+              Book Now
             </PopoverButton>
           </div>
         </div>
@@ -136,11 +136,8 @@ export function Header() {
               </svg>
             </div>
             <div className="flex flex-col">
-              <span className="font-display text-xl font-bold text-slate-900 uppercase tracking-tight leading-none">
+              <span className="font-display text-xl font-bold text-sky-600 uppercase tracking-tight leading-none">
                 CleanJet
-              </span>
-              <span className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">
-                Clinical Hygiene
               </span>
             </div>
           </Link>
@@ -149,8 +146,8 @@ export function Header() {
           <div className="hidden h-full items-center border-r border-slate-100 md:flex">
             <NavLink href="#services">Services</NavLink>
             <NavLink href="#pricing">Pricing</NavLink>
-            <NavLink href="#how-it-works">Protocol</NavLink>
-            <NavLink href="#testimonials">Verification</NavLink>
+            <NavLink href="#how-it-works">How It Works</NavLink>
+            <NavLink href="#testimonials">Reviews</NavLink>
           </div>
 
           {/* Desktop CTAs */}
@@ -171,9 +168,9 @@ export function Header() {
             </a>
             <a
               href="#booking"
-              className="inline-flex h-10 items-center justify-center bg-sky-500 px-6 font-sans text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-sky-400 rounded-none shadow-xs"
+              className="inline-flex h-10 items-center justify-center bg-sky-600 px-6 font-sans text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-sky-500 rounded-full shadow-xs"
             >
-              Initiate Service
+              Book Now
             </a>
           </div>
 

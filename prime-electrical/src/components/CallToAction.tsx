@@ -1,139 +1,128 @@
 import { Container } from '@/components/Container'
 
-const lenders = [
-  { name: 'ANZ', detail: 'Interest-free heat pump & insulation loans' },
-  { name: 'Westpac', detail: 'Warm Up Loan' },
-  { name: 'GEM Visa', detail: '6 months interest-free on $250+' },
-  { name: 'Q Mastercard', detail: '3+ months zero interest & zero payments' },
+const financingOptions = [
+  { provider: 'ANZ', detail: 'Interest-free heat pump & insulation loans' },
+  { provider: 'Westpac', detail: 'Warm Up Loan' },
+  { provider: 'GEM Visa', detail: '6 months interest-free on $250+' },
+  { provider: 'Q Mastercard', detail: '3+ months zero interest & zero payments' },
 ]
 
 export function CallToAction() {
   return (
     <>
-      {/* Financing section - Technical Grid */}
+      {/* Capital Allocation / Financing section */}
       <section
         id="financing"
         aria-labelledby="financing-title"
-        className="bg-slate-950 py-20 sm:py-28 border-t border-slate-800 relative overflow-hidden"
+        className="relative bg-slate-950 py-20 sm:py-28 border-t border-slate-900"
       >
-        {/* Subtle circuit lines */}
-        <div className="absolute inset-0 pointer-events-none opacity-5">
-          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="circuit" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 0 40 L 40 0 M 20 40 L 40 20 M 0 20 L 20 0" stroke="white" strokeWidth="0.5" fill="none" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#circuit)" />
-          </svg>
-        </div>
+        {/* Subtle circuit grid */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage:
+              'linear-gradient(to right, #3b82f6 1px, transparent 1px), linear-gradient(to bottom, #3b82f6 1px, transparent 1px)',
+            backgroundSize: '40px 40px',
+          }}
+        />
 
-        <Container className="relative z-10">
-          <div className="mx-auto max-w-2xl text-center">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <div className="h-px w-8 bg-blue-500" />
-              <span className="font-mono text-xs font-bold uppercase tracking-widest text-blue-400">
-                Capital Allocation
-              </span>
-              <div className="h-px w-8 bg-blue-500" />
-            </div>
-            <h2
-              id="financing-title"
-              className="font-display text-3xl font-bold uppercase tracking-tight text-white sm:text-4xl"
-            >
-              System Upgrades from{' '}
-              <span className="text-blue-500">$0 Upfront</span>
-            </h2>
-            <p className="mt-4 text-lg text-slate-400">
-              We interface directly with Auckland&apos;s leading financial institutions to make energy upgrades accessible. Seamless processing, zero friction.
-            </p>
+        <Container className="relative">
+          <div className="mb-6 flex items-center gap-4">
+            <div className="h-0.5 w-12 bg-blue-600" />
+            <span className="font-mono text-sm font-bold uppercase tracking-widest text-blue-600">
+              Capital Allocation
+            </span>
           </div>
 
-          <div className="mx-auto mt-16 grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2">
-            {lenders.map((lender) => (
-              <div
-                key={lender.name}
-                className="flex items-start gap-4 bg-slate-900 border border-slate-800 px-6 py-5 hover:border-blue-500/50 transition-colors group"
-              >
-                <div className="flex h-10 w-10 flex-none items-center justify-center bg-slate-950 border border-slate-800 group-hover:border-blue-500/50 transition-colors">
-                  <svg
-                    aria-hidden="true"
-                    className="h-5 w-5 text-blue-500"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.418 0-8-3.582-8-8s3.582-8 8-8 8 3.582 8 8-3.582 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="font-display text-base font-bold uppercase tracking-widest text-white">
-                    {lender.name}
-                  </p>
-                  <p className="mt-1 text-xs text-slate-400 font-mono">
-                    {lender.detail}
-                  </p>
-                </div>
+          <h2
+            id="financing-title"
+            className="font-display text-4xl font-bold tracking-tight text-white sm:text-5xl"
+          >
+            System Upgrades from{' '}
+            <span className="text-blue-400">$0 Upfront</span>
+          </h2>
+          <p className="mt-4 max-w-2xl text-lg text-slate-400">
+            We interface directly with Auckland&apos;s leading financial institutions to
+            make energy upgrades accessible. Seamless processing, zero friction.
+          </p>
+
+          <div className="mt-10 grid grid-cols-1 gap-px bg-slate-800 sm:grid-cols-2 lg:grid-cols-4">
+            {financingOptions.map((opt) => (
+              <div key={opt.provider} className="bg-slate-950 px-8 py-6">
+                <p className="font-display text-xl font-bold text-white">
+                  {opt.provider}
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-slate-400">
+                  {opt.detail}
+                </p>
               </div>
             ))}
           </div>
 
-          <div className="mt-12 flex justify-center">
-            <a 
-              href="#contact" 
-              className="inline-flex h-12 items-center justify-center border border-slate-700 bg-transparent px-8 font-mono text-xs font-bold uppercase tracking-widest text-slate-300 transition-colors hover:border-blue-500 hover:text-white"
+          <div className="mt-10">
+            <a
+              href="#contact"
+              className="inline-flex items-center gap-2 border border-blue-600 px-6 py-3 font-mono text-sm font-bold uppercase tracking-widest text-blue-400 transition-colors hover:bg-blue-600 hover:text-white"
             >
-              Initialize Finance Request
+              {'>'} Initialize Finance Request
             </a>
           </div>
         </Container>
       </section>
 
-      {/* Final CTA section - Clinical Action */}
+      {/* Commence Operations CTA */}
       <section
-        id="contact"
-        className="relative overflow-hidden bg-blue-950 py-24 sm:py-32 border-t-2 border-blue-500"
+        id="contact-cta"
+        className="relative bg-slate-100 py-24 sm:py-32"
       >
-        <div 
-          className="absolute inset-0 opacity-10 pointer-events-none"
+        {/* Blueprint circuit SVG overlay */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-[0.04]"
           style={{
-            backgroundImage: `linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-            backgroundSize: '10vw 100%'
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='40' fill='none' stroke='%230f172a' stroke-width='0.5'/%3E%3Ccircle cx='50' cy='50' r='2' fill='%230f172a'/%3E%3Cline x1='10' y1='50' x2='90' y2='50' stroke='%230f172a' stroke-width='0.3'/%3E%3Cline x1='50' y1='10' x2='50' y2='90' stroke='%230f172a' stroke-width='0.3'/%3E%3C/svg%3E")`,
+            backgroundSize: '120px 120px',
           }}
         />
 
-        <Container className="relative z-10">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="font-display text-4xl font-bold uppercase tracking-tight text-white sm:text-5xl">
+        <Container className="relative">
+          <div className="mx-auto max-w-3xl text-center">
+            <div className="mx-auto mb-8 flex items-center justify-center gap-4">
+              <div className="h-px w-16 bg-slate-400" />
+              <span className="font-mono text-xs font-bold uppercase tracking-widest text-slate-500">
+                Dispatch Ready
+              </span>
+              <div className="h-px w-16 bg-slate-400" />
+            </div>
+
+            <h2 className="font-display text-5xl font-bold uppercase tracking-tight text-slate-900 sm:text-6xl">
               Commence Operations.
             </h2>
-            <p className="mt-6 text-lg text-blue-200">
-              Engage our technical team for a site assessment. We deliver precise, fixed-price proposals within 24 hours of inspection.
+            <p className="mt-6 text-xl text-slate-600 max-w-2xl mx-auto">
+              Engage our technical team for a site assessment. We deliver precise,
+              fixed-price proposals within 24 hours of inspection.
             </p>
+
             <div className="mt-12 flex flex-col items-center gap-4 sm:flex-row sm:justify-center sm:gap-x-6">
-              <a 
+              <a
                 href="tel:0993903620"
-                className="inline-flex h-14 w-full sm:w-auto items-center justify-center bg-blue-600 px-10 font-sans text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-blue-500"
+                className="inline-flex h-16 w-full sm:w-auto items-center justify-center bg-slate-900 px-10 font-sans text-base font-bold uppercase tracking-widest text-blue-400 transition-colors hover:bg-slate-800"
               >
                 CALL [09] 390-3620
               </a>
               <a
                 href="mailto:info@theprimeelectrical.co.nz"
-                className="inline-flex h-14 w-full sm:w-auto items-center justify-center border border-blue-400 bg-transparent px-10 font-sans text-sm font-bold uppercase tracking-widest text-blue-100 transition-colors hover:bg-blue-900"
+                className="inline-flex h-16 w-full sm:w-auto items-center justify-center border-2 border-slate-900 bg-transparent px-10 font-sans text-base font-bold uppercase tracking-widest text-slate-900 transition-colors hover:bg-slate-900 hover:text-white"
               >
                 SUBMIT SCHEMATICS
               </a>
             </div>
-            
-            <div className="mt-12 border-t border-blue-800/50 pt-8 flex justify-center">
-              <div className="inline-flex items-center gap-3 bg-slate-900/50 px-4 py-2 border border-slate-800">
-                <span className="flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                <p className="font-mono text-xs uppercase tracking-widest text-slate-300">
-                  Dispatch Ready: Mon–Fri 8:30am–5:00pm
-                </p>
-              </div>
+
+            <div className="mt-12 inline-block border border-slate-300 bg-white px-6 py-3 shadow-xs">
+              <p className="text-sm font-mono font-bold uppercase tracking-widest text-slate-500">
+                Dispatch Ready: Mon–Fri 8:30am–5:00pm
+              </p>
             </div>
           </div>
         </Container>

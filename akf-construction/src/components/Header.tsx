@@ -70,11 +70,10 @@ function MobileNavigation() {
         <div className="p-2">
           <MobileNavLink href="#projects">Projects</MobileNavLink>
           <MobileNavLink href="#services">Services</MobileNavLink>
-          <MobileNavLink href="#process">How We Work</MobileNavLink>
-          <MobileNavLink href="#testimonials">Reviews</MobileNavLink>
-          <MobileNavLink href="#faq">FAQ</MobileNavLink>
+          <MobileNavLink href="#decks-fencing">Decks & Fencing</MobileNavLink>
+          <MobileNavLink href="#about">About</MobileNavLink>
           <div className="mt-4 p-4">
-            <PopoverButton as={Link} href="#contact" className="flex w-full h-12 items-center justify-center bg-amber-500 font-sans text-sm font-bold uppercase tracking-widest text-slate-950 transition-colors hover:bg-amber-400">
+            <PopoverButton as={Link} href="#contact" className="flex w-full h-12 items-center justify-center bg-slate-900 font-sans text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-slate-800 rounded-full">
               Get a Quote
             </PopoverButton>
           </div>
@@ -97,7 +96,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 bg-white border-b-4 border-slate-900">
+    <header className="sticky top-0 z-50 bg-white shadow-sm">
       {/* High-Vis Utility bar */}
       <div className="hidden bg-slate-900 sm:block">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 sm:px-6 lg:px-8">
@@ -154,17 +153,17 @@ export function Header() {
           <div className="hidden items-center md:flex">
             <NavLink href="#projects">Projects</NavLink>
             <NavLink href="#services">Services</NavLink>
-            <NavLink href="#process">Process</NavLink>
-            <NavLink href="#testimonials">Reviews</NavLink>
+            <NavLink href="#decks-fencing">Decks & Fencing</NavLink>
+            <NavLink href="#about">About</NavLink>
           </div>
 
           {/* Desktop CTAs */}
           <div className="hidden items-center gap-x-6 md:flex">
             <a
               href="#contact"
-              className="inline-flex h-10 items-center justify-center bg-slate-900 px-6 font-sans text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-slate-800 rounded-none border-b-2 border-amber-500"
+              className="inline-flex h-10 items-center justify-center bg-slate-900 px-6 font-sans text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-slate-800 rounded-full"
             >
-              Request Quote
+              Get a Quote
             </a>
           </div>
 

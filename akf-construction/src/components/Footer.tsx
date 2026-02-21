@@ -32,7 +32,7 @@ const hubBrands = [
 
 export function Footer() {
   return (
-    <footer className="bg-slate-950">
+    <footer className="bg-slate-900">
       <Container>
         <div className="py-16 lg:py-20">
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-4 lg:gap-8">
@@ -176,25 +176,11 @@ export function Footer() {
         </div>
 
         {/* Prime Group strip */}
-        <div className="border-t border-white/5 py-8">
+        <div className="border-t border-white/10 py-8">
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
-            <p className="text-xs font-semibold uppercase tracking-widest text-slate-600">
-              Part of the Prime Group
+            <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+              Part of the Prime Group: Prime Electrical · CleanJet
             </p>
-            <div className="flex gap-x-8">
-              {hubBrands.map((brand) => (
-                <Link
-                  key={brand.name}
-                  href={brand.href}
-                  className="group text-center"
-                >
-                  <p className="text-sm font-semibold text-slate-500 transition-colors group-hover:text-white">
-                    {brand.name}
-                  </p>
-                  <p className="text-xs text-slate-700">{brand.desc}</p>
-                </Link>
-              ))}
-            </div>
           </div>
         </div>
 

@@ -39,8 +39,12 @@
   --container-2xl: 40rem;
 
   /* AKF Construction brand tokens */
-  --color-brand-primary: oklch(0.35 0.03 240);
-  --color-brand-accent: oklch(0.65 0.12 55);
-  --color-brand-dark: oklch(0.15 0.02 240);
-  --color-brand-light: oklch(0.96 0.01 240);
+  --color-brand-primary: oklch(0.32 0.03 240);    /* Deep slate — professional, solid */
+  --color-brand-primary-hover: oklch(0.28 0.03 240);
+  --color-brand-accent: oklch(0.65 0.14 55);       /* Warm amber/timber — craft, warmth */
+  --color-brand-accent-hover: oklch(0.60 0.14 55);
+  --color-brand-dark: oklch(0.13 0.02 240);        /* Near-black for hero overlay */
+  --color-brand-light: oklch(0.97 0.01 55);        /* Warm off-white for light sections */
+
+  --z-overlay: 100;
 }

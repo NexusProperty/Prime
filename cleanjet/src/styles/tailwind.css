@@ -39,8 +39,12 @@
   --container-2xl: 40rem;
 
   /* CleanJet brand tokens */
-  --color-brand-primary: oklch(0.68 0.18 225);
-  --color-brand-accent: oklch(0.72 0.18 145);
-  --color-brand-dark: oklch(0.20 0.06 225);
-  --color-brand-light: oklch(0.95 0.04 225);
+  --color-brand-primary: oklch(0.60 0.20 225);
+  --color-brand-primary-hover: oklch(0.55 0.20 225);
+  --color-brand-accent: oklch(0.68 0.18 145);
+  --color-brand-accent-hover: oklch(0.63 0.18 145);
+  --color-brand-dark: oklch(0.18 0.06 225);
+  --color-brand-light: oklch(0.96 0.03 225);
+
+  --z-overlay: 100;
 }

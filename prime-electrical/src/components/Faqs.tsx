@@ -6,7 +6,7 @@ import backgroundImage from '@/images/background-faqs.jpg'
 const faqs = [
   [
     {
-      question: 'How much does a solar panel system cost in Auckland?',
+      question: 'How much does solar cost in Auckland?',
       answer:
         'A typical residential solar system in Auckland ranges from $8,000–$18,000 depending on system size and roof type. We offer free, no-obligation quotes and flexible finance options including GEM Visa (6 months interest-free) and Q Mastercard.',
     },
@@ -23,14 +23,14 @@ const faqs = [
         'Yes. All our work is backed by a 12-month workmanship guarantee. We\'re Licensed Electrical Inspectors and members of Master Electricians New Zealand (MENZ), so you\'re covered.',
     },
     {
-      question: 'Can I finance a solar or heat pump installation?',
+      question: 'Can you finance a solar system for me?',
       answer:
         'Absolutely. We work with ANZ (interest-free heat pump home loan top-ups), Westpac Warm Up Loans, GEM Visa (6 months interest-free on $250+), and Q Mastercard (3+ months zero interest). Ask us about the best option for your situation.',
     },
   ],
   [
     {
-      question: 'What smart home systems do you install and support?',
+      question: 'What smart home systems do you work with?',
       answer:
         'We install and configure Apple HomeKit, Google Home, and Alexa-compatible systems — including smart lighting, security cameras, alarm systems, and whole-home automation. We\'ll also future-proof your wiring for EV charging.',
     },

@@ -40,7 +40,11 @@
 
   /* Prime Electrical brand tokens */
   --color-brand-primary: oklch(0.52 0.26 255);
-  --color-brand-accent: oklch(0.85 0.18 90);
-  --color-brand-dark: oklch(0.18 0.04 255);
-  --color-brand-light: oklch(0.95 0.04 255);
+  --color-brand-primary-hover: oklch(0.47 0.26 255);
+  --color-brand-accent: oklch(0.82 0.19 90);
+  --color-brand-dark: oklch(0.16 0.04 255);
+  --color-brand-light: oklch(0.96 0.02 255);
+  --color-brand-muted: oklch(0.60 0.10 255);
+
+  --z-overlay: 100;
 }

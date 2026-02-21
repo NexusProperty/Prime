@@ -35,7 +35,7 @@ const faqs = [
         'Yes. Our end of tenancy clean is designed to meet property manager and landlord standards. If your bond is withheld due to cleaning, we\'ll return and reclean the affected areas at no cost — guaranteed.',
     },
     {
-      question: 'Can you clean after renovation or building work?',
+      question: 'Do you clean after building or renovation work?',
       answer:
         'We specialise in post-build and post-renovation cleans, including heavy dust removal, paint splash clean-up, window cleaning, and full scrub-down. We work directly with AKF Construction clients — ask about our bundle discount.',
     },

@@ -1,1 +1,14 @@
+# Vercel
 .vercel
+
+# Local environment secrets — NEVER commit these
+.env.local
+.env*.local
+
+# Dependencies
+node_modules/
+
+# Build output
+.next/
+out/
+

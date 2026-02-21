@@ -9,10 +9,10 @@ const testimonials = [
   [
     {
       content:
-        'We recently had our home renovated by AKF Construction, and the experience was seamless from start to finish. The team was professional, communicated well throughout the process, and delivered exceptional workmanship. Highly recommend!',
+        'We recently had our home renovated by AKF Construction, and the experience was seamless from start to finish. Exceptional workmanship. Highly recommend!',
       author: {
         name: 'Priya S.',
-        role: 'East Tamaki, Auckland',
+        role: 'East Tamaki',
         image: avatarImage1,
       },
     },
@@ -20,10 +20,10 @@ const testimonials = [
   [
     {
       content:
-        'I hired AKF Construction for a deck extension and couldn\'t be happier. They were transparent with pricing, offered great design suggestions, and the final result looks fantastic. Would definitely use them again!',
+        'I hired AKF Construction for a deck extension and couldn\'t be happier. Transparent with pricing, great design suggestions, and the final result looks fantastic.',
       author: {
         name: 'Sarah K.',
-        role: 'Manukau, Auckland',
+        role: 'Manukau',
         image: avatarImage2,
       },
     },
@@ -31,10 +31,10 @@ const testimonials = [
   [
     {
       content:
-        'The AKF team built our new fence and driveway — everything was completed on time and within budget. They were friendly, efficient, and cleaned up thoroughly after the job. Highly reliable!',
+        'The AKF team built our new fence and driveway, completed on time and within budget. Friendly, efficient, and cleaned up thoroughly. Highly reliable!',
       author: {
         name: 'Jonathan T.',
-        role: 'Flat Bush, Auckland',
+        role: 'Flat Bush',
         image: avatarImage3,
       },
     },
@@ -59,11 +59,8 @@ export function Testimonials() {
       <Container>
         <div className="mx-auto max-w-2xl md:text-center">
           <h2 className="font-display text-3xl tracking-tight text-slate-900 sm:text-4xl">
-            What Auckland homeowners say.
+            What Auckland homeowners say
           </h2>
-          <p className="mt-4 text-lg tracking-tight text-slate-700">
-            We let our work speak for itself — but our clients speak even louder.
-          </p>
         </div>
         <ul
           role="list"

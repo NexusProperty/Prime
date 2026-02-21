@@ -2,72 +2,37 @@ import Image from 'next/image'
 
 import { Container } from '@/components/Container'
 import avatarImage1 from '@/images/avatars/avatar-1.png'
-import avatarImage2 from '@/images/avatars/avatar-2.png'
 import avatarImage3 from '@/images/avatars/avatar-3.png'
-import avatarImage4 from '@/images/avatars/avatar-4.png'
 import avatarImage5 from '@/images/avatars/avatar-5.png'
 
 const testimonials = [
-  [
-    {
-      content:
-        'Max and the team are a bunch of professional young guys with solid expertise in their trade. Competent pricing — probably the best in the market. They do not cut corners to save time. Will surely use them again.',
-      author: {
-        name: 'Chaiwala',
-        role: 'Auckland homeowner',
-        image: avatarImage1,
-      },
+  {
+    content:
+      'Max and team are a bunch of professional young guys with solid expertise. Competent pricing, probably the best in the market.',
+    author: {
+      name: 'Chaiwala',
+      role: 'Auckland homeowner',
+      image: avatarImage1,
     },
-    {
-      content:
-        'Very happy with the service and quality of work provided. They\'ve done a lot for me — heat pump install to complete wiring for a new house build, home automation, sound system wiring, security systems and camera systems.',
-      author: {
-        name: 'Arjun Preet Sandhu',
-        role: 'Auckland homeowner',
-        image: avatarImage4,
-      },
+  },
+  {
+    content:
+      'Very thorough and reasonably priced. Couldn\'t recommend them more, and will continue to use them for electrical work.',
+    author: {
+      name: 'Hayden Debenham',
+      role: 'Auckland homeowner',
+      image: avatarImage5,
     },
-  ],
-  [
-    {
-      content:
-        'Very thorough and reasonably priced, with great installation of two high-quality heat pumps for my personal home. The installation was not easy, but they made it work and did what was necessary to make sure they did it right.',
-      author: {
-        name: 'Hayden Debenham',
-        role: 'Auckland homeowner',
-        image: avatarImage5,
-      },
+  },
+  {
+    content:
+      'Came to fit the heat pump very quickly. Arrived on time. Very well priced and efficient. I have already recommended this company to others.',
+    author: {
+      name: 'Lorraine Coller',
+      role: 'Auckland homeowner',
+      image: avatarImage3,
     },
-    {
-      content:
-        'Excellent installation of a new heat pump. It wasn\'t a standard install and the team did a really good job with the whole process. Looks like it\'s been part of the furniture for ages. Best investment coming into winter.',
-      author: {
-        name: 'Aman Grewal',
-        role: 'Auckland homeowner',
-        image: avatarImage2,
-      },
-    },
-  ],
-  [
-    {
-      content:
-        'Came to fit the heat pump very quickly. Arrived on time. Polite and friendly. Respectful of my home and offered to vacuum some dust after fitting the unit. Very well priced and efficient. I have already recommended this company to others.',
-      author: {
-        name: 'Lorraine Coller',
-        role: 'Auckland homeowner',
-        image: avatarImage3,
-      },
-    },
-    {
-      content:
-        'I would highly recommend this company. Had 4 other big heat pump companies come and give me quotes. But Prime Electrical beat all the quotes and did a wonderful job. Very impressed with communication and professionalism.',
-      author: {
-        name: 'Likhil Landge',
-        role: 'Auckland homeowner',
-        image: avatarImage4,
-      },
-    },
-  ],
+  },
 ]
 
 function QuoteIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
@@ -99,41 +64,35 @@ export function Testimonials() {
           role="list"
           className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-6 sm:gap-8 lg:mt-20 lg:max-w-none lg:grid-cols-3"
         >
-          {testimonials.map((column, columnIndex) => (
-            <li key={columnIndex}>
-              <ul role="list" className="flex flex-col gap-y-6 sm:gap-y-8">
-                {column.map((testimonial, testimonialIndex) => (
-                  <li key={testimonialIndex}>
-                    <figure className="relative rounded-2xl bg-white p-6 shadow-xl shadow-slate-900/10">
-                      <QuoteIcon className="absolute top-6 left-6 fill-slate-100" />
-                      <blockquote className="relative">
-                        <p className="text-lg tracking-tight text-slate-900">
-                          {testimonial.content}
-                        </p>
-                      </blockquote>
-                      <figcaption className="relative mt-6 flex items-center justify-between border-t border-slate-100 pt-6">
-                        <div>
-                          <div className="font-display text-base text-slate-900">
-                            {testimonial.author.name}
-                          </div>
-                          <div className="mt-1 text-sm text-slate-500">
-                            {testimonial.author.role}
-                          </div>
-                        </div>
-                        <div className="overflow-hidden rounded-full bg-slate-50">
-                          <Image
-                            className="h-14 w-14 object-cover"
-                            src={testimonial.author.image}
-                            alt=""
-                            width={56}
-                            height={56}
-                          />
-                        </div>
-                      </figcaption>
-                    </figure>
-                  </li>
-                ))}
-              </ul>
+          {testimonials.map((testimonial, index) => (
+            <li key={index}>
+              <figure className="relative rounded-2xl bg-white p-6 shadow-xl shadow-slate-900/10">
+                <QuoteIcon className="absolute top-6 left-6 fill-slate-100" />
+                <blockquote className="relative">
+                  <p className="text-lg tracking-tight text-slate-900">
+                    {testimonial.content}
+                  </p>
+                </blockquote>
+                <figcaption className="relative mt-6 flex items-center justify-between border-t border-slate-100 pt-6">
+                  <div>
+                    <div className="font-display text-base text-slate-900">
+                      {testimonial.author.name}
+                    </div>
+                    <div className="mt-1 text-sm text-slate-500">
+                      {testimonial.author.role}
+                    </div>
+                  </div>
+                  <div className="overflow-hidden rounded-full bg-slate-50">
+                    <Image
+                      className="h-14 w-14 object-cover"
+                      src={testimonial.author.image}
+                      alt=""
+                      width={56}
+                      height={56}
+                    />
+                  </div>
+                </figcaption>
+              </figure>
             </li>
           ))}
         </ul>

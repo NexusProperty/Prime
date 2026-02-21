@@ -20,15 +20,10 @@ const navigation = {
   contact: [
     { name: '09-390-3620', href: 'tel:0993903620' },
     { name: 'info@theprimeelectrical.co.nz', href: 'mailto:info@theprimeelectrical.co.nz' },
-    { name: '2/41 Smales Rd, East Tāmaki', href: '#' },
+    { name: 'Unit 2, 41 Smales Road, East Tāmaki, Auckland 2013', href: '#' },
     { name: 'Mon–Fri 8:30am–5:00pm', href: '#' },
   ],
 }
-
-const hubBrands = [
-  { name: 'AKF Construction', href: '#', desc: 'Renovations, decks & fencing' },
-  { name: 'CleanJet', href: '#', desc: 'Residential home cleaning' },
-]
 
 export function Footer() {
   return (
@@ -135,26 +130,12 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Prime Group cross-links */}
-        <div className="border-t border-white/10 py-8">
-          <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
-            <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-              Part of the Prime Group
+        {/* Prime Group strip */}
+        <div className="border-t border-white/10 py-6">
+          <div className="text-center">
+            <p className="text-sm text-slate-400">
+              Part of the Prime Group: <span className="text-white font-medium">AKF Construction</span> · <span className="text-white font-medium">CleanJet</span>
             </p>
-            <div className="flex gap-x-8">
-              {hubBrands.map((brand) => (
-                <Link
-                  key={brand.name}
-                  href={brand.href}
-                  className="group text-center"
-                >
-                  <p className="text-sm font-semibold text-slate-400 transition-colors group-hover:text-white">
-                    {brand.name}
-                  </p>
-                  <p className="text-xs text-slate-600">{brand.desc}</p>
-                </Link>
-              ))}
-            </div>
           </div>
         </div>
 

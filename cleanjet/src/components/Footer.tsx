@@ -148,7 +148,7 @@ export function Footer() {
         <div className="border-t border-white/10 py-8">
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
             <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">
-              Part of the Prime Group
+              Part of the Prime Group: Prime Electrical · AKF Construction
             </p>
             <div className="flex gap-x-8">
               {hubBrands.map((brand) => (
