@@ -100,6 +100,20 @@ export async function ingestFormSubmit(
     console.error(`[ingest-${brand}][lead-insert]`, leadErr.message);
   }
 
+  // 5. Trigger lead-qualifier agent (fire-and-forget — does not block response)
+  if (contactId && event?.id) {
+    const lqUrl = `${Deno.env.get('SUPABASE_URL')}/functions/v1/lead-qualifier`;
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    fetch(lqUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${serviceKey}`,
+      },
+      body: JSON.stringify({ contactId, eventId: event.id }),
+    }).catch((err) => console.error(`[ingest-${brand}][lead-qualifier-trigger]`, err));
+  }
+
   console.log(
     `[ingest-${brand}] contact=${contactId ?? 'none'} event=${event?.id ?? 'err'} lead=${lead?.id ?? 'err'}`,
   );

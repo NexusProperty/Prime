@@ -47,7 +47,7 @@ IF confidence < 0.7: log escalation to agent_actions, notify human
 | **Escalation** | Score > 80 → immediately notify sales team. Insufficient data to score → log and skip |
 | **Timeout** | 5 seconds |
 | **Cursor agents** | `codebase-scanner-fast` (data analysis), `database-migration-specialist-fast` (schema queries) |
-| **Deployment Status** | ❌ Pending — Edge Function not yet created |
+| **Deployment Status** | ✅ Live — `supabase/functions/lead-qualifier/index.ts` deployed. Triggered on every `form_submit` via `_shared/ingest.ts` (fire-and-forget). |
 
 **Scoring weights:**
 | Factor | Weight |
