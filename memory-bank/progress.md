@@ -26,11 +26,14 @@
 | 2026-02-21 | PHASE6-001 complete (code) — n8n blueprint created, stale refs fixed, awaiting user activation |
 | 2026-02-21 | Sprint 3 reflection complete (INFRA-002 + DEPLOY-002 + PHASE6-001 + TEST-002) |
 | 2026-02-21 | Sprint 3 ARCHIVED — INFRA-002 + DEPLOY-002 + PHASE6-001 + TEST-002 |
+| 2026-02-22 | MC-001 Session 1: Mission Control web app built — 13 routes, 85 TS files, 4 DB tables, 3 Edge Functions scaffolded |
+| 2026-02-22 | MC-001 Session 2: Hotfix — RLS policies (6), Edge Functions deployed (3 ACTIVE), pg_cron scheduled, optimistic UI |
 
 ## Archive References
 
 | Task | Archive Location |
 |------|-----------------|
+| MC-001 | `memory-bank/archive/MC-001/archive-MC-001.md` |
 | SPRINT3 | memory-bank/archive/SPRINT3/archive-SPRINT3.md |
 | AI-UX-001 | `memory-bank/archive/AI-UX-001/archive-AI-UX-001.md` |
 | QA-SPRINT-001 | `memory-bank/archive/QA-SPRINT-001/archive-QA-SPRINT-001.md` |

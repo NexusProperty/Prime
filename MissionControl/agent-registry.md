@@ -75,7 +75,7 @@ IF confidence < 0.7: log escalation to agent_actions, notify human
 | **Escalation** | ALWAYS alerts human on anomaly — this agent never self-resolves |
 | **Timeout** | 30 seconds per check cycle |
 | **Cursor agents** | `deployment-monitoring-engineer-fast` |
-| **Deployment Status** | ❌ Pending — Edge Function not yet created |
+| **Deployment Status** | ✅ Live — `supabase/functions/data-monitor/index.ts` deployed. Schedule: Supabase Dashboard → Functions → data-monitor → `*/15 * * * *`. |
 
 **Checks performed each cycle:**
 1. For each active site: has any event been received in the last 2 hours? If not → alert

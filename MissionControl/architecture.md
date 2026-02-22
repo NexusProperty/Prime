@@ -21,9 +21,9 @@
 | Voice intake agent (Max / Prime) | ✅ Live — +6498734191 |
 | Voice intake agent (Alex / AKF) | ⚠️ Vapi assistant deployed, no phone number |
 | Voice intake agent (Jess / CleanJet) | ⚠️ Vapi assistant deployed, no phone number |
-| Email responder agent | ❌ Not yet deployed |
-| Lead qualifier agent | ❌ Not yet deployed |
-| Data monitor agent | ❌ Not yet deployed |
+| Email responder agent | ❌ Pending — email provider not configured |
+| Lead qualifier agent | ✅ Live — `lead-qualifier` Edge Fn, fires on every `form_submit` |
+| Data monitor agent | ✅ Live — `data-monitor` Edge Fn, schedule `*/15 * * * *` (set in dashboard) |
 
 ---
 

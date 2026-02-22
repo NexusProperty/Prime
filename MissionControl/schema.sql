@@ -289,6 +289,317 @@ LANGUAGE sql AS $$
   WHERE id = p_event_id;
 $$;
 
+-- ══════════════════════════════════════════════════════════════════════════════
+-- Phase 2 Extensions — API Connection Manager, Records, Workers, Outbound Queue
+-- Added: 2026-02-22
+-- ══════════════════════════════════════════════════════════════════════════════
+
+-- ── Workers ────────────────────────────────────────────────────────────────────
+-- Contractors and admins scoped to a specific site.
+-- Linked to Supabase Auth users via user_id.
+
+CREATE TABLE workers (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  site_id     UUID NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
+  user_id     UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  full_name   TEXT NOT NULL,
+  email       TEXT NOT NULL,
+  role        TEXT NOT NULL DEFAULT 'worker'
+    CHECK (role IN ('admin', 'manager', 'worker')),
+  is_active   BOOLEAN DEFAULT true,
+  metadata    JSONB DEFAULT '{}',
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(site_id, email)
+);
+
+CREATE INDEX workers_site_idx ON workers(site_id);
+CREATE INDEX workers_user_idx ON workers(user_id);
+CREATE INDEX workers_email_idx ON workers(email);
+
+-- ── Connections ────────────────────────────────────────────────────────────────
+-- Third-party API integrations per site (CRMs, Zapier, Slack, accounting, etc.)
+-- API keys are stored in Supabase Vault — vault_secret_id is only the secret name.
+
+CREATE TABLE connections (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  site_id           UUID NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
+  app_name          TEXT NOT NULL,                      -- display name: "HubSpot", "Zapier"
+  app_slug          TEXT NOT NULL,                      -- machine key: 'hubspot', 'zapier'
+  vault_secret_id   TEXT,                               -- Vault secret name (never plaintext key)
+  config            JSONB DEFAULT '{}',                 -- non-secret config (webhook URLs, scopes)
+  is_enabled        BOOLEAN DEFAULT true,
+  last_sync_at      TIMESTAMPTZ,
+  last_sync_status  TEXT CHECK (last_sync_status IN ('success', 'error', 'pending')),
+  last_sync_error   TEXT,
+  created_by        UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  created_at        TIMESTAMPTZ DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(site_id, app_slug)
+);
+
+CREATE INDEX connections_site_idx ON connections(site_id);
+CREATE INDEX connections_enabled_idx ON connections(is_enabled);
+
+-- ── Records ────────────────────────────────────────────────────────────────────
+-- Unified business record storage: quotes, jobs, invoices, bookings, notes, tasks.
+-- Tagged by site, worker, contact, and source event.
+
+CREATE TABLE records (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  site_id         UUID NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
+  worker_id       UUID REFERENCES workers(id) ON DELETE SET NULL,
+  contact_id      UUID REFERENCES contacts(id) ON DELETE SET NULL,
+  source_event_id UUID REFERENCES events(id) ON DELETE SET NULL,
+  record_type     TEXT NOT NULL
+    CHECK (record_type IN ('quote', 'job', 'invoice', 'note', 'booking', 'task')),
+  status          TEXT NOT NULL DEFAULT 'open'
+    CHECK (status IN ('open', 'pending', 'approved', 'completed', 'cancelled')),
+  title           TEXT NOT NULL,                        -- human-readable summary
+  amount          NUMERIC(12, 2),                       -- dollar value for quotes/invoices
+  currency        TEXT DEFAULT 'NZD',
+  payload         JSONB NOT NULL DEFAULT '{}',          -- full record data (flexible per type)
+  tags            TEXT[] DEFAULT '{}',
+  due_at          TIMESTAMPTZ,
+  closed_at       TIMESTAMPTZ,
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX records_site_idx ON records(site_id);
+CREATE INDEX records_worker_idx ON records(worker_id);
+CREATE INDEX records_contact_idx ON records(contact_id);
+CREATE INDEX records_type_idx ON records(record_type);
+CREATE INDEX records_status_idx ON records(status);
+CREATE INDEX records_created_idx ON records(created_at DESC);
+CREATE INDEX records_site_type_idx ON records(site_id, record_type);
+CREATE INDEX records_tags_idx ON records USING GIN(tags);
+
+-- ── Outbound Queue ─────────────────────────────────────────────────────────────
+-- Jobs to push data back to sites or external systems.
+-- Processed by the mc-send Edge Function (cron, every 1 minute).
+-- Exponential backoff: next_attempt_at = NOW() + (2 ^ attempt_count * 30 seconds)
+
+CREATE TABLE outbound_queue (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  site_id           UUID NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
+  record_id         UUID REFERENCES records(id) ON DELETE SET NULL,
+  contact_id        UUID REFERENCES contacts(id) ON DELETE SET NULL,
+  delivery_type     TEXT NOT NULL
+    CHECK (delivery_type IN ('webhook', 'email', 'sms')),
+  destination_url   TEXT,                               -- target URL for webhook delivery
+  destination_email TEXT,                               -- target email for email delivery
+  payload           JSONB NOT NULL DEFAULT '{}',        -- data to deliver
+  status            TEXT NOT NULL DEFAULT 'pending'
+    CHECK (status IN ('pending', 'sending', 'delivered', 'failed', 'cancelled')),
+  attempt_count     INTEGER DEFAULT 0,
+  max_attempts      INTEGER DEFAULT 5,
+  last_attempted_at TIMESTAMPTZ,
+  next_attempt_at   TIMESTAMPTZ DEFAULT NOW(),          -- backoff scheduling
+  delivered_at      TIMESTAMPTZ,
+  error             TEXT,
+  created_by_agent  UUID REFERENCES agents(id) ON DELETE SET NULL,
+  idempotency_key   TEXT UNIQUE,
+  created_at        TIMESTAMPTZ DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Partial index for the polling query in mc-send (only pending items that are due)
+CREATE INDEX outbound_queue_pending_due_idx ON outbound_queue(next_attempt_at)
+  WHERE status = 'pending';
+CREATE INDEX outbound_queue_site_idx ON outbound_queue(site_id);
+CREATE INDEX outbound_queue_status_idx ON outbound_queue(status);
+
+-- ── Analytics Helper Function ──────────────────────────────────────────────────
+-- Called by mc-analytics Edge Function. Returns a single JSON aggregate.
+
+CREATE OR REPLACE FUNCTION analytics_summary(
+  p_site_id UUID DEFAULT NULL,          -- NULL = all sites
+  p_range_days INT DEFAULT 7
+)
+RETURNS JSONB
+LANGUAGE plpgsql STABLE AS $$
+DECLARE
+  v_since TIMESTAMPTZ := NOW() - (p_range_days || ' days')::INTERVAL;
+  v_result JSONB;
+BEGIN
+  SELECT jsonb_build_object(
+    'contacts_total',
+      (SELECT COUNT(*) FROM contacts
+       WHERE (p_site_id IS NULL OR source_site = p_site_id)),
+    'events_in_range',
+      (SELECT COUNT(*) FROM events
+       WHERE created_at >= v_since
+         AND (p_site_id IS NULL OR site_id = p_site_id)),
+    'events_unprocessed',
+      (SELECT COUNT(*) FROM events
+       WHERE processed = false
+         AND (p_site_id IS NULL OR site_id = p_site_id)),
+    'records_by_type',
+      (SELECT COALESCE(jsonb_object_agg(record_type, cnt), '{}')
+       FROM (
+         SELECT record_type, COUNT(*) AS cnt
+         FROM records
+         WHERE (p_site_id IS NULL OR site_id = p_site_id)
+         GROUP BY record_type
+       ) t),
+    'agent_actions_by_status',
+      (SELECT COALESCE(jsonb_object_agg(status, cnt), '{}')
+       FROM (
+         SELECT status, COUNT(*) AS cnt
+         FROM agent_actions
+         WHERE created_at >= v_since
+         GROUP BY status
+       ) t),
+    'agent_failures_last_hour',
+      (SELECT COUNT(*) FROM agent_actions
+       WHERE status = 'failed'
+         AND created_at >= NOW() - INTERVAL '1 hour'),
+    'outbound_pending',
+      (SELECT COUNT(*) FROM outbound_queue
+       WHERE status = 'pending'
+         AND (p_site_id IS NULL OR site_id = p_site_id)),
+    'outbound_failed',
+      (SELECT COUNT(*) FROM outbound_queue
+       WHERE status = 'failed'
+         AND (p_site_id IS NULL OR site_id = p_site_id)),
+    'events_by_day',
+      (SELECT COALESCE(jsonb_agg(day_row ORDER BY day ASC), '[]')
+       FROM (
+         SELECT DATE_TRUNC('day', created_at)::DATE AS day, COUNT(*) AS cnt
+         FROM events
+         WHERE created_at >= v_since
+           AND (p_site_id IS NULL OR site_id = p_site_id)
+         GROUP BY DATE_TRUNC('day', created_at)::DATE
+       ) day_row),
+    'top_workers',
+      (SELECT COALESCE(jsonb_agg(w_row ORDER BY record_count DESC), '[]')
+       FROM (
+         SELECT w.full_name, w.id AS worker_id, COUNT(r.id) AS record_count
+         FROM workers w
+         LEFT JOIN records r ON r.worker_id = w.id
+           AND r.created_at >= v_since
+         WHERE (p_site_id IS NULL OR w.site_id = p_site_id)
+         GROUP BY w.id, w.full_name
+         ORDER BY record_count DESC
+         LIMIT 10
+       ) w_row)
+  ) INTO v_result;
+
+  RETURN v_result;
+END;
+$$;
+
+-- ── Row Level Security ─────────────────────────────────────────────────────────
+-- Workers see only their own site's data.
+-- Admins (role = 'admin') see all data for all sites they belong to.
+
+ALTER TABLE workers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE connections ENABLE ROW LEVEL SECURITY;
+ALTER TABLE records ENABLE ROW LEVEL SECURITY;
+ALTER TABLE outbound_queue ENABLE ROW LEVEL SECURITY;
+
+-- Helper: get all site IDs the current user is a worker for
+CREATE OR REPLACE FUNCTION auth_user_site_ids()
+RETURNS UUID[]
+LANGUAGE sql STABLE SECURITY DEFINER AS $$
+  SELECT ARRAY_AGG(site_id)
+  FROM workers
+  WHERE user_id = auth.uid()
+    AND is_active = true;
+$$;
+
+-- workers: users see only workers on their own sites
+CREATE POLICY workers_select ON workers
+  FOR SELECT USING (site_id = ANY(auth_user_site_ids()));
+
+CREATE POLICY workers_insert ON workers
+  FOR INSERT WITH CHECK (site_id = ANY(auth_user_site_ids()));
+
+CREATE POLICY workers_update ON workers
+  FOR UPDATE USING (site_id = ANY(auth_user_site_ids()));
+
+-- connections: site workers see their site's connections; only admins/managers can mutate
+CREATE POLICY connections_select ON connections
+  FOR SELECT USING (site_id = ANY(auth_user_site_ids()));
+
+CREATE POLICY connections_insert ON connections
+  FOR INSERT WITH CHECK (
+    site_id = ANY(auth_user_site_ids())
+    AND EXISTS (
+      SELECT 1 FROM workers
+      WHERE user_id = auth.uid()
+        AND site_id = connections.site_id
+        AND role IN ('admin', 'manager')
+    )
+  );
+
+CREATE POLICY connections_update ON connections
+  FOR UPDATE USING (
+    site_id = ANY(auth_user_site_ids())
+    AND EXISTS (
+      SELECT 1 FROM workers
+      WHERE user_id = auth.uid()
+        AND site_id = connections.site_id
+        AND role IN ('admin', 'manager')
+    )
+  );
+
+CREATE POLICY connections_delete ON connections
+  FOR DELETE USING (
+    EXISTS (
+      SELECT 1 FROM workers
+      WHERE user_id = auth.uid()
+        AND site_id = connections.site_id
+        AND role = 'admin'
+    )
+  );
+
+-- records: workers see only records for their site
+CREATE POLICY records_select ON records
+  FOR SELECT USING (site_id = ANY(auth_user_site_ids()));
+
+CREATE POLICY records_insert ON records
+  FOR INSERT WITH CHECK (site_id = ANY(auth_user_site_ids()));
+
+CREATE POLICY records_update ON records
+  FOR UPDATE USING (site_id = ANY(auth_user_site_ids()));
+
+-- outbound_queue: site workers can view; only admins can cancel
+CREATE POLICY outbound_select ON outbound_queue
+  FOR SELECT USING (site_id = ANY(auth_user_site_ids()));
+
+CREATE POLICY outbound_update ON outbound_queue
+  FOR UPDATE USING (
+    EXISTS (
+      SELECT 1 FROM workers
+      WHERE user_id = auth.uid()
+        AND site_id = outbound_queue.site_id
+        AND role IN ('admin', 'manager')
+    )
+  );
+
+-- ── Outbound Queue Claim Function ─────────────────────────────────────────────
+-- Atomically claims a batch of pending outbound_queue items for processing.
+-- Uses FOR UPDATE SKIP LOCKED to prevent double-processing under concurrent cron runs.
+-- Called by the mc-send Edge Function with service role key.
+
+CREATE OR REPLACE FUNCTION claim_outbound_queue_items(p_batch_size INT DEFAULT 25)
+RETURNS SETOF outbound_queue
+LANGUAGE sql AS $$
+  UPDATE outbound_queue
+  SET status = 'sending', updated_at = NOW()
+  WHERE id IN (
+    SELECT id FROM outbound_queue
+    WHERE status = 'pending'
+      AND next_attempt_at <= NOW()
+    ORDER BY next_attempt_at ASC
+    LIMIT p_batch_size
+    FOR UPDATE SKIP LOCKED
+  )
+  RETURNING *;
+$$;
+
 -- ── Initial Data — Site Registry ──────────────────────────────────────────────
 -- Populate with real site details when connecting each property.
 

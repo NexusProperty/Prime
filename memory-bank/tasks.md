@@ -8,12 +8,14 @@ _None — all tasks complete. See Next Sprint Candidates below._
 
 | Task | Description | Date |
 |------|-------------|------|
+| MC-001 | Mission Control — 13-route Next.js app, 3 Edge Functions deployed, 2 DB migrations, pg_cron queue processor | 2026-02-22 |
 | VAPI-001 | Vapi voice agent — 3 assistants, Supabase Edge Function, pgvector RAG, Telnyx NZ — Live in Production | 2026-02-22 |
 
 ## Archived Completions
 
 | Task | Description | Date |
 |------|-------------|------|
+| MC-001 | Mission Control — Next.js 16 app (13 routes, 85 TS files), 3 Edge Functions (ACTIVE), 4 DB tables, RLS, pg_cron queue | 2026-02-22 |
 | VAPI-001 | Vapi voice agent — 3 assistants (Max/Alex/Jess), pgvector RAG, Supabase Edge Function v8, Telnyx +6498734191, 13 KB chunks. Live. | 2026-02-22 |
 | INFRA-003 | Root tsconfig.json + E2E type imports from @prime/ui-ai — 3 files, 0 lint errors | 2026-02-22 |
 | PHASE6-001 | n8n blueprint + code fixes — awaiting user workflow activation | 2026-02-21 |
