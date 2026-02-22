@@ -3,24 +3,24 @@ import { Container } from '@/components/Container'
 
 const navigation = {
   services: [
-    { name: 'Electrical Services', href: '#electrical' },
-    { name: 'Solar Panels', href: '#solar' },
-    { name: 'Heat Pumps', href: '#solar' },
-    { name: 'EV Chargers', href: '#solar' },
-    { name: 'Smart Home', href: '#smart-home' },
-    { name: 'Healthy Homes', href: '#electrical' },
+    { name: 'Electrical Services', href: '/electrical-services' },
+    { name: 'Solar Panels', href: '/solar-service' },
+    { name: 'Heat Pumps', href: '/heat-pump-installation-service' },
+    { name: 'EV Chargers', href: '/electrical-services' },
+    { name: 'Smart Home', href: '/smart-home-automation' },
+    { name: 'Healthy Homes', href: '/electrical-services' },
   ],
   company: [
-    { name: 'About Us', href: '#' },
+    { name: 'About Us', href: '/about-us' },
     { name: 'Reviews', href: '#testimonials' },
     { name: 'Finance Options', href: '#financing' },
     { name: 'FAQ', href: '#faq' },
-    { name: 'Careers', href: '#' },
+    { name: 'Careers', href: '/career' },
   ],
   contact: [
     { name: '09-390-3620', href: 'tel:0993903620' },
-    { name: 'info@theprimeelectrical.co.nz', href: 'mailto:info@theprimeelectrical.co.nz' },
-    { name: 'Unit 2, 41 Smales Road, East Tāmaki, Auckland 2013', href: '#' },
+    { name: 'sales@theprimeelectrical.co.nz', href: 'mailto:sales@theprimeelectrical.co.nz' },
+    { name: 'Unit 2, 41 Smales Road, East Tāmaki, Auckland 2013', href: 'https://maps.app.goo.gl/bZcBYu3yVhhXWJb1A' },
     { name: 'Mon–Fri 8:30am–5:00pm', href: '#' },
   ],
 }
@@ -146,10 +146,10 @@ export function Footer() {
               Copyright &copy; {new Date().getFullYear()} Prime Electrical Ltd. All rights reserved.
             </p>
             <div className="flex gap-x-6">
-              <Link href="#" className="text-sm text-slate-500 hover:text-slate-400">
+              <Link href="/privacy-policy" className="text-sm text-slate-500 hover:text-slate-400">
                 Privacy Policy
               </Link>
-              <Link href="#" className="text-sm text-slate-500 hover:text-slate-400">
+              <Link href="/terms-and-conditions" className="text-sm text-slate-500 hover:text-slate-400">
                 Terms
               </Link>
             </div>

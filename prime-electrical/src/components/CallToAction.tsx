@@ -112,7 +112,7 @@ export function CallToAction() {
                 CALL [09] 390-3620
               </a>
               <a
-                href="mailto:info@theprimeelectrical.co.nz"
+                href="mailto:sales@theprimeelectrical.co.nz"
                 className="inline-flex h-16 w-full sm:w-auto items-center justify-center border-2 border-slate-900 bg-transparent px-10 font-sans text-base font-bold uppercase tracking-widest text-slate-900 transition-colors hover:bg-slate-900 hover:text-white"
               >
                 SUBMIT SCHEMATICS
