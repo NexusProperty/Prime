@@ -10,10 +10,25 @@ interface Props {
   crossSellData?: CrossSellData
 }
 
+interface QuoteData {
+  quote_id: string
+  total_amount: number
+  line_items: Array<{ description: string; quantity: number; unit_price: number; total: number }>
+}
+
+function detectServiceType(serviceType: string | undefined): 'essential' | 'comfort' | 'solar_smart' {
+  const s = (serviceType ?? '').toLowerCase()
+  if (s.includes('solar')) return 'solar_smart'
+  if (s.includes('heat pump') || s.includes('ev') || s.includes('smart') || s.includes('automation')) return 'comfort'
+  return 'essential'
+}
+
 export function LeadCaptureForm({ brand, onSubmit, crossSellData }: Props) {
   const [state, setState] = useState<FormState>('idle')
   const [csState, setCsState] = useState<CrossSellState>('hidden')
   const [activeCrossData, setActiveCrossData] = useState<CrossSellData | null>(null)
+  const [quoteData, setQuoteData] = useState<QuoteData | null>(null)
+  const [pendingState, setPendingState] = useState<'cross_sell_triggered' | 'confirmed'>('confirmed')
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -27,6 +42,7 @@ export function LeadCaptureForm({ brand, onSubmit, crossSellData }: Props) {
     }
     setState('submitting')
     setState('ai_processing')
+
     try {
       const res = await fetch('/api/leads/submit', {
         method: 'POST',
@@ -34,17 +50,62 @@ export function LeadCaptureForm({ brand, onSubmit, crossSellData }: Props) {
         body: JSON.stringify({ ...data, brand }),
       })
       if (!res.ok) throw new Error('Submit failed')
-      const result = await res.json() as { leadId: string; crossSell?: CrossSellData }
-      const activeSuggestion = result.crossSell ?? crossSellData ?? null
-      if (activeSuggestion) {
-        setActiveCrossData(activeSuggestion)
+
+      const result = await res.json() as {
+        leadId: string
+        contactId?: string
+        crossSell?: CrossSellData
+      }
+
+      const crossSell = result.crossSell ?? crossSellData ?? null
+      const next: 'cross_sell_triggered' | 'confirmed' = crossSell ? 'cross_sell_triggered' : 'confirmed'
+      setPendingState(next)
+      if (crossSell) setActiveCrossData(crossSell)
+      onSubmit?.(data)
+
+      // Attempt AI quote generation
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+      const siteId = process.env.NEXT_PUBLIC_PRIME_SITE_ID
+      const workerId = process.env.NEXT_PUBLIC_DEFAULT_WORKER_ID
+
+      if (supabaseUrl && anonKey && siteId && workerId && result.contactId && data.message) {
+        const quoteRes = await fetch(`${supabaseUrl}/functions/v1/quote-generate-electrical`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${anonKey}`,
+          },
+          body: JSON.stringify({
+            job_description: data.message,
+            service_type: detectServiceType(data.serviceType),
+            property_type: 'residential',
+            site_id: siteId,
+            worker_id: workerId,
+            contact_id: result.contactId,
+            lead_id: result.leadId ?? undefined,
+            idempotency_key: `lead-${result.leadId}`,
+          }),
+        }).catch(() => null)
+
+        if (quoteRes?.ok) {
+          const quoteJson = await quoteRes.json() as { data: QuoteData | null; error: string | null }
+          if (quoteJson.data) {
+            setQuoteData(quoteJson.data)
+            setState('quote_preview')
+            return
+          }
+        }
+      }
+
+      // Fallback: skip quote preview
+      if (crossSell) {
         setState('cross_sell_triggered')
         setCsState('appearing')
         setTimeout(() => setCsState('visible'), 50)
       } else {
         setState('confirmed')
       }
-      onSubmit?.(data)
     } catch {
       setState('idle')
     }
@@ -64,6 +125,38 @@ export function LeadCaptureForm({ brand, onSubmit, crossSellData }: Props) {
 
   if (state === 'ai_processing') {
     return <AIProcessingOverlay brand={brand} message="Our AI is reviewing your request and checking for service bundles…" />
+  }
+
+  if (state === 'quote_preview' && quoteData) {
+    return (
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 text-center">
+        <div className="mb-1 text-sm font-medium text-amber-700 uppercase tracking-wide">
+          Your Instant Estimate
+        </div>
+        <div className="text-4xl font-bold text-amber-900 tracking-tight">
+          ${(quoteData.total_amount / 100).toLocaleString('en-NZ', { maximumFractionDigits: 0 })}
+        </div>
+        <div className="mt-1 text-sm text-amber-700">NZD · {quoteData.line_items.length} line items</div>
+        <p className="mt-3 text-xs text-amber-600">
+          Estimate only — final price confirmed at site assessment.
+          Full itemised quote sent to your email shortly.
+        </p>
+        <button
+          onClick={() => {
+            if (pendingState === 'cross_sell_triggered' && activeCrossData) {
+              setState('cross_sell_triggered')
+              setCsState('appearing')
+              setTimeout(() => setCsState('visible'), 50)
+            } else {
+              setState('confirmed')
+            }
+          }}
+          className="mt-4 rounded-lg bg-amber-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-amber-700 transition-colors"
+        >
+          Continue →
+        </button>
+      </div>
+    )
   }
 
   if (state === 'cross_sell_triggered' && activeCrossData) {

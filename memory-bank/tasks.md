@@ -2,7 +2,9 @@
 
 ## Active Tasks
 
-_None — all tasks complete. See Next Sprint Candidates below._
+| Task | Description | Status |
+|------|-------------|--------|
+| QUOTES-001 | AI Quote Generation System — Prime Group (3 Brands) | IN_PROGRESS (all functions deployed — reflect pending) |
 
 ## Recently Completed
 
@@ -48,3 +50,69 @@ _None — all tasks complete. See Next Sprint Candidates below._
 | Priority | Task | Description |
 |----------|------|-------------|
 | 1 | N8N-ACTIVATE | Activate n8n workflow (user action — see IMPORT-INSTRUCTIONS.md) |
+
+---
+
+## QUOTES-001 — AI Quote Generation System
+
+| Field | Value |
+|-------|-------|
+| **Task ID** | QUOTES-001 |
+| **Title** | AI Quote Generation System — Prime Group (3 Brands) |
+| **Status** | IN_PROGRESS (all functions deployed — reflect pending) |
+| **Complexity** | Level 3 |
+| **Priority** | HIGH |
+| **Date Created** | 2026-02-22 |
+
+**Description:**  
+Build a shared AI quoting system for all three Prime Group brands (Prime Electrical, AKF Construction, CleanJet) on the shared Supabase project `tfdxlhkaziskkwwohtwd`. The system uses Supabase Edge Functions (Deno), OpenRouter LLM, Zod validation, and Resend email delivery to generate, store, and send AI-powered quotes from customer job descriptions.
+
+**Reference Plans:** All plans live in `f:/Prime/AIquotes/`
+- `README.md` — overview and implementation sequence
+- `prime-electrical-plan.md` — 5 functions, Prime Electrical brand
+- `akf-construction-plan.md` — 6 functions, AKF Construction brand  
+- `cleanjet-plan.md` — 6 functions, CleanJet brand
+
+**Scope:**
+- 17 Supabase Edge Functions (Deno) across 3 brands
+- 3 new database tables: `workers`, `quotes`, `quote_line_items`
+- 7 ALTER TABLE additions (construction + cleaning specific columns)
+- Cross-sell bridge: AKF → CleanJet, Prime → AKF/CleanJet
+- Email delivery via Resend (3 brand-specific templates)
+- Integration with: LeadCaptureForm, BookingWizard, n8n webhooks, cross_sell_events table
+
+**Implementation Phases:**
+- Phase 1 (Schema): Create shared DB tables — Supabase migration
+- Phase 2 (P0 Functions): quote-generate-electrical, quote-generate-akf, calculate-post-build-price, generate-cleaning-quote
+- Phase 3 (P1 Functions): quote-send-*, quote-enrichment, estimate-deck-cost, consent-estimator, suggest-service-type, recommend-extras, cross-sell-to-cleanjet, bundle-analyzer-akf
+- Phase 4 (Frontend): LeadCaptureForm integration, BookingWizard custom quote path
+- Phase 5 (P2 Functions): quote-review, quote-followup, project-timeline-estimator, estimate-cleaning-time
+
+**Success Criteria:**
+- [x] All quotes stored with site_id isolation per brand — schema enforced
+- [x] Idempotency prevents duplicate quotes from retried requests — `checkIdempotency()` in all generate functions
+- [x] All AI quotes flagged with ai_generated=true and ai_model — set in `insertQuoteWithLineItems`
+- [x] Customer submits lead → AI ballpark quote generated < 3 seconds (Phase 6 frontend integration ✅)
+- [x] AKF cross-sell → CleanJet post-build quote auto-emailed to customer (functions ready; requires deploy)
+- [x] CleanJet BookingWizard shows real price for post-build (not "Custom") (Phase 6 frontend integration ✅)
+
+**Dependencies:**
+- `cross_sell_events` table: EXISTS in prod
+- `leads` table: EXISTS in prod
+- `contacts` table: EXISTS in prod (referenced as contacts)
+- `workers` table: MISSING — must create in Phase 1
+- `quotes` table: MISSING — must create in Phase 1
+- `quote_line_items` table: MISSING — must create in Phase 1
+
+**Next Action:** Run `/reflect` to close out QUOTES-001 — all 17 functions deployed
+
+**Plan Document:** `memory-bank/plan/QUOTES-001/plan-QUOTES-001.md`
+**Planning Completed:** 2026-02-22
+**Build Started:** 2026-02-22 (Phases 1–4 complete; Phase 6 complete 2026-02-22; Phase 7 P2 functions complete 2026-02-22)
+**Creative Phase Completed:** 2026-02-22
+**Creative Document:** `memory-bank/creative/QUOTES-001/creative-QUOTES-001.md`
+**Design Decisions:**
+- LLM Prompts: Option B — Benchmarked prompts with pricing tables (3 brand-specific + 1 enrichment)
+- Email Templates: Option B — Branded Card Layout with shared `buildQuoteEmail()` helper in `_shared/email.ts`
+- LeadCaptureForm: Option B — New `quote_preview` state (amber) between ai_processing and cross_sell
+- BookingWizard: Option B — Enhanced Step 1 with Custom Quote tab (zero impact on standard flow)

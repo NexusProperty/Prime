@@ -3,10 +3,12 @@
  *
  * Proxy to the Mission Control ingest-akf Edge Function.
  * The Edge Function handles: contacts upsert, events log, leads insert, n8n fire.
+ * Returns contactId alongside leadId to enable client-side quote generation.
  */
 import { NextRequest, NextResponse } from 'next/server'
 
 const INGEST_URL = 'https://tfdxlhkaziskkwwohtwd.supabase.co/functions/v1/ingest-akf'
+const SUPABASE_URL = 'https://tfdxlhkaziskkwwohtwd.supabase.co'
 
 export async function POST(request: NextRequest) {
   const body = await request.json()
@@ -46,5 +48,27 @@ export async function POST(request: NextRequest) {
   }
 
   const result = await ingestRes.json() as { leadId: string }
-  return NextResponse.json({ leadId: result.leadId })
+
+  // Look up contactId by email so the client can call quote-generate-akf
+  let contactId: string | undefined
+  if (email) {
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (serviceKey) {
+      const contactRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/contacts?email=eq.${encodeURIComponent(email)}&select=id&limit=1`,
+        {
+          headers: {
+            'apikey': serviceKey,
+            'Authorization': `Bearer ${serviceKey}`,
+          },
+        },
+      ).catch(() => null)
+      if (contactRes?.ok) {
+        const contacts = await contactRes.json() as Array<{ id: string }>
+        contactId = contacts[0]?.id
+      }
+    }
+  }
+
+  return NextResponse.json({ leadId: result.leadId, contactId })
 }

@@ -1,23 +1,29 @@
 # Active Context
 
 **Last Updated:** 2026-02-22
-**Status:** Mission Control — post-build hardening complete
+**Status:** QUOTES-001 — AI Quote Generation System (Creative phase complete — Ready to build)
 
 ---
 
 ## Current Focus
 
-**MC-001 ARCHIVED.** Mission Control is fully built, all Edge Functions deployed, RLS locked down, pg_cron queue processor running. The app runs locally (`npm run dev` in `mission-control/`). Only Vercel deployment remains — user action required.
+**QUOTES-001 — AI Quote Generation System.** Shared AI quoting for Prime Electrical, AKF Construction, CleanJet on Supabase `tfdxlhkaziskkwwohtwd`. 17 Edge Functions, 3 new tables, Resend email, OpenRouter LLM. Level 3 complexity. Creative phase complete — Ready to build.
 
-### Remaining user action
-- Add `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY` to Vercel environment variables
-- Run `vercel --prod` from `mission-control/`
-- Set Auth redirect URL in Supabase Dashboard → Auth → URL Configuration
+### New Task Initialized
+- **Task:** QUOTES-001
+- **Title:** AI Quote Generation System — Prime Group (3 Brands)
+- **Level:** 3
+- **Phase:** Creative complete
+- **Next Action:** Run `/build` to implement Phase 1 (schema) → Phase 3 (P0 Edge Functions)
 
-### Next sprint candidates
-- AKF + CleanJet KB seeding (embed FAQ content for Alex/Jess voice agents)
-- Assign NZ phone numbers to AKF (Alex) + CleanJet (Jess) Vapi assistants
-- N8N-ACTIVATE (user action — see `memory-bank/build/PHASE6-001/IMPORT-INSTRUCTIONS.md`)
+### Reference plans
+- `f:/Prime/AIquotes/README.md` — overview and implementation sequence
+- `f:/Prime/AIquotes/prime-electrical-plan.md` — 5 functions
+- `f:/Prime/AIquotes/akf-construction-plan.md` — 6 functions
+- `f:/Prime/AIquotes/cleanjet-plan.md` — 6 functions
+
+### Previous focus (MC-001)
+Mission Control fully built; Vercel deployment pending user action. See Next sprint candidates below.
 
 ---
 
@@ -51,3 +57,4 @@
 
 - Activate n8n workflow: see `memory-bank/build/PHASE6-001/IMPORT-INSTRUCTIONS.md`
 - Assign NZ phone numbers to AKF (Alex) + CleanJet (Jess) Vapi assistants
+- Mission Control Vercel deploy: add env vars, run `vercel --prod` from `mission-control/`

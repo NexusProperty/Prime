@@ -14,6 +14,7 @@ export type FormState =
   | 'filling'
   | 'submitting'
   | 'ai_processing'
+  | 'quote_preview'
   | 'cross_sell_triggered'
   | 'confirmed'
   | 'confirmed_with_crosssell'

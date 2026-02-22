@@ -3,7 +3,57 @@
 ## Overall Status
 - **Phase:** Sprint 1 Complete — All 3 sites built, QA passed, ready for deployment
 - **Health:** 🟢 Green
-- **Last Updated:** 2026-02-21
+- **Last Updated:** 2026-02-22
+
+## 2026-02-22 — QUOTES-001 Phase 7 — P2 Functions Complete
+
+4 P2 Edge Functions created and deployed:
+- `quote-review` — AI quality gate (LLM, auto-send, status update)
+- `quote-followup` — follow-up email template via Resend
+- `project-timeline-estimator` — week-by-week AKF timeline (LLM, consent detection)
+- `estimate-cleaning-time` — deterministic CleanJet duration/staffing calc
+
+All 17 QUOTES-001 Edge Functions are now live on tfdxlhkaziskkwwohtwd.
+Smoke tests: estimate-cleaning-time ✅, project-timeline-estimator ✅
+Next: /reflect
+
+---
+
+## 2026-02-22 — QUOTES-001 Phase 6 — Frontend Integration Complete
+
+**Status:** COMPLETE  
+**Date:** 2026-02-22
+
+**Summary:**
+- 14 files modified/created across packages/ui-ai, prime-electrical, akf-construction, cleanjet, supabase
+- All three brand forms now show AI quote previews inline during lead submission
+- 4 P0 Edge Functions re-deployed to `tfdxlhkaziskkwwohtwd`
+- Smoke test passed: `generate-cleaning-quote` returned $859.00 NZD with 4 line items, 7.5h estimate
+
+**Next:** Phase 7 P2 Edge Functions (quote-enrichment-akf, bundle-analyzer-cleanjet, etc.)
+
+---
+
+## 2026-02-22 — QUOTES-001 Build (Phases 1–4)
+
+**Status:** IN_PROGRESS  
+**Build Session:** `/build` command executed
+
+**Completed:**
+- Schema migration `20260222003_quotes_schema.sql` — `workers`, `quotes`, `quote_line_items` tables
+- `_shared/quotes.ts` — shared Zod schemas, `callOpenRouter`, `insertQuoteWithLineItems`, `checkIdempotency`
+- `_shared/email.ts` — `buildQuoteEmail` shared HTML email builder
+- 4 P0 Edge Functions: `quote-generate-electrical`, `quote-generate-akf`, `calculate-post-build-price`, `generate-cleaning-quote`
+- 9 P1 Edge Functions: `quote-send-electrical`, `quote-send-akf`, `quote-enrichment`, `estimate-deck-cost`, `consent-estimator`, `bundle-analyzer-akf`, `suggest-service-type`, `recommend-extras`, `cross-sell-to-cleanjet`
+
+**Total files created:** 16 (1 migration + 2 shared modules + 13 Edge Functions)
+
+**Pending:**
+- Operator: `supabase db push`, set secrets, deploy 13 functions
+- Phase 5 (P2 functions): defer
+- Phase 6 (Frontend): ✅ COMPLETE (2026-02-22)
+
+---
 
 ## Milestone Log
 
@@ -28,6 +78,7 @@
 | 2026-02-21 | Sprint 3 ARCHIVED — INFRA-002 + DEPLOY-002 + PHASE6-001 + TEST-002 |
 | 2026-02-22 | MC-001 Session 1: Mission Control web app built — 13 routes, 85 TS files, 4 DB tables, 3 Edge Functions scaffolded |
 | 2026-02-22 | MC-001 Session 2: Hotfix — RLS policies (6), Edge Functions deployed (3 ACTIVE), pg_cron scheduled, optimistic UI |
+| 2026-02-22 | QUOTES-001 Phase 6: Frontend Integration — LeadCaptureForm + BookingWizard AI quote previews, 14 files, 4 functions re-deployed |
 
 ## Archive References
 
