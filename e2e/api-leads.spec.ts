@@ -14,6 +14,7 @@
  */
 
 import { test, expect } from '@playwright/test'
+import type { CrossSellData } from '@prime/ui-ai'
 
 const BASE = 'http://localhost:3001'
 const SKIP = !!process.env.PLAYWRIGHT_SKIP_API_TESTS
@@ -105,7 +106,7 @@ test.describe('POST /api/leads/submit', () => {
       },
     })
     expect(res.status()).toBe(200)
-    const body = await res.json() as { leadId: string; crossSell?: { partnerBrand: string; servicePitch: string } }
+    const body = await res.json() as { leadId: string; crossSell?: CrossSellData }
     expect(body.crossSell).toBeTruthy()
     expect(body.crossSell?.partnerBrand).toBe('cleanjet')
     expect(typeof body.crossSell?.servicePitch).toBe('string')

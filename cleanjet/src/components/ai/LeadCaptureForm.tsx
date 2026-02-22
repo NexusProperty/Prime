@@ -13,6 +13,7 @@ interface Props {
 export function LeadCaptureForm({ brand, onSubmit, crossSellData }: Props) {
   const [state, setState] = useState<FormState>('idle')
   const [csState, setCsState] = useState<CrossSellState>('hidden')
+  const [activeCrossData, setActiveCrossData] = useState<CrossSellData | null>(null)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -25,17 +26,28 @@ export function LeadCaptureForm({ brand, onSubmit, crossSellData }: Props) {
       serviceType: fd.get('serviceType') as string,
     }
     setState('submitting')
-    await new Promise((r) => setTimeout(r, 500))
     setState('ai_processing')
-    await new Promise((r) => setTimeout(r, 2000))
-    if (crossSellData) {
-      setState('cross_sell_triggered')
-      setCsState('appearing')
-      setTimeout(() => setCsState('visible'), 50)
-    } else {
-      setState('confirmed')
+    try {
+      const res = await fetch('/api/leads/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...data, brand }),
+      })
+      if (!res.ok) throw new Error('Submit failed')
+      const result = await res.json() as { leadId: string; crossSell?: CrossSellData }
+      const activeSuggestion = result.crossSell ?? crossSellData ?? null
+      if (activeSuggestion) {
+        setActiveCrossData(activeSuggestion)
+        setState('cross_sell_triggered')
+        setCsState('appearing')
+        setTimeout(() => setCsState('visible'), 50)
+      } else {
+        setState('confirmed')
+      }
+      onSubmit?.(data)
+    } catch {
+      setState('idle')
     }
-    onSubmit?.(data)
   }
 
   if (state === 'confirmed' || state === 'confirmed_with_crosssell') {
@@ -54,12 +66,12 @@ export function LeadCaptureForm({ brand, onSubmit, crossSellData }: Props) {
     return <AIProcessingOverlay brand={brand} message="Our AI is reviewing your request and checking for service bundles…" />
   }
 
-  if (state === 'cross_sell_triggered' && crossSellData) {
+  if (state === 'cross_sell_triggered' && activeCrossData) {
     return (
       <CrossSellPromptCard
         brand={brand}
         state={csState}
-        data={crossSellData}
+        data={activeCrossData}
         onAccept={() => { setCsState('accepted'); setState('confirmed_with_crosssell') }}
         onDecline={() => { setCsState('declined'); setState('confirmed') }}
       />

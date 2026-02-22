@@ -1,34 +1,30 @@
 /**
  * POST /api/leads/submit
  *
- * Thin proxy to the Mission Control ingest-prime Edge Function.
+ * Proxy to the Mission Control ingest-cleanjet Edge Function.
  * The Edge Function handles: contacts upsert, events log, leads insert, n8n fire.
- * This route adds cross-sell detection on top before returning to the client.
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { detectCrossSell } from '@/lib/crossSell'
-import type { SiteBrand } from '@/types/database'
 
-const INGEST_URL = 'https://tfdxlhkaziskkwwohtwd.supabase.co/functions/v1/ingest-prime'
+const INGEST_URL = 'https://tfdxlhkaziskkwwohtwd.supabase.co/functions/v1/ingest-cleanjet'
 
 export async function POST(request: NextRequest) {
   const body = await request.json()
-  const { name, phone, email, message, serviceType, brand } = body as {
+  const { name, phone, email, message, serviceType } = body as {
     name: string
     phone: string
     email?: string
     message?: string
     serviceType?: string
-    brand: string
   }
 
   if (!name || !phone) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
   }
 
-  const secret = process.env.PRIME_WEBHOOK_SECRET
+  const secret = process.env.CLEANJET_WEBHOOK_SECRET
   if (!secret) {
-    console.error('[leads/submit] PRIME_WEBHOOK_SECRET not set')
+    console.error('[cleanjet/leads/submit] CLEANJET_WEBHOOK_SECRET not set')
     return NextResponse.json({ error: 'Configuration error' }, { status: 500 })
   }
 
@@ -40,22 +36,15 @@ export async function POST(request: NextRequest) {
     },
     body: JSON.stringify({ name, phone, email, message, serviceType }),
   }).catch((err) => {
-    console.error('[leads/submit] ingest-prime fetch error:', err)
+    console.error('[cleanjet/leads/submit] ingest-cleanjet fetch error:', err)
     return null
   })
 
   if (!ingestRes?.ok) {
-    console.error('[leads/submit] ingest-prime error:', ingestRes?.status)
+    console.error('[cleanjet/leads/submit] ingest-cleanjet error:', ingestRes?.status)
     return NextResponse.json({ error: 'Failed to save lead' }, { status: 500 })
   }
 
   const result = await ingestRes.json() as { leadId: string }
-
-  const crossSell = detectCrossSell(
-    (brand ?? 'prime') as SiteBrand,
-    serviceType,
-    message,
-  )
-
-  return NextResponse.json({ leadId: result.leadId, crossSell: crossSell ?? undefined })
+  return NextResponse.json({ leadId: result.leadId })
 }

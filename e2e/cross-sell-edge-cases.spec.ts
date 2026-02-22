@@ -16,13 +16,14 @@
  */
 
 import { test, expect, type Page } from '@playwright/test'
+import type { CrossSellData } from '@prime/ui-ai'
 
 const BASE = 'http://localhost:3001'
 const SKIP = !!process.env.PLAYWRIGHT_SKIP_API_TESTS
 
 type LeadSubmitResponse = {
   leadId: string
-  crossSell?: { partnerBrand: string; servicePitch: string; price?: string }
+  crossSell?: CrossSellData
 }
 
 // ---------------------------------------------------------------------------

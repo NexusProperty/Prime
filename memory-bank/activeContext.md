@@ -1,15 +1,15 @@
 # Active Context
 
 **Last Updated:** 2026-02-22
-**Status:** VAPI-001 Code Complete — Pending User Deployment Actions
+**Status:** Idle — VAPI-001 + INFRA-003 archived. No active tasks.
 
 ---
 
 ## Current Focus
 
-**VAPI-001** — Code complete. All files built. Pending 5 user deployment actions (see tasks.md for ordered checklist).
+**All tasks archived.** VAPI-001 voice agent is live for Prime Electrical (Max, +6498734191). INFRA-003 completed the E2E → `@prime/ui-ai` type migration (root `tsconfig.json` created). AKF and CleanJet assistants deployed but phone numbers not yet assigned.
 
-Sprint 3 is archived. n8n workflow activation is a pending user action.
+Next sprint candidate: N8N-ACTIVATE (user action) or AKF/CleanJet KB seeding.
 
 ---
 
@@ -53,16 +53,11 @@ Sprint 3 is archived. n8n workflow activation is a pending user action.
 
 ---
 
-## Ready to Start (User Deployment Actions — in order)
+## Optional Next Actions
 
-| Priority | Action | Command / Location |
-|----------|--------|--------------------|
-| 🔴 1 | Rotate `VAPI_API_KEY` | dashboard.vapi.ai → API Keys |
-| 2 | Run DB migration | `supabase db push` |
-| 3 | Set Supabase secrets | `supabase secrets set ...` (see plan §1.4) |
-| 4 | Deploy Edge Function | `supabase functions deploy vapi-webhook --no-verify-jwt` |
-| 5 | Set webhook secret | Vapi dashboard → Account → Webhooks → Server URL Secret |
-| 6 | Update 3 Vapi assistants | `vapi update assistant <id> --file vapi/assistant-<brand>.json` |
-| 7 | Run embedding script | `deno run --allow-net --allow-env --allow-read supabase/seed/embed-knowledge-base.ts` |
-| 8 | Integration tests | curl commands in plan §5.3 |
-| 9 | Voice smoke tests | `vapi call create --assistant-id <id> --type web` |
+| Priority | Action | Notes |
+|----------|--------|-------|
+| 1 | Embed AKF + CleanJet KB | `BRAND=akf deno run ...` when FAQ content ready |
+| 2 | Assign NZ numbers to Alex + Jess | Buy 2 more Telnyx numbers, link in Vapi |
+| 3 | ~~INFRA-003~~ | ✅ Archived — root tsconfig + `CrossSellData` imports in 2 spec files |
+| 4 | N8N-ACTIVATE | Activate n8n workflow (see IMPORT-INSTRUCTIONS.md) |
