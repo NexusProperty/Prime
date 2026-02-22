@@ -106,8 +106,10 @@
     ]
   },
   "voice": {
-    "provider": "playht",
-    "voiceId": "s3://peregrine-voices/oliver_parrot_saad/manifest.json",
+    "provider": "11labs",
+    "voiceId": "0ctHipTscpgE8IXfSmNN",
+    "stability": 0.5,
+    "similarityBoost": 0.75,
     "speed": 1.0
   },
   "transcriber": {
