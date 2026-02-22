@@ -10,6 +10,7 @@
 | Orion ID | Date | Target | Status | Outputs | Related Sessions |
 |----------|------|--------|--------|---------|------------------|
 | ORION-001 | 2026-02-19 | `C:\Users\Jackc\.cursor\skills-cursor\`, `f:\Prime\.cursor\skills\`, `f:\Prime\.agent\skills\skills\` | Complete | FINDINGS, SOLUTIONS, TASKS, PLAN | — |
+| ORION-002 | 2026-02-22 | `F:/Prime` (full root) | Complete | REPORT, TASKS | Complementary to ORION-001 |
 
 ### Status Values
 - **Complete** — Analysis finished, outputs generated
@@ -22,6 +23,22 @@
 ## Active Threads
 
 > Ongoing investigations or unresolved findings.
+
+### United Trades — Sprint 2 Planning
+- **Origin Session**: ORION-002
+- **Target**: `F:/Prime` (full project)
+- **Unresolved Findings**:
+  1. Mission Control not deployed to Vercel (A-001) — Critical
+  2. n8n workflow not activated (A-002) — Critical
+  3. NZ phone numbers not assigned to AKF/CleanJet Vapi agents (A-003) — High
+  4. PHASE6-001 build folder missing (B-001) — Critical
+  5. AKF + CleanJet KB not seeded (B-002) — High
+  6. CleanJet Deep Clean page is 404 (B-003) — High
+  7. 17 E2E API tests skipped in CI (B-010) — Medium
+- **Last Updated**: 2026-02-22
+- **Next Action**: Human completes A-001, AI completes B-001, then A-002
+
+---
 
 ### Skills gap + skill pack
 - **Origin Session:** ORION-001
@@ -45,3 +62,4 @@
 > How sessions connect to each other and to the broader task workflow.
 
 - ORION-001 → **new thread** (skills review; first Orion session)
+- ORION-002 → **complementary to** ORION-001 (skills review → full project audit)
