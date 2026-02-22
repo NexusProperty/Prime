@@ -6,11 +6,11 @@ import '@/styles/tailwind.css'
 
 export const metadata: Metadata = {
   title: {
-    template: '%s - CleanJet',
-    default: 'CleanJet — Auckland Home Cleaning. Book in 60 Seconds.',
+    template: '%s | CleanJet',
+    default: 'House Cleaning Auckland | Book in 60 Seconds | CleanJet',
   },
   description:
-    'Professional home cleaning services across Auckland. Vetted, insured cleaners. Eco-friendly products. 100% satisfaction guarantee. First clean 20% off. Book online in under a minute.',
+    'CleanJet — vetted, insured home cleaning across Auckland from $79. Eco-friendly products. 100% satisfaction guarantee. Book online now.',
 }
 
 const inter = Inter({

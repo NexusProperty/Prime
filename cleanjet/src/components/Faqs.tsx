@@ -8,27 +8,25 @@ const faqs = [
     {
       question: 'Do you bring your own cleaning products?',
       answer:
-        'Yes — we bring everything we need, including eco-friendly, non-toxic cleaning products that are safe for children and pets. You don\'t need to supply anything. If you have a preferred product you\'d like us to use, just let us know.',
+        'Yes — we bring everything we need, including eco-friendly, non-toxic cleaning products that are safe for children and pets. You don\'t need to supply anything. If you have a preferred product you\'d like us to use, just let us know when booking.',
     },
     {
       question: 'Are your cleaners police-checked and insured?',
       answer:
         'Every CleanJet cleaner is background-checked and fully insured. We carry public liability insurance and take responsibility for any damage caused during a clean — your home is in safe hands.',
     },
-  ],
-  [
     {
       question: 'Can I skip or reschedule a clean?',
       answer:
-        'Absolutely. There are no lock-in contracts. You can skip, reschedule, or cancel any clean with at least 24 hours\' notice — no fees, no hassle. Life happens, and we get it.',
-    },
-    {
-      question: 'What\'s included in a regular clean?',
-      answer:
-        'A regular clean includes all rooms vacuumed and mopped, bathrooms scrubbed and sanitised, kitchen surfaces and appliance exteriors wiped down, and beds made on request. We follow a consistent checklist every visit so your home is always cleaned to the same high standard.',
+        'Absolutely. There are no lock-in contracts. You can skip, reschedule, or cancel any clean with at least 24 hours\' notice — no fees, no hassle.',
     },
   ],
   [
+    {
+      question: 'What\'s included in a regular clean?',
+      answer:
+        'A regular clean includes all rooms vacuumed and mopped, bathrooms scrubbed and sanitised, kitchen surfaces and appliance exteriors wiped down, and beds made on request. We follow a 45-point checklist to ensure nothing is missed.',
+    },
     {
       question: 'Do you offer a bond-back guarantee for end of tenancy cleans?',
       answer:
@@ -38,6 +36,18 @@ const faqs = [
       question: 'Do you clean after building or renovation work?',
       answer:
         'We specialise in post-build and post-renovation cleans, including heavy dust removal, paint splash clean-up, window cleaning, and full scrub-down. We work directly with AKF Construction clients — ask about our bundle discount.',
+    },
+  ],
+  [
+    {
+      question: 'How much does home cleaning cost in Auckland?',
+      answer:
+        'CleanJet\'s regular maintenance cleaning starts at $79 per visit (weekly) or $99 one-off for a 1–2 bedroom home. 3–4 bedrooms is $149 one-off, 5+ bedrooms $199. Deep cleans and move-out/end of tenancy cleans are priced separately — from $357 (4-bedroom) to $391 (2–3 bedroom) inc-GST based on actual invoiced jobs. All prices include GST (CleanJet GST: 144-124-286).',
+    },
+    {
+      question: 'What areas of Auckland does CleanJet service?',
+      answer:
+        'CleanJet operates across the Auckland metropolitan area, covering suburbs in East Auckland, South Auckland, Central Auckland, West Auckland, and North Auckland. Call or book online to confirm service availability in your specific area.',
     },
   ],
 ]
@@ -63,7 +73,7 @@ export function Faqs() {
             id="faq-title"
             className="font-display text-3xl tracking-tight text-slate-900 sm:text-4xl"
           >
-            Frequently asked questions
+            Frequently Asked Questions — CleanJet Auckland
           </h2>
           <p className="mt-4 text-lg tracking-tight text-slate-700">
             Still have a question? We&apos;d love to help — call or text us any

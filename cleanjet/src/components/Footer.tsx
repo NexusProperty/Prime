@@ -3,21 +3,21 @@ import { Container } from '@/components/Container'
 
 const navigation = {
   services: [
-    { name: 'Regular Clean', href: '#services' },
-    { name: 'Deep Clean', href: '#services' },
-    { name: 'End of Tenancy', href: '#services' },
-    { name: 'Post-Build Clean', href: '#services' },
-    { name: 'Pricing', href: '#pricing' },
+    { name: 'Regular Clean', href: '/regular-clean' },
+    { name: 'Deep Clean', href: '/deep-clean' },
+    { name: 'End of Tenancy', href: '/end-of-tenancy' },
+    { name: 'Post-Build Clean', href: '/post-build-clean' },
+    { name: 'Pricing', href: '/pricing' },
   ],
   company: [
-    { name: 'How It Works', href: '#how-it-works' },
+    { name: 'How It Works', href: '/how-it-works' },
     { name: 'Reviews', href: '#testimonials' },
-    { name: 'FAQ', href: '#faq' },
-    { name: 'About Us', href: '#' },
-    { name: 'Great Clean Guarantee', href: '#why-cleanjet' },
+    { name: 'FAQ', href: '/faq' },
+    { name: 'About Us', href: '/about-us' },
+    { name: 'Great Clean Guarantee', href: '/great-clean-guarantee' },
   ],
   contact: [
-    { name: '0800 000 000', href: 'tel:0800000000' },
+    { name: '(09) 215-2900', href: 'tel:092152900' },
     { name: 'hello@cleanjet.co.nz', href: 'mailto:hello@cleanjet.co.nz' },
     { name: 'Auckland-wide service', href: '#' },
     { name: 'Mon–Sat 8am–6pm', href: '#' },
@@ -25,8 +25,8 @@ const navigation = {
 }
 
 const hubBrands = [
-  { name: 'Prime Electrical', href: '#', desc: 'Solar, heat pumps & electrical' },
-  { name: 'AKF Construction', href: '#', desc: 'Renovations, decks & fencing' },
+  { name: 'Prime Electrical', href: 'https://theprimeelectrical.co.nz/', desc: 'Solar, heat pumps & electrical' },
+  { name: 'AKF Construction', href: 'https://www.akfconstruction.co.nz/', desc: 'Renovations, decks & fencing' },
 ]
 
 export function Footer() {

@@ -8,11 +8,6 @@ export function Hero() {
       <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center text-center">
           
-          {/* Promo Pill */}
-          <div className="mb-8 inline-flex items-center gap-2 bg-sky-50 ring-1 ring-sky-200 text-sky-700 rounded-full px-4 py-2 text-sm font-medium">
-            🎉 First clean 20% off — book before Friday
-          </div>
-
           {/* H1 with wave underline on "60 Seconds" */}
           <h1 className="mx-auto max-w-4xl font-display text-5xl font-medium tracking-tight text-slate-900 sm:text-7xl">
             Auckland Home Cleaning —{' '}
@@ -38,6 +33,17 @@ export function Hero() {
           <div className="mt-10 w-full max-w-2xl">
             <BookingWizard />
           </div>
+
+          {/* Secondary CTA */}
+          <a
+            href="tel:092152900"
+            className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-sky-600 transition-colors"
+          >
+            <svg aria-hidden="true" className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+            </svg>
+            (09) 215-2900
+          </a>
 
           {/* Trust Icons Row */}
           <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-slate-700">

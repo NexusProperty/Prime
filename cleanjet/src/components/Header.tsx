@@ -68,10 +68,10 @@ function MobileNavigation() {
         className="absolute inset-x-4 top-24 z-50 flex origin-top flex-col bg-white border-t-4 border-sky-500 shadow-2xl data-closed:scale-95 data-closed:opacity-0 data-enter:duration-150 data-enter:ease-out data-leave:duration-100 data-leave:ease-in rounded-none"
       >
         <div className="p-2">
-          <MobileNavLink href="#services">Services</MobileNavLink>
-          <MobileNavLink href="#pricing">Pricing</MobileNavLink>
-          <MobileNavLink href="#how-it-works">How It Works</MobileNavLink>
-          <MobileNavLink href="#testimonials">Reviews</MobileNavLink>
+          <MobileNavLink href="/#services">Services</MobileNavLink>
+          <MobileNavLink href="/pricing">Pricing</MobileNavLink>
+          <MobileNavLink href="/how-it-works">How It Works</MobileNavLink>
+          <MobileNavLink href="/#testimonials">Reviews</MobileNavLink>
           <div className="mt-4 p-4">
             <PopoverButton as={Link} href="#booking" className="flex w-full h-12 items-center justify-center bg-sky-600 font-sans text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-sky-500 rounded-full">
               Book Now
@@ -104,12 +104,12 @@ export function Header() {
             <span className="h-1.5 w-1.5 bg-sky-500 rounded-none" />
             First service deployment: 20% discount active
           </div>
-          <a
-            href="#pricing"
-            className="text-[10px] font-bold tracking-widest text-sky-600 uppercase hover:text-sky-800 transition-colors"
-          >
+            <Link
+              href="/pricing"
+              className="text-[10px] font-bold tracking-widest text-sky-600 uppercase hover:text-sky-800 transition-colors"
+            >
             Review Pricing Matrix →
-          </a>
+          </Link>
         </div>
       </div>
 
@@ -144,16 +144,16 @@ export function Header() {
 
           {/* Desktop links */}
           <div className="hidden h-full items-center border-r border-slate-100 md:flex">
-            <NavLink href="#services">Services</NavLink>
-            <NavLink href="#pricing">Pricing</NavLink>
-            <NavLink href="#how-it-works">How It Works</NavLink>
-            <NavLink href="#testimonials">Reviews</NavLink>
+            <NavLink href="/#services">Services</NavLink>
+            <NavLink href="/pricing">Pricing</NavLink>
+            <NavLink href="/how-it-works">How It Works</NavLink>
+            <NavLink href="/#testimonials">Reviews</NavLink>
           </div>
 
           {/* Desktop CTAs */}
           <div className="hidden items-center gap-x-6 pl-6 md:flex">
             <a
-              href="tel:0800000000"
+              href="tel:092152900"
               className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-slate-500 hover:text-sky-600 transition-colors"
             >
               <svg
@@ -164,7 +164,7 @@ export function Header() {
               >
                 <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
               </svg>
-              0800 000 000
+              (09) 215-2900
             </a>
             <a
               href="#booking"
