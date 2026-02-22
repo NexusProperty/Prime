@@ -35,24 +35,24 @@ export function Hero() {
 
           {/* Massive brutalist headline */}
           <h1 className="font-display text-6xl font-bold uppercase leading-none tracking-tight text-slate-900 sm:text-7xl lg:text-8xl">
-            We Build
-            <br />
-            <span className="text-slate-900">Auckland.</span>
+            A TEAM THAT BUILDS
           </h1>
 
           {/* Subheadline */}
-          <p className="mt-8 max-w-lg text-lg leading-relaxed text-slate-600">
-            Architectural renovations and structural engineering. Executed with
-            absolute precision.
+          <p className="mt-6 max-w-lg text-xl font-medium leading-relaxed text-slate-600">
+            Auckland&apos;s Expert Builders for Residential & Commercial Projects
+          </p>
+          <p className="mt-2 font-mono text-sm font-bold uppercase tracking-[0.2em] text-amber-600">
+            Built on Trust. Driven by Quality.
           </p>
 
           {/* Hairline underline CTA */}
           <div className="mt-10">
             <a
-              href="#projects"
+              href="/contact-us"
               className="group inline-flex items-center gap-3 border-b-2 border-slate-900 pb-1 font-sans text-sm font-bold uppercase tracking-widest text-slate-900 transition-all hover:gap-5"
             >
-              Initiate Project
+              Get a Free Quote
               <svg
                 aria-hidden="true"
                 className="h-4 w-4 transition-transform group-hover:translate-x-1"

@@ -3,23 +3,23 @@ import { Container } from '@/components/Container'
 
 const navigation = {
   services: [
-    { name: 'Home Renovations', href: '#renovations' },
-    { name: 'Decks & Outdoor Living', href: '#decks' },
-    { name: 'Fencing & Boundaries', href: '#fencing' },
-    { name: 'New Builds & Extensions', href: '#new-builds' },
-    { name: 'Landscaping', href: '#services' },
+    { name: 'Our Services', href: '/our-services' },
+    { name: 'Deck Construction', href: '/our-services#deck' },
+    { name: 'Fence Construction', href: '/our-services#fence' },
+    { name: 'Home Renovation', href: '/our-services#renovation' },
+    { name: 'New Builds', href: '/our-services#new-build' },
   ],
   company: [
-    { name: 'Featured Projects', href: '#projects' },
-    { name: 'How We Work', href: '#process' },
-    { name: 'Reviews', href: '#testimonials' },
-    { name: 'FAQ', href: '#faq' },
-    { name: 'About Us', href: '#' },
+    { name: 'About Us', href: '/about-us' },
+    { name: 'Contact Us', href: '/contact-us' },
+    { name: 'Featured Projects', href: '/#projects' },
+    { name: 'How We Work', href: '/#process' },
+    { name: 'FAQ', href: '/#faq' },
   ],
   contact: [
     { name: '09-951-8763', href: 'tel:0995198763' },
-    { name: 'info@akfconstruction.co.nz', href: 'mailto:info@akfconstruction.co.nz' },
-    { name: '2/41 Smales Rd, East Tāmaki', href: '#' },
+    { name: 'Info@akfconstruction.co.nz', href: 'mailto:Info@akfconstruction.co.nz' },
+    { name: '2/41 Smales Road, East Tamaki', href: 'https://maps.google.com/?q=2/41+Smales+Road+East+Tamaki+Auckland+2013' },
     { name: 'Auckland 2013', href: '#' },
     { name: 'Mon–Fri 8:00am–5:00pm', href: '#' },
   ],
@@ -191,11 +191,11 @@ export function Footer() {
               Copyright &copy; {new Date().getFullYear()} AKF Construction Ltd. All rights reserved.
             </p>
             <div className="flex gap-x-6">
-              <Link href="#" className="text-sm text-slate-700 hover:text-slate-500">
+              <Link href="/privacy-policy" className="text-sm text-slate-700 hover:text-slate-500">
                 Privacy Policy
               </Link>
-              <Link href="#" className="text-sm text-slate-700 hover:text-slate-500">
-                Terms
+              <Link href="/terms-and-conditions" className="text-sm text-slate-700 hover:text-slate-500">
+                Terms & Conditions
               </Link>
             </div>
           </div>

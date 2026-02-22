@@ -6,38 +6,50 @@ import backgroundImage from '@/images/background-faqs.jpg'
 const faqs = [
   [
     {
-      question: 'Do you handle Auckland Council consents?',
+      question: 'What construction services does AKF Construction offer?',
       answer:
-        'Yes — we manage the consent process for you. For decks over 1.5m, structural alterations, and new builds, we prepare and submit all required documentation to Auckland Council. We\'ll keep you updated throughout.',
+        'AKF Construction offers a full range of residential and commercial construction services in Auckland, including new home builds, deck construction, fence building, painting services, home renovations, landscape work, and complete project management from initial planning through to final completion.',
     },
     {
-      question: 'What materials do you use for decks?',
+      question: 'Where in Auckland does AKF Construction work?',
       answer:
-        'We use a range of premium materials including Kwila hardwood, composite decking (Trex, Futurewood), and treated pine — matched to your budget, aesthetic, and maintenance preference. We\'ll walk you through the options at your free consultation.',
-    },
-  ],
-  [
-    {
-      question: 'Do you offer a structural guarantee?',
-      answer:
-        'All our structural work is backed by a 10-year guarantee. We use licensed building practitioners and adhere to NZ Building Code standards on every project, large or small.',
-    },
-    {
-      question: 'Can you give me an online quote?',
-      answer:
-        'We recommend a free on-site consultation for accurate pricing — every project is different. However, you can call us on 09-951-8763 or fill in our contact form and we\'ll give you a ballpark figure before we visit.',
+        'AKF Construction is based in East Tamaki and serves homeowners and businesses across the wider Auckland region, including Manukau, Flat Bush, Botany, Howick, Pakuranga, and surrounding suburbs. Contact us to confirm availability for your location.',
     },
   ],
   [
     {
-      question: 'Do you do landscaping as well as construction?',
+      question: 'Is AKF Construction a licensed builder?',
       answer:
-        'Yes. We offer a full suite of outdoor services including landscape design, retaining walls, driveway construction, and automated gates — so you get a complete outdoor transformation from one team.',
+        'Yes, AKF Construction operates with licensed and experienced building professionals. Our team brings years of industry experience to every residential and commercial project, ensuring all work meets New Zealand building standards and is completed to the highest quality.',
     },
     {
-      question: 'How long does a renovation take?',
+      question: 'How do I get a quote from AKF Construction?',
       answer:
-        'Timelines vary depending on scope. A kitchen renovation typically takes 3–6 weeks; a full home renovation can take 3–6 months. We provide a detailed project schedule before we begin and send weekly progress updates.',
+        'Getting a quote is straightforward — call 09-951-8763, email Info@akfconstruction.co.nz, or fill in the contact form on our website. We discuss your project requirements, visit the site if needed, and provide a clear, transparent quote with no hidden costs.',
+    },
+  ],
+  [
+    {
+      question: 'How long does a deck construction project take?',
+      answer:
+        'Most residential deck projects in Auckland are completed within one to two weeks, depending on size, design complexity, and material availability. AKF Construction provides a clear project timeline before work begins and keeps you informed throughout every stage of the build.',
+    },
+    {
+      question: 'Can AKF Construction manage the full project from start to finish?',
+      answer:
+        'Yes. Project management is a core part of what AKF Construction does. We coordinate every stage of your build — from initial planning and council requirements through to final completion — so you have one trusted team handling your project from beginning to end.',
+    },
+  ],
+  [
+    {
+      question: 'Does AKF Construction build new homes in Auckland?',
+      answer:
+        'Yes. AKF Construction specialises in new home builds across Auckland for residential clients. We work from initial design planning through to project completion, using quality materials and expert craftsmanship to deliver your new home on time and within budget.',
+    },
+    {
+      question: 'Does AKF Construction offer commercial construction services?',
+      answer:
+        'Yes. In addition to residential work, AKF Construction provides construction services for commercial clients across Auckland, including commercial new builds, fit-outs, painting, fencing, and renovation work for offices, retail spaces, and other commercial properties.',
     },
   ],
 ]
@@ -63,7 +75,7 @@ export function Faqs() {
             id="faq-title"
             className="font-display text-3xl tracking-tight text-slate-900 sm:text-4xl"
           >
-            Frequently asked questions
+            Frequently Asked Questions About AKF Construction
           </h2>
           <p className="mt-4 text-lg tracking-tight text-slate-700">
             Have a question we haven&apos;t answered? Call us on{' '}
@@ -75,17 +87,17 @@ export function Faqs() {
             </a>{' '}
             or email{' '}
             <a
-              href="mailto:info@akfconstruction.co.nz"
+              href="mailto:Info@akfconstruction.co.nz"
               className="font-semibold text-slate-900 hover:text-slate-700"
             >
-              info@akfconstruction.co.nz
+              Info@akfconstruction.co.nz
             </a>
             .
           </p>
         </div>
         <ul
           role="list"
-          className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 lg:max-w-none lg:grid-cols-3"
+          className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 lg:max-w-none lg:grid-cols-4"
         >
           {faqs.map((column, columnIndex) => (
             <li key={columnIndex}>

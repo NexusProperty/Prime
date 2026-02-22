@@ -50,7 +50,7 @@ export default function Home() {
           <Container>
             <div className="mx-auto max-w-2xl">
               <h2 className="mb-4 text-center font-display text-3xl font-bold text-slate-900 sm:text-4xl">
-                Start Your Project
+                Get a Free Quote from AKF Construction
               </h2>
               <p className="mb-10 text-center text-slate-500">
                 Tell us about your build. Our AI checks for bundle savings with our trade partners.

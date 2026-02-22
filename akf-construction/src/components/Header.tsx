@@ -68,12 +68,12 @@ function MobileNavigation() {
         className="absolute inset-x-4 top-24 z-50 flex origin-top flex-col bg-slate-900 border-l-4 border-amber-500 shadow-2xl data-closed:scale-95 data-closed:opacity-0 data-enter:duration-150 data-enter:ease-out data-leave:duration-100 data-leave:ease-in rounded-none"
       >
         <div className="p-2">
-          <MobileNavLink href="#projects">Projects</MobileNavLink>
-          <MobileNavLink href="#services">Services</MobileNavLink>
-          <MobileNavLink href="#decks-fencing">Decks & Fencing</MobileNavLink>
-          <MobileNavLink href="#about">About</MobileNavLink>
+          <MobileNavLink href="/#projects">Projects</MobileNavLink>
+          <MobileNavLink href="/our-services">Our Services</MobileNavLink>
+          <MobileNavLink href="/about-us">About Us</MobileNavLink>
+          <MobileNavLink href="/contact-us">Contact Us</MobileNavLink>
           <div className="mt-4 p-4">
-            <PopoverButton as={Link} href="#contact" className="flex w-full h-12 items-center justify-center bg-slate-900 font-sans text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-slate-800 rounded-full">
+            <PopoverButton as={Link} href="/contact-us" className="flex w-full h-12 items-center justify-center bg-slate-900 font-sans text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-slate-800 rounded-full">
               Get a Quote
             </PopoverButton>
           </div>
@@ -151,20 +151,20 @@ export function Header() {
 
           {/* Desktop links */}
           <div className="hidden items-center md:flex">
-            <NavLink href="#projects">Projects</NavLink>
-            <NavLink href="#services">Services</NavLink>
-            <NavLink href="#decks-fencing">Decks & Fencing</NavLink>
-            <NavLink href="#about">About</NavLink>
+            <NavLink href="/#projects">Projects</NavLink>
+            <NavLink href="/our-services">Our Services</NavLink>
+            <NavLink href="/about-us">About Us</NavLink>
+            <NavLink href="/contact-us">Contact Us</NavLink>
           </div>
 
           {/* Desktop CTAs */}
           <div className="hidden items-center gap-x-6 md:flex">
-            <a
-              href="#contact"
+            <Link
+              href="/contact-us"
               className="inline-flex h-10 items-center justify-center bg-slate-900 px-6 font-sans text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-slate-800 rounded-full"
             >
               Get a Quote
-            </a>
+            </Link>
           </div>
 
           {/* Mobile hamburger */}
