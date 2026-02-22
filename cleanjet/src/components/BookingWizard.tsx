@@ -52,7 +52,24 @@ export function BookingWizard() {
           roomSel={roomSel}
           dateSel={dateSel}
           onBack={() => setStep(2)}
-          onConfirm={() => setConfirmed(true)}
+          onConfirm={async (contact) => {
+            fetch('/api/leads/submit', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                name: contact.name,
+                phone: contact.phone,
+                brand: 'cleanjet',
+                serviceType: `Cleaning — ${roomSel.rooms} Bedrooms`,
+                message: [
+                  roomSel.extras.length ? `Extras: ${roomSel.extras.join(', ')}` : null,
+                  `Date: ${dateSel.date.toLocaleDateString('en-NZ')} at ${dateSel.timeSlot}`,
+                  `Price: $${roomSel.basePrice} NZD`,
+                ].filter(Boolean).join('. '),
+              }),
+            }).catch((err) => console.error('[BookingWizard] ingest error:', err))
+            setConfirmed(true)
+          }}
         />
       )}
     </div>
