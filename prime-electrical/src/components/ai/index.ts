@@ -1,9 +1,11 @@
-export { AIChatWidget } from './AIChatWidget'
-export { VoiceStatusIndicator } from './VoiceStatusIndicator'
-export { CrossSellPromptCard } from './CrossSellPromptCard'
-export { EmergencyTriageAlert } from './EmergencyTriageAlert'
-export { LeadCaptureForm } from './LeadCaptureForm'
-export { AIProcessingOverlay } from './AIProcessingOverlay'
+// Shared components from @prime/ui-ai package
+export {
+  VoiceStatusIndicator,
+  CrossSellPromptCard,
+  EmergencyTriageAlert,
+  AIProcessingOverlay,
+  brandConfig,
+} from '@prime/ui-ai'
 
 export type {
   Brand,
@@ -14,4 +16,8 @@ export type {
   CrossSellData,
   ChatMessageData,
   LeadFormData,
-} from './types'
+} from '@prime/ui-ai'
+
+// Per-site components (intentionally kept separate)
+export { AIChatWidget } from './AIChatWidget'
+export { LeadCaptureForm } from './LeadCaptureForm'

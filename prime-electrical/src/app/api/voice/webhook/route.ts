@@ -78,8 +78,8 @@ export async function POST(request: NextRequest) {
     })
   }
 
-  // Trigger Make.com → GPT-4o enrichment (fire-and-forget)
-  const webhookUrl = process.env.MAKE_WEBHOOK_URL
+  // Trigger n8n → GPT-4o enrichment (fire-and-forget)
+  const webhookUrl = process.env.N8N_WEBHOOK_URL
   if (webhookUrl && lead?.id) {
     fetch(webhookUrl, {
       method: 'POST',

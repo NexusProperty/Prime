@@ -1,10 +1,13 @@
 /**
- * POST /api/leads/enrich
+ * /api/leads/enrich
  *
- * Called by Make.com after GPT-4o has analysed a lead.
- * Updates the lead's ai_notes and records a cross_sell_event if detected.
+ * GET  — Health-check used by n8n's HTTP Request node to verify the endpoint
+ *         is reachable before activating the workflow. Returns 200 + JSON.
  *
- * Expected JSON payload from Make.com:
+ * POST — Called by Make.com after GPT-4o has analysed a lead.
+ *         Updates the lead's ai_notes and records a cross_sell_event if detected.
+ *
+ * Expected POST payload from Make.com:
  * {
  *   leadId: string
  *   aiNotes: string          // GPT-4o summary
@@ -14,11 +17,16 @@
  *   }
  * }
  *
- * Security: Make.com must send header  x-enrich-secret: <ENRICH_SECRET>
+ * Security: n8n must send header  x-enrich-secret: <ENRICH_SECRET>
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase'
 import type { SiteBrand } from '@/types/database'
+
+/** n8n HTTP Request node GET verification — confirms endpoint is reachable. */
+export async function GET() {
+  return NextResponse.json({ ok: true, endpoint: 'leads/enrich' })
+}
 
 export async function POST(request: NextRequest) {
   const secret = request.headers.get('x-enrich-secret')

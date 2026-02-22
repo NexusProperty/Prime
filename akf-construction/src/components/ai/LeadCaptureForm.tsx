@@ -1,10 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { FormFields } from './LeadCaptureForm/FormFields'
-import { AIProcessingOverlay } from './AIProcessingOverlay'
-import { CrossSellPromptCard } from './CrossSellPromptCard'
-import type { Brand, FormState, CrossSellState, CrossSellData, LeadFormData } from './types'
+import { FormFields, AIProcessingOverlay, CrossSellPromptCard } from '@prime/ui-ai'
+import type { Brand, FormState, CrossSellState, CrossSellData, LeadFormData } from '@prime/ui-ai'
 
 interface Props {
   brand: Brand

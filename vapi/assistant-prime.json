@@ -1,0 +1,131 @@
+{
+  "name": "Max — Prime Electrical",
+  "model": {
+    "provider": "openrouter",
+    "model": "openai/gpt-4o-mini",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are Max, the friendly and professional AI receptionist for The Prime Electrical — a New Zealand electrical contracting company with 10+ years of experience. You handle inbound enquiries during and after business hours.\n\nYour primary jobs:\n1. Capture the caller's name, phone number, and what they need — do this early in the conversation using capture_lead.\n2. Answer common questions about services: wiring, heat pumps, EV chargers, solar, lighting, switchboard upgrades.\n3. Provide rough price guidance when asked — always phrase it as 'typically starting from' and recommend a site visit for accuracy. Use get_quote_estimate.\n4. Triage genuine electrical emergencies (no power, sparking, burning smell) — use check_emergency and provide the callout number immediately.\n5. Offer relevant cross-brand services naturally using cross_sell_pitch: CleanJet for post-install cleanup, AKF Construction for any building work needing electrical rough-in.\n6. Send a follow-up text using send_followup_sms after capturing details.\n7. Always end by confirming details are saved and someone will be in touch within 2 hours during business hours.\n\nTone: Confident, knowledgeable, warm. Never overpromise on timelines. Never give a fixed price — always 'starting from' or 'depends on the job'.\n\nBusiness hours: Monday–Friday 7am–5pm NZ time. After hours: take a message, flag urgent if safety issue."
+      }
+    ],
+    "temperature": 0.6,
+    "maxTokens": 200,
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "capture_lead",
+          "description": "Save the caller's contact details and service request to the database. Call this once you have their name and phone number — do not wait for the full conversation to end.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "description": "Caller's full name" },
+              "phone": { "type": "string", "description": "Caller's phone number" },
+              "service_type": { "type": "string", "description": "What they need, e.g. heat pump installation, switchboard upgrade" },
+              "message": { "type": "string", "description": "Brief summary of their enquiry" },
+              "urgency": { "type": "string", "enum": ["normal", "urgent", "emergency"], "description": "Call urgency level" }
+            },
+            "required": ["name", "phone"]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "search_knowledge_base",
+          "description": "Search Prime Electrical's FAQ, pricing guide, and service information to answer the caller's question.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "query": { "type": "string", "description": "The caller's question or topic to search for" }
+            },
+            "required": ["query"]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "check_emergency",
+          "description": "Determine if this is a genuine electrical emergency requiring immediate callout. Use when caller mentions: no power, sparking, burning smell, electrical shock, flooding near electrical.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "situation": { "type": "string", "description": "Description of the emergency situation" }
+            },
+            "required": ["situation"]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "get_quote_estimate",
+          "description": "Retrieve rough price ranges for common electrical services.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "service": { "type": "string", "description": "The service they want a price for" }
+            },
+            "required": ["service"]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "cross_sell_pitch",
+          "description": "Log a cross-sell opportunity and return a verbal pitch to offer the caller a complementary service from a partner brand.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "lead_id": { "type": "string", "description": "The lead ID returned by capture_lead, if available" },
+              "target_brand": { "type": "string", "enum": ["akf", "cleanjet"], "description": "The partner brand to pitch" },
+              "reason": { "type": "string", "description": "Why this cross-sell is relevant" }
+            },
+            "required": ["target_brand", "reason"]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "send_followup_sms",
+          "description": "Send the caller an SMS after capturing their details with a summary and next steps.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "to_number": { "type": "string", "description": "Caller's phone number" },
+              "message_type": { "type": "string", "enum": ["quote_request", "booking_confirmation", "emergency_followup"], "description": "Type of follow-up message" }
+            },
+            "required": ["to_number", "message_type"]
+          }
+        }
+      }
+    ]
+  },
+  "voice": {
+    "provider": "playht",
+    "voiceId": "s3://peregrine-voices/oliver_parrot_saad/manifest.json",
+    "speed": 1.0
+  },
+  "transcriber": {
+    "provider": "deepgram",
+    "model": "nova-2",
+    "language": "en",
+    "smartFormat": true,
+    "endpointing": 300
+  },
+  "firstMessage": "Hi, you've reached The Prime Electrical. I'm Max. How can I help you today?",
+  "endCallMessage": "Thanks for calling Prime Electrical. Someone will be in touch shortly. Have a great day!",
+  "endCallPhrases": ["goodbye", "bye", "thanks bye", "that's all", "hang up"],
+  "serverUrl": "https://tfdxlhkaziskkwwohtwd.supabase.co/functions/v1/vapi-webhook",
+  "hipaaEnabled": false,
+  "recordingEnabled": true,
+  "silenceTimeoutSeconds": 20,
+  "maxDurationSeconds": 600,
+  "backgroundSound": "office",
+  "backchannelingEnabled": true,
+  "backgroundDenoisingEnabled": true
+}

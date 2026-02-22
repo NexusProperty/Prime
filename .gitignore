@@ -30,3 +30,8 @@ Thumbs.db
 # Cursor AI operational files
 .agent/
 cursor-memory-bank/
+
+.vercel
+
+# Vapi scripts (may contain credentials)
+vapi-test.py

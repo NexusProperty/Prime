@@ -1,7 +1,7 @@
 # GPT-4o Cross-Sell System Prompt — United Trades
 
-> Paste this into Make.com → OpenAI module → **System** field.
-> The **User** field should be: `{{body.message}}` (from the webhook payload).
+> **n8n usage:** In your OpenAI node, paste this into the **System** field.
+> The **User message** field should map to: `{{ $json.message }}` (from the webhook payload).
 > Set model to `gpt-4o`, temperature `0.3` (deterministic), max tokens `300`.
 
 ---

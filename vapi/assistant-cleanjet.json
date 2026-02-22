@@ -1,0 +1,136 @@
+{
+  "name": "Jess — CleanJet",
+  "model": {
+    "provider": "openrouter",
+    "model": "openai/gpt-4o-mini",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are Jess, the friendly and efficient AI receptionist for CleanJet — a professional cleaning company in New Zealand. You handle bookings, enquiries, and pricing questions.\n\nYour primary jobs:\n1. Capture the caller's name, phone number, and cleaning needs early using capture_lead.\n2. Check availability and offer booking slots using check_booking_slots.\n3. Create bookings using create_booking once the caller confirms a date and time.\n4. Answer pricing questions: residential cleans from $99, commercial from $149, weekly subscription saves 20%, post-renovation cleans from $199.\n5. Offer cross-brand services naturally using cross_sell_pitch: Prime Electrical for any electrical inspection needs, AKF Construction if they mention renovation or building work that isn't finished.\n6. Send a booking confirmation SMS using send_followup_sms after creating a booking.\n7. Use search_knowledge_base for specific questions about products, processes, or service areas.\n\nTone: Friendly, efficient, organised. Emphasise eco-friendly products, professional team, and reliability.\n\nBusiness hours: Monday–Saturday 7am–6pm NZ time. After hours: take a message for next-day callback."
+      }
+    ],
+    "temperature": 0.6,
+    "maxTokens": 200,
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "capture_lead",
+          "description": "Save the caller's contact details and cleaning requirements to the database.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "description": "Caller's full name" },
+              "phone": { "type": "string", "description": "Caller's phone number" },
+              "service_type": { "type": "string", "description": "Type of clean, e.g. residential, commercial, post-renovation, end-of-tenancy" },
+              "message": { "type": "string", "description": "Brief summary of their cleaning needs" },
+              "urgency": { "type": "string", "enum": ["normal", "urgent", "emergency"], "description": "Call urgency level" }
+            },
+            "required": ["name", "phone"]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "search_knowledge_base",
+          "description": "Search CleanJet's FAQ, pricing, service areas, and product information.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "query": { "type": "string", "description": "The caller's question" }
+            },
+            "required": ["query"]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "check_booking_slots",
+          "description": "Check available booking slots for the caller's preferred date and service type.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "date_preference": { "type": "string", "description": "Their preferred date or day of week" },
+              "service_type": { "type": "string", "description": "Type of cleaning service" }
+            }
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "create_booking",
+          "description": "Create a confirmed cleaning booking once the caller has agreed on a date, time, and service.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string", "description": "Caller's full name" },
+              "phone": { "type": "string", "description": "Caller's phone number" },
+              "service_type": { "type": "string", "description": "Type of cleaning service booked" },
+              "date": { "type": "string", "description": "Confirmed booking date" },
+              "time_slot": { "type": "string", "description": "Preferred time, e.g. morning, afternoon, or specific time" },
+              "address": { "type": "string", "description": "Property address for the clean" }
+            },
+            "required": ["name", "phone", "service_type", "date"]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "cross_sell_pitch",
+          "description": "Log a cross-sell opportunity and return a verbal pitch for a complementary service.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "lead_id": { "type": "string", "description": "The lead ID from capture_lead, if available" },
+              "target_brand": { "type": "string", "enum": ["prime", "akf"], "description": "The partner brand to pitch" },
+              "reason": { "type": "string", "description": "Why this cross-sell is relevant" }
+            },
+            "required": ["target_brand", "reason"]
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "send_followup_sms",
+          "description": "Send the caller an SMS booking confirmation or follow-up.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "to_number": { "type": "string", "description": "Caller's phone number" },
+              "message_type": { "type": "string", "enum": ["quote_request", "booking_confirmation", "emergency_followup"], "description": "Type of message" }
+            },
+            "required": ["to_number", "message_type"]
+          }
+        }
+      }
+    ]
+  },
+  "voice": {
+    "provider": "11labs",
+    "voiceId": "21m00Tcm4TlvDq8ikWAM",
+    "speed": 1.0
+  },
+  "transcriber": {
+    "provider": "deepgram",
+    "model": "nova-2",
+    "language": "en",
+    "smartFormat": true,
+    "endpointing": 300
+  },
+  "firstMessage": "Hi, CleanJet! This is Jess. Are you looking to book a clean or just have a question?",
+  "endCallMessage": "Thanks for calling CleanJet. We look forward to getting your place sparkling! Have a great day.",
+  "endCallPhrases": ["goodbye", "bye", "thanks bye", "that's all", "hang up"],
+  "serverUrl": "https://tfdxlhkaziskkwwohtwd.supabase.co/functions/v1/vapi-webhook",
+  "hipaaEnabled": false,
+  "recordingEnabled": true,
+  "silenceTimeoutSeconds": 20,
+  "maxDurationSeconds": 600,
+  "backgroundSound": "office",
+  "backchannelingEnabled": true,
+  "backgroundDenoisingEnabled": true
+}

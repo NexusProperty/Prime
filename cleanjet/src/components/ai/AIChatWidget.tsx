@@ -2,11 +2,8 @@
 
 import { useState } from 'react'
 import clsx from 'clsx'
-import { brandConfig } from './brandConfig'
-import { VoiceStatusIndicator } from './VoiceStatusIndicator'
-import { ChatMessage } from './AIChatWidget/ChatMessage'
-import { ChatInput } from './AIChatWidget/ChatInput'
-import type { Brand, VoiceState, ChatMessageData } from './types'
+import { brandConfig, VoiceStatusIndicator, ChatMessage, ChatInput } from '@prime/ui-ai'
+import type { Brand, VoiceState, ChatMessageData } from '@prime/ui-ai'
 
 interface Props {
   brand: Brand

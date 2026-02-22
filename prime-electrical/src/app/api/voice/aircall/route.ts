@@ -1,44 +1,40 @@
 /**
- * Aircall Webhook → Callback Router
+ * Aircall Webhook → Vapi AI Callback
  *
  * Receives call.ended and call.voicemail_left events from Aircall.
- * When a call is missed or voicemail left, runs a two-track callback:
- *
- * Track 1 — Vapi AI (Max): Tries to call the customer back using the
- *   Twilio phone number so Max handles the conversation automatically.
- *
- * Track 2 — Aircall human fallback: If Vapi fails, uses the Aircall API
- *   to ring Weijie's Aircall app, which then connects to the customer
- *   from the NZ number +64 9 873 4246.
+ * When a call is missed (ended with duration 0 and no answer) or a
+ * voicemail is left, triggers Vapi to call the customer back with Max.
  *
  * Aircall webhook config:
- *   URL:    https://prime-electrical-nu.vercel.app/api/voice/aircall
+ *   URL:    https://theprimeelectrical.co.nz/api/voice/aircall
  *   Events: call.ended, call.voicemail_left
- *   Token:  AIRCALL_WEBHOOK_TOKEN env var
+ *   Token:  set AIRCALL_WEBHOOK_TOKEN in .env.local
  *
  * Required env vars:
- *   AIRCALL_API_ID / AIRCALL_API_TOKEN  — Aircall Basic Auth
- *   AIRCALL_WEBHOOK_TOKEN               — webhook signature validation
- *   AIRCALL_NUMBER_ID                   — Aircall number to call from (1206933)
- *   AIRCALL_USER_ID                     — Weijie's Aircall user ID (1864716)
- *   VAPI_API_KEY / VAPI_ASSISTANT_PRIME — Vapi AI
- *   VAPI_PHONE_NUMBER_ID                — Twilio number ID in Vapi
+ *   AIRCALL_WEBHOOK_TOKEN   — from Aircall webhook creation response
+ *   VAPI_API_KEY            — already set
+ *   VAPI_ASSISTANT_PRIME    — already set
+ *   VAPI_PHONE_NUMBER_ID    — ID of the Vapi phone number to call out from
  */
 import { NextRequest, NextResponse } from 'next/server'
 
-const VAPI_BASE    = 'https://api.vapi.ai'
-const AIRCALL_BASE = 'https://api.aircall.io/v1'
+const VAPI_BASE = 'https://api.vapi.ai'
 
+/** Aircall call.ended payload shape (partial) */
 interface AircallPayload {
   event: string
   token: string
   data: {
     id: number
     direction: 'inbound' | 'outbound'
-    status: string
-    duration: number
-    raw_digits: string
-    number: { digits: string; id: number }
+    status: string          // "missed", "answered", "done", "voicemail"
+    duration: number        // seconds
+    missed_call_reason?: string
+    raw_digits: string      // caller number e.g. "+64212345678"
+    number: {
+      digits: string        // Aircall number dialled
+      id: number
+    }
     user?: { id: number; name: string }
   }
 }
@@ -55,82 +51,16 @@ function isMissedCall(payload: AircallPayload): boolean {
   return false
 }
 
-/** Track 1: Vapi AI calls the customer back with Max */
-async function tryVapiCallback(callerNumber: string): Promise<{ ok: boolean; callId?: string; error?: string }> {
-  const vapiKey       = process.env.VAPI_API_KEY
-  const assistantId   = process.env.VAPI_ASSISTANT_PRIME
-  const phoneNumberId = process.env.VAPI_PHONE_NUMBER_ID  // Twilio number in Vapi
-
-  if (!vapiKey || !assistantId || !phoneNumberId) {
-    return { ok: false, error: 'Vapi env vars not set' }
-  }
-
-  const res = await fetch(`${VAPI_BASE}/call/phone`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${vapiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      assistantId,
-      phoneNumberId,
-      customer: { number: callerNumber },
-      assistantOverrides: {
-        firstMessage: `Hi, this is Max from Prime Electrical — I see you just tried to reach us. How can I help?`,
-      },
-    }),
-  })
-
-  if (!res.ok) {
-    const err = await res.text()
-    return { ok: false, error: err }
-  }
-
-  const data = await res.json()
-  return { ok: true, callId: data.id }
-}
-
-/**
- * Track 2: Aircall outbound call — rings Weijie's Aircall app first,
- * then connects to the customer from the NZ number.
- */
-async function tryAircallCallback(callerNumber: string): Promise<{ ok: boolean; callId?: number; error?: string }> {
-  const apiId    = process.env.AIRCALL_API_ID
-  const apiToken = process.env.AIRCALL_API_TOKEN
-  const userId   = process.env.AIRCALL_USER_ID   || '1864716'
-  const numberId = process.env.AIRCALL_NUMBER_ID  || '1206933'
-
-  if (!apiId || !apiToken) {
-    return { ok: false, error: 'Aircall credentials not set' }
-  }
-
-  const auth = Buffer.from(`${apiId}:${apiToken}`).toString('base64')
-
-  const res = await fetch(`${AIRCALL_BASE}/calls`, {
-    method: 'POST',
-    headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      user_id:   parseInt(userId),
-      number_id: parseInt(numberId),
-      to:        callerNumber,
-    }),
-  })
-
-  if (!res.ok) {
-    const err = await res.text()
-    return { ok: false, error: err }
-  }
-
-  const data = await res.json()
-  return { ok: true, callId: data.call?.id }
-}
-
 export async function POST(request: NextRequest) {
   const body = (await request.json()) as AircallPayload
 
-  // Validate webhook token
+  // Validate Aircall webhook token
   const expectedToken = process.env.AIRCALL_WEBHOOK_TOKEN
   if (expectedToken && body.token !== expectedToken) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
+  // Only act on missed/voicemail calls
   if (!isMissedCall(body)) {
     return NextResponse.json({ ok: true, action: 'ignored' })
   }
@@ -140,25 +70,47 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, action: 'anonymous_caller_skipped' })
   }
 
-  // Track 1: try Vapi AI callback
-  const vapiResult = await tryVapiCallback(callerNumber)
-  if (vapiResult.ok) {
-    console.log('[callback] Vapi AI callback OK → callId:', vapiResult.callId, '→', callerNumber)
-    return NextResponse.json({ ok: true, action: 'vapi_ai_callback', callId: vapiResult.callId, to: callerNumber })
+  // Trigger Vapi outbound call — Max calls the missed caller back
+  const vapiKey        = process.env.VAPI_API_KEY
+  const assistantId    = process.env.VAPI_ASSISTANT_PRIME
+  const phoneNumberId  = process.env.VAPI_PHONE_NUMBER_ID
+
+  if (!vapiKey || !assistantId || !phoneNumberId) {
+    console.error('[aircall-webhook] Missing Vapi env vars')
+    return NextResponse.json({ error: 'Vapi not configured' }, { status: 500 })
   }
 
-  console.warn('[callback] Vapi failed:', vapiResult.error, '— falling back to Aircall')
-
-  // Track 2: Aircall human callback fallback
-  const aircallResult = await tryAircallCallback(callerNumber)
-  if (aircallResult.ok) {
-    console.log('[callback] Aircall human callback OK → callId:', aircallResult.callId, '→', callerNumber)
-    return NextResponse.json({ ok: true, action: 'aircall_human_callback', callId: aircallResult.callId, to: callerNumber })
+  const vapiPayload = {
+    assistantId,
+    phoneNumberId,
+    customer: { number: callerNumber },
+    assistantOverrides: {
+      firstMessage: `Hi, this is Max from Prime Electrical calling back — I see you tried to reach us just now. How can I help?`,
+    },
   }
 
-  console.error('[callback] Both tracks failed. Aircall error:', aircallResult.error)
-  return NextResponse.json(
-    { ok: false, action: 'both_failed', vapiError: vapiResult.error, aircallError: aircallResult.error },
-    { status: 502 }
-  )
+  const vapiRes = await fetch(`${VAPI_BASE}/call/phone`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${vapiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(vapiPayload),
+  })
+
+  if (!vapiRes.ok) {
+    const err = await vapiRes.text()
+    console.error('[aircall-webhook] Vapi error:', err)
+    return NextResponse.json({ error: 'Vapi call failed', detail: err }, { status: 502 })
+  }
+
+  const vapiCall = await vapiRes.json()
+  console.log('[aircall-webhook] Vapi callback initiated:', vapiCall.id, '→', callerNumber)
+
+  return NextResponse.json({
+    ok: true,
+    action: 'vapi_callback_triggered',
+    callId: vapiCall.id,
+    to: callerNumber,
+  })
 }

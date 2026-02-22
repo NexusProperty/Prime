@@ -4,10 +4,10 @@
  * Receives form data from LeadCaptureForm, saves a new lead to Supabase,
  * then fires a Make.com webhook so GPT-4o can analyse and enrich the lead.
  *
- * Make.com scenario setup:
- *   1. Create a "Custom Webhook" trigger in Make.com → copy the URL
- *   2. Set MAKE_WEBHOOK_URL in .env.local to that URL
- *   3. The scenario receives this payload and should call GPT-4o, then POST
+ * n8n workflow setup:
+ *   1. Create a "Webhook" trigger node in n8n → copy the Production URL
+ *   2. Set N8N_WEBHOOK_URL in .env.local to that URL
+ *   3. The workflow receives this payload, calls GPT-4o via OpenAI node, then POSTs
  *      results back to /api/leads/enrich with header x-enrich-secret: <ENRICH_SECRET>
  */
 import { NextRequest, NextResponse } from 'next/server'
@@ -51,14 +51,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to save lead' }, { status: 500 })
   }
 
-  // Fire-and-forget: trigger Make.com to process the lead with GPT-4o
-  const webhookUrl = process.env.MAKE_WEBHOOK_URL
+  // Fire-and-forget: trigger n8n to process the lead with GPT-4o
+  const webhookUrl = process.env.N8N_WEBHOOK_URL
   if (webhookUrl) {
     fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ leadId: lead.id, name, phone, email, message, serviceType, brand }),
-    }).catch((err) => console.error('[leads/submit] Make.com webhook error:', err))
+    }).catch((err) => console.error('[leads/submit] n8n webhook error:', err))
   }
 
   const crossSell = detectCrossSell(

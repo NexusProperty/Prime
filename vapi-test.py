@@ -10,9 +10,12 @@ Usage:
   python3 vapi-test.py jess     # Jess — CleanJet
 """
 
+import os
 import sys, json, subprocess
 
-API_KEY = "7f6fff5d-df27-42f5-8503-63d3d3f84330"
+API_KEY = os.environ.get("VAPI_API_KEY", "")
+if not API_KEY:
+    raise RuntimeError("VAPI_API_KEY environment variable is not set. Export it before running this script.")
 BASE    = "https://api.vapi.ai"
 
 ASSISTANTS = {

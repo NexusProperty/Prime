@@ -10,7 +10,7 @@
 //   Table:       leads
 //   Events:      UPDATE
 //   HTTP Method: POST
-//   URL:         https://<your-domain>/api/jobs/sync
+//   URL:         https://prime-electrical-nu.vercel.app/api/jobs/sync
 //   Headers:     x-sync-secret: <JOB_SYNC_WEBHOOK_SECRET>
 //
 // The webhook fires on every UPDATE so we gate on the new status value and
