@@ -2,33 +2,52 @@
  * Knowledge Base Embedding Script
  *
  * Reads the seed markdown files, chunks them at paragraph boundaries,
- * generates OpenAI embeddings (text-embedding-3-small), and upserts
- * rows into the Supabase knowledge_base table.
+ * generates embeddings (text-embedding-3-small) via OpenRouter or OpenAI,
+ * and upserts rows into the Supabase knowledge_base table.
  *
  * Usage:
  *   export SUPABASE_URL=https://tfdxlhkaziskkwwohtwd.supabase.co
  *   export SUPABASE_SERVICE_ROLE_KEY=your-key
- *   export OPENAI_API_KEY=your-key
+ *   export OPENROUTER_API_KEY=sk-or-...   (preferred)
+ *   -- OR --
+ *   export OPENAI_API_KEY=sk-...
+ *
+ *   # Embed all brands:
  *   deno run --allow-net --allow-env --allow-read supabase/seed/embed-knowledge-base.ts
+ *
+ *   # Embed a single brand:
+ *   BRAND=prime deno run --allow-net --allow-env --allow-read supabase/seed/embed-knowledge-base.ts
  */
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SUPABASE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+const OPENROUTER_KEY = Deno.env.get('OPENROUTER_API_KEY') ?? '';
 const OPENAI_KEY = Deno.env.get('OPENAI_API_KEY') ?? '';
+const EMBED_KEY = OPENROUTER_KEY || OPENAI_KEY;
+const EMBED_URL = OPENROUTER_KEY
+  ? 'https://openrouter.ai/api/v1/embeddings'
+  : 'https://api.openai.com/v1/embeddings';
+const BRAND_FILTER = Deno.env.get('BRAND') ?? '';
 
-if (!SUPABASE_URL || !SUPABASE_KEY || !OPENAI_KEY) {
-  console.error('Missing required env vars: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY');
+if (!SUPABASE_URL || !SUPABASE_KEY || !EMBED_KEY) {
+  console.error('Missing required env vars: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, and OPENROUTER_API_KEY or OPENAI_API_KEY');
   Deno.exit(1);
 }
 
+console.log(`Embedding provider: ${OPENROUTER_KEY ? 'OpenRouter' : 'OpenAI'} | URL: ${EMBED_URL}`);
+
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const SEED_FILES: Array<{ brand: string; path: string; source: string }> = [
+const ALL_SEED_FILES: Array<{ brand: string; path: string; source: string }> = [
   { brand: 'prime',    path: './supabase/seed/knowledge_base/prime-faq.md',    source: 'faq' },
   { brand: 'akf',      path: './supabase/seed/knowledge_base/akf-faq.md',      source: 'faq' },
   { brand: 'cleanjet', path: './supabase/seed/knowledge_base/cleanjet-faq.md', source: 'faq' },
 ];
+
+const SEED_FILES = BRAND_FILTER
+  ? ALL_SEED_FILES.filter((f) => f.brand === BRAND_FILTER)
+  : ALL_SEED_FILES;
 
 interface Chunk {
   brand: string;
@@ -67,12 +86,17 @@ function chunkMarkdown(text: string, brand: string, source: string): Chunk[] {
 }
 
 async function embedText(text: string): Promise<number[]> {
-  const res = await fetch('https://api.openai.com/v1/embeddings', {
+  const headers: Record<string, string> = {
+    'Authorization': `Bearer ${EMBED_KEY}`,
+    'Content-Type': 'application/json',
+  };
+  if (OPENROUTER_KEY) {
+    headers['HTTP-Referer'] = 'https://tfdxlhkaziskkwwohtwd.supabase.co';
+    headers['X-Title'] = 'Prime Group Knowledge Base';
+  }
+  const res = await fetch(EMBED_URL, {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${OPENAI_KEY}`,
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify({ model: 'text-embedding-3-small', input: text }),
   });
 
@@ -114,7 +138,7 @@ async function main(): Promise<void> {
             embedding,
             source: chunk.source,
           },
-          { onConflict: 'title', ignoreDuplicates: false },
+          { onConflict: 'brand,title', ignoreDuplicates: false },
         );
 
         if (error) {

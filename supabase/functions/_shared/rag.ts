@@ -3,7 +3,11 @@ import { env, OPENAI_API_KEY } from './env.ts';
 
 const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
 
-const EMBED_URL = 'https://api.openai.com/v1/embeddings';
+const OPENROUTER_API_KEY: string = Deno.env.get('OPENROUTER_API_KEY') ?? '';
+const EMBED_KEY = OPENROUTER_API_KEY || OPENAI_API_KEY;
+const EMBED_URL = OPENROUTER_API_KEY
+  ? 'https://openrouter.ai/api/v1/embeddings'
+  : 'https://api.openai.com/v1/embeddings';
 const EMBED_MODEL = 'text-embedding-3-small';
 const EMBED_TIMEOUT_MS = 3000;
 
@@ -17,22 +21,28 @@ export async function searchKnowledgeBase(
   query: string,
   brand: 'prime' | 'akf' | 'cleanjet',
 ): Promise<string> {
-  if (!OPENAI_API_KEY) {
-    console.warn('[RAG] OPENAI_API_KEY not set — knowledge base search unavailable');
+  if (!EMBED_KEY) {
+    console.warn('[RAG] No embedding key set (OPENROUTER_API_KEY or OPENAI_API_KEY) — knowledge base search unavailable');
     return 'I do not have specific information on that right now. I will have someone from the team follow up with you.';
   }
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), EMBED_TIMEOUT_MS);
 
+  const embedHeaders: Record<string, string> = {
+    'Authorization': `Bearer ${EMBED_KEY}`,
+    'Content-Type': 'application/json',
+  };
+  if (OPENROUTER_API_KEY) {
+    embedHeaders['HTTP-Referer'] = env.SUPABASE_URL;
+    embedHeaders['X-Title'] = 'Prime Group Voice Agent';
+  }
+
   let embedding: number[];
   try {
     const embedRes = await fetch(EMBED_URL, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
+      headers: embedHeaders,
       body: JSON.stringify({ model: EMBED_MODEL, input: query }),
       signal: controller.signal,
     });
