@@ -27,9 +27,10 @@ interface QueueItem {
   site_id: string;
   record_id: string | null;
   contact_id: string | null;
-  delivery_type: 'webhook' | 'email' | 'sms';
+  delivery_type: 'webhook' | 'email' | 'sms' | 'telegram';
   destination_url: string | null;
   destination_email: string | null;
+  telegram_chat_id: number | null;
   payload: Record<string, unknown>;
   attempt_count: number;
   max_attempts: number;
@@ -114,6 +115,35 @@ async function deliverEmail(item: QueueItem): Promise<{ ok: boolean; error?: str
   }
 }
 
+async function deliverTelegram(item: QueueItem): Promise<{ ok: boolean; error?: string }> {
+  const token = Deno.env.get('TELEGRAM_BOT_TOKEN');
+  if (!token) return { ok: false, error: 'TELEGRAM_BOT_TOKEN not configured' };
+  if (!item.telegram_chat_id) return { ok: false, error: 'No telegram_chat_id configured' };
+
+  const text = (item.payload.text as string) ?? JSON.stringify(item.payload);
+  const truncated = text.length > 4000 ? text.slice(0, 3997) + '...' : text;
+
+  try {
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: item.telegram_chat_id,
+        text: truncated,
+        parse_mode: (item.payload.parse_mode as string) ?? undefined,
+      }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({ description: 'Unknown error' }));
+      return { ok: false, error: `Telegram API: ${(body as { description?: string }).description ?? res.status}` };
+    }
+    return { ok: true };
+  } catch (err: unknown) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Network error' };
+  }
+}
+
 async function logFailedAlert(
   supabase: ReturnType<typeof createClient>,
   item: QueueItem,
@@ -165,6 +195,8 @@ Deno.serve(async (_req: Request): Promise<Response> => {
         result = await deliverWebhook(item);
       } else if (item.delivery_type === 'email') {
         result = await deliverEmail(item);
+      } else if (item.delivery_type === 'telegram') {
+        result = await deliverTelegram(item);
       } else {
         result = { ok: false, error: `Unsupported delivery_type: ${item.delivery_type}` };
       }

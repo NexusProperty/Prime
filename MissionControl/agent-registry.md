@@ -106,6 +106,36 @@ IF confidence < 0.7: log escalation to agent_actions, notify human
 
 ---
 
+## Agent 5: Telegram Bot
+
+| Property | Value |
+|----------|-------|
+| **Name** | `telegram_bot` |
+| **Type** | `custom` |
+| **Purpose** | Routes inbound Telegram messages to appropriate Mission Control agents and delivers responses; handles freeform LLM chat with conversation history |
+| **Trigger events** | `telegram_message` (inbound Telegram message via webhook) |
+| **can_read** | `telegram_sessions`, `telegram_messages`, `contacts`, `agent_memory` |
+| **can_write** | `telegram_sessions`, `telegram_messages`, `outbound_queue` |
+| **Escalation** | Rate limit: 10 messages/60s per chat. Admin-only commands rejected for non-admin users. |
+| **Timeout** | 30 seconds (LLM path); < 2 seconds (command path) |
+| **Cursor agents** | `edge-function-developer-fast` (Deno Edge Function) |
+| **Deployment Status** | ✅ Live — `supabase/functions/telegram-webhook/index.ts` deployed. Webhook registered at Telegram. Phase 6 complete. |
+
+**Command routing:**
+```
+telegram_message → auth check → rate limit check →
+  /start → session + email linking
+  /status → data-monitor report (admin only)
+  /leads → recent high-score contacts with inline keyboard (admin only)
+  /help → command list
+  [freeform] → sendTyping → OpenRouter LLM (gpt-4o-mini) → response
+  [callback_query] → qualify/call action handler
+```
+
+**SQL registration:** Uses `telegram_sessions` and `telegram_messages` tables (migration `20260223002_telegram_tables.sql`).
+
+---
+
 ## Agent Trigger Map
 
 | Event Type | Agent(s) Triggered | Mode |
@@ -116,6 +146,7 @@ IF confidence < 0.7: log escalation to agent_actions, notify human
 | `order_placed` | Lead Qualifier | Auto |
 | `call_initiated` | Voice Intake | Auto (Vapi) |
 | `scheduled:15min` | Data Monitor | Auto (cron) |
+| `telegram_message` | Telegram Bot | Auto (Telegram webhook) |
 | `ticket_created` | [Future agent] | To be assigned |
 | `page_view` | [Future agent] | To be assigned |
 

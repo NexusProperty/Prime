@@ -1,0 +1,105 @@
+---
+description: "n8n workflow building — applies when building, editing, or validating n8n workflows using MCP tools"
+globs:
+  - "**/plans/n8n-*.md"
+  - "**/n8n/**/*.json"
+alwaysApply: false
+---
+
+# n8n Workflow Builder Rules
+
+Read `f:\Prime\n8n\MASTER_KNOWLEDGE.md` before starting any n8n workflow task. Then read the relevant skills from `f:\Prime\.cursor\skills\` based on your task (see skill list at the bottom of this rule).
+
+---
+
+## Critical: nodeType Format (§2)
+
+**Two different prefixes — using the wrong one causes "Node not found":**
+
+| Tool context | Format | Example |
+|---|---|---|
+| search_nodes / get_node / validate_node | `nodes-base.*` | `nodes-base.slack` |
+| n8n_create_workflow / n8n_update_partial_workflow | `n8n-nodes-base.*` | `n8n-nodes-base.slack` |
+| LangChain AI nodes | `@n8n/n8n-nodes-langchain.*` | `@n8n/n8n-nodes-langchain.agent` |
+
+`search_nodes` returns BOTH formats — use `workflowNodeType` field for workflow tools.
+
+---
+
+## MCP Tool Selection (§1)
+
+**Always available (no API needed):** search_nodes, get_node, validate_node, validate_workflow, search_templates, get_template, tools_documentation, n8n_health_check
+
+**Requires N8N_API_URL + N8N_API_KEY:** n8n_create_workflow, n8n_update_partial_workflow, n8n_validate_workflow, n8n_test_workflow, n8n_deploy_template, n8n_workflow_versions, n8n_autofix_workflow
+
+**Most used tool:** `n8n_update_partial_workflow` (99% success rate, 50–200ms)
+
+---
+
+## Standard Build Sequence
+
+```
+1. search_nodes({query: "keyword"})           → find nodeType
+2. get_node({nodeType: "nodes-base.X"})       → understand config (detail: "standard")
+3. validate_node({nodeType, config, profile: "runtime"}) → pre-check
+4. n8n_create_workflow({name, nodes, connections})
+5. n8n_validate_workflow({id})
+6. n8n_update_partial_workflow({id, intent: "...", operations: [...]})
+7. Repeat steps 5–6 until complete
+8. activateWorkflow operation
+```
+
+**Workflows are built iteratively (avg 56s between edits) — NEVER one-shot.**
+
+---
+
+## Validation Rules (§5)
+
+- Always use `profile: "runtime"` — balanced, catches real errors
+- Expect 2–3 validate → fix cycles (23s thinking, 58s fixing per cycle)
+- Auto-sanitization runs on ALL nodes during ANY update — do not fight it
+- For broken connections: use `cleanStaleConnections` operation
+- For operator structure errors: use `n8n_autofix_workflow`
+
+---
+
+## Expression Syntax (§7)
+
+```javascript
+{{$json.body.email}}        // Webhook payload (NOT {{$json.email}})
+{{$json.fieldName}}         // Standard node output
+{{$node["Name"].json.field}} // Reference another node
+```
+
+**Most common mistake:** Missing `.body` for webhook data.
+
+---
+
+## The 6 Mistakes to Avoid (§8)
+
+1. Wrong nodeType prefix → "Node not found"
+2. `detail: "full"` by default → wastes 3–8K tokens
+3. No validation profile → false positives or missed errors
+4. Fighting auto-sanitization → unnecessary confusion
+5. Manual `sourceIndex` → use `branch: "true"` / `case: 0` instead
+6. No `intent` param → less helpful MCP responses
+
+---
+
+## Workflow Patterns (§3)
+
+Select one before building:
+- **Webhook:** Webhook → Validate → Transform → Respond
+- **API:** Trigger → HTTP Request → Transform → Action → Error Handler
+- **Database:** Schedule → Query → Transform → Write → Verify
+- **AI Agent:** Trigger → Agent (Model+Tools+Memory) → Output  ← see n8n-ai-agent.mdc
+- **Scheduled:** Schedule → Fetch → Process → Deliver → Log
+
+**Skills available in `f:\Prime\.cursor\skills\`** — read the relevant SKILL.md for deep guidance:
+- `n8n-workflow-patterns\SKILL.md` — pattern selection and build checklist
+- `n8n-mcp-tools-expert\SKILL.md` — which MCP tool to use when
+- `n8n-node-configuration\SKILL.md` — operation-aware node configuration
+- `n8n-expression-syntax\SKILL.md` — correct `{{$json...}}` expression syntax
+- `n8n-code-node\SKILL.md` — JavaScript and Python Code node patterns
+- `n8n-ai-agent-builder\SKILL.md` — full AI agent workflow guidance (see also n8n-ai-agent.mdc)
+- `n8n-validation-expert\SKILL.md` — fixing validation errors

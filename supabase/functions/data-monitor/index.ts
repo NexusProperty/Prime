@@ -151,6 +151,25 @@ Deno.serve(async (req: Request): Promise<Response> => {
     console.warn('[data-monitor] ALERTS RAISED:', alerts.length, JSON.stringify(alerts.map((a) => a.message)))
   }
 
+  // Push Telegram notification if admin chat_id is configured and alerts raised
+  const adminChatId = Deno.env.get('TELEGRAM_ADMIN_CHAT_ID')
+  if (adminChatId && alerts.length > 0 && agent?.id) {
+    const lines = [`⚠️ Mission Control Alert (${alerts.length} issue${alerts.length > 1 ? 's' : ''}):\n`]
+    for (const alert of alerts) {
+      const icon = alert.severity === 'critical' ? '🔴' : '🟡'
+      lines.push(`${icon} ${alert.message}`)
+    }
+    const { error: tgErr } = await supabase.from('outbound_queue').insert({
+      site_id: sites?.[0]?.id ?? null,
+      delivery_type: 'telegram',
+      telegram_chat_id: parseInt(adminChatId),
+      payload: { text: lines.join('\n') },
+      created_by_agent: agent.id,
+      idempotency_key: `dm-telegram-alert-${cycle}`,
+    })
+    if (tgErr) console.error('[data-monitor][telegram-push]', tgErr)
+  }
+
   // ── Log all-clear when no alerts ─────────────────────────────────────────
   if (agent?.id && alerts.length === 0) {
     await supabase.from('agent_actions').insert({

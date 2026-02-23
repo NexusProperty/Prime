@@ -1,0 +1,102 @@
+---
+description: "n8n AI agent workflow building — applies when building LangChain-based AI agent workflows in n8n"
+globs:
+  - "**/plans/n8n-*agent*.md"
+  - "**/plans/n8n-*ai*.md"
+alwaysApply: false
+---
+
+# n8n AI Agent Rules
+
+Read `f:\Prime\n8n\MASTER_KNOWLEDGE.md` §4 (AI Agent Architecture) before building any AI agent workflow. Also read `f:\Prime\.cursor\skills\n8n-ai-agent-builder\SKILL.md`.
+
+---
+
+## AI Agent Architecture (§4)
+
+```
+[Trigger: Webhook / Chat / Schedule]
+        │
+        ▼
+[@n8n/n8n-nodes-langchain.agent]   ← MAIN AGENT NODE
+        │
+        ├── ai_languageModel → [lmOpenAi / lmChatAnthropic / lmChatGoogleGemini]
+        ├── ai_tool          → [toolHttpRequest / toolCode / toolPostgres / ...]
+        ├── ai_tool          → [Multiple tools supported]
+        ├── ai_memory        → [memoryWindowBuffer / memoryPostgresChatMemory]
+        └── ai_outputParser  → [structuredOutputParser — optional]
+        │
+        ▼
+[n8n-nodes-base.webhookResponse / Slack / Email / DB]
+```
+
+---
+
+## AI Connection Types (§4)
+
+| Connection Type | What connects to the agent | Direction |
+|----------------|--------------------------|-----------|
+| `ai_languageModel` | LLM model node | model → agent |
+| `ai_tool` | Tool nodes (HTTP, DB, Code) | tool → agent |
+| `ai_memory` | Memory node | memory → agent |
+| `ai_outputParser` | Output parser node | parser → agent |
+
+---
+
+## LangChain Node Prefixes (§2)
+
+**ALL LangChain nodes use `@n8n/n8n-nodes-langchain.*` — NOT `n8n-nodes-base.*`**
+
+```
+@n8n/n8n-nodes-langchain.agent              ← Main agent
+@n8n/n8n-nodes-langchain.lmOpenAi           ← OpenAI GPT-4
+@n8n/n8n-nodes-langchain.lmChatAnthropic    ← Claude
+@n8n/n8n-nodes-langchain.lmChatGoogleGemini ← Gemini
+@n8n/n8n-nodes-langchain.memoryWindowBuffer ← Conversation memory
+@n8n/n8n-nodes-langchain.memoryPostgresChatMemory ← Persistent memory
+@n8n/n8n-nodes-langchain.toolHttpRequest    ← HTTP tool
+@n8n/n8n-nodes-langchain.toolCode          ← Code execution tool
+```
+
+---
+
+## Build Steps for AI Agent Workflows
+
+```
+1. n8n_create_workflow({name: "AI Agent", nodes: [trigger, agent], connections: {...}})
+2. n8n_update_partial_workflow({intent: "attach OpenAI model",
+     operations: [{type: "addNode", node: {type: "@n8n/n8n-nodes-langchain.lmOpenAi"}}]})
+3. n8n_update_partial_workflow({intent: "connect model to agent",
+     operations: [{type: "addConnection", source: "OpenAI", target: "AI Agent",
+                   connectionType: "ai_languageModel"}]})
+4. Attach memory via ai_memory connection
+5. Attach tools via ai_tool connections (one operation per tool)
+6. n8n_validate_workflow({id}) — use profile: "ai-friendly" for agent workflows
+7. activateWorkflow
+```
+
+---
+
+## Validation for AI Agents (§5)
+
+Use `profile: "ai-friendly"` (not `runtime`) — reduces false positives common in AI workflow configurations.
+
+```javascript
+validate_node({
+  nodeType: "nodes-base.agent",
+  config: {...},
+  profile: "ai-friendly"   // ← Use this for AI agent nodes
+})
+```
+
+---
+
+## Common AI Agent Mistakes
+
+| Mistake | Fix |
+|---------|-----|
+| Using `n8n-nodes-base.agent` | Use `@n8n/n8n-nodes-langchain.agent` |
+| Connecting model with wrong connection type | Use `ai_languageModel` (not `main`) |
+| No memory = no multi-turn conversation | Always attach memoryWindowBuffer for chat use cases |
+| `strict` validation on AI workflows | Use `ai-friendly` — AI nodes have looser config requirements |
+| One-shot workflow creation | Build iteratively: agent → model → memory → tools |

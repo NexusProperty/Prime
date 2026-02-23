@@ -1,9 +1,154 @@
 # Progress
 
 ## Overall Status
-- **Phase:** Sprint 1 Complete — All 3 sites built, QA passed, ready for deployment
+- **Phase:** N8N-ACTIVATE COMPLETE ✅ — n8n lead enrichment pipeline live
 - **Health:** 🟢 Green
-- **Last Updated:** 2026-02-22
+- **Last Updated:** 2026-02-23
+
+## 2026-02-23 — N8N-ACTIVATE COMPLETE
+
+**Action:** /reflect N8N-ACTIVATE  
+**Status:** Complete — end-to-end verified
+
+n8n lead enrichment pipeline live. OpenRouter GPT-4o mini, ai_notes written to Supabase, 9 n8n issues debugged and fixed. Workflow configured via MCP; contentType raw + Code node pre-processor pattern for dynamic JSON bodies. Reflection: `memory-bank/reflection/N8N-ACTIVATE/reflection-N8N-ACTIVATE.md`
+
+---
+
+## 2026-02-23 — TELEGRAM-001 Archived
+
+**Action:** /archive TELEGRAM-001  
+**Archive location:** `memory-bank/archive/TELEGRAM-001/archive-TELEGRAM-001.md`  
+**Files consolidated:** plan-TELEGRAM-001.md, qa-TELEGRAM-001.md, reflection-TELEGRAM-001.md  
+**Source folders deleted:** `memory-bank/plan/TELEGRAM-001/`, `memory-bank/reflection/TELEGRAM-001/`
+
+---
+
+## 2026-02-23 — TELEGRAM-001 Phase 6 Built & Deployed
+
+**Action:** /build Phase 6 — Production Hardening: rate limiting + error handling + docs  
+**Status:** Complete — deployed and tested
+
+**Files modified:**
+- `supabase/functions/telegram-webhook/index.ts` — Added module-level `rateLimitMap` + `isRateLimited()` (10 msgs/60s per instance); rate limit check after `chatId` extraction (returns 200 + user message, not 500); improved error handler (sends user-facing "Sorry, something went wrong" + returns 200 to stop Telegram retries)
+- `MissionControl/agent-registry.md` — Added Agent 5: `telegram_bot` with full property table, command routing flow, and `telegram_message` in Agent Trigger Map
+- `MissionControl/architecture.md` — Updated status header, date, Current State table (Telegram row ✅), Mermaid diagram (TB node + edges), Integration Points table (Telegram row ✅)
+
+**Known limitation:** In-memory rate limiter resets on Edge Function cold start (expected in serverless). Works within a single warm instance. The plan explicitly documents this trade-off.
+
+**Test results:** Rate limiter code verified ✅ | Admin-only blocking verified ✅ | Error handler returns 200 ✅ | Docs updated ✅
+
+**TELEGRAM-001 is now complete.** All 6 phases built, deployed, and tested.
+
+---
+
+## 2026-02-23 — TELEGRAM-001 Phase 5 Built & Deployed
+
+**Action:** /build Phase 5 — Freeform Chat: General Assistant via OpenRouter LLM  
+**Status:** Complete — deployed and tested
+
+**Files modified:**
+- `supabase/functions/telegram-webhook/index.ts` — Added `sendTyping` to imports; added `handleFreeform()` (loads conversation history from `telegram_sessions.context.messages`, injects `agent_memory` for linked contacts, calls OpenRouter API with system prompt + history, persists updated history back to session); replaced "Unknown command" fallback with `sendTyping` + `handleFreeform`; updated `/help` text to mention freeform chat
+
+**Test results:** Freeform → LLM responds ✅ | Multi-turn history preserved (4 messages after 2 turns) ✅ | Turn 2 context-aware (referenced turn 1 question) ✅ | No errors ✅
+
+**Next phase:** Phase 6 — Production Hardening (rate limiting, error envelopes, monitoring). No new prerequisites.
+
+---
+
+## 2026-02-23 — TELEGRAM-001 Phase 4 Built & Deployed
+
+**Action:** /build Phase 4 — Lead Qualifier: /leads command + inline keyboard  
+**Status:** Complete — deployed and tested
+
+**Files modified:**
+- `supabase/functions/telegram-webhook/index.ts` — Import extended with `sendInlineKeyboard`, `answerCallbackQuery`; added `handleLeads()` (admin-only, fetches contacts lead_score ≥ 60 from last 24h, sends each with inline keyboard); added `handleCallbackQuery()` for `qualify:` and `call:` callbacks; callback_query routing before `!message?.text` check; `/leads` route with early-return pattern
+
+**Test results:** /leads non-admin → access denied ✅ | /leads admin → leads with inline keyboard ✅ | qualify callback → contact tags updated ✅ | call callback → answered + follow-up sent ✅
+
+**Next phase:** Phase 5 — Freeform Chat (General Assistant via OpenRouter LLM). Prerequisite: `OPENROUTER_API_KEY` in Supabase Vault.
+
+---
+
+## 2026-02-23 — TELEGRAM-001 Phase 3 Built & Deployed
+
+**Action:** /build Phase 3 — Data Monitor: /status command + push notifications  
+**Status:** Complete — deployed and tested
+
+**Files modified:**
+- `supabase/functions/telegram-webhook/index.ts` — Added `handleStatus` function + `/status` route in command router
+- `supabase/functions/mc-send/index.ts` — Added `deliverTelegram()` function, updated `QueueItem` interface (`telegram_chat_id`, `delivery_type: 'telegram'`), updated delivery router
+- `supabase/functions/data-monitor/index.ts` — Added Telegram push notification block after alert logging (reads `TELEGRAM_ADMIN_CHAT_ID`, inserts into `outbound_queue` with `delivery_type: 'telegram'`)
+
+**Bug fixed:** `logMessage` used `.catch()` on a supabase query (throws in Deno Edge Runtime). Fixed to `const { error } = await supabase...` pattern.
+
+**Test results:** /status non-admin → access denied ✅ | /status admin → live report ✅ | mc-send Telegram delivery → deliverTelegram invoked, retry scheduled ✅ | No crashes, no 500s ✅
+
+**Pending user action:** Set `TELEGRAM_ADMIN_CHAT_ID` in Supabase Vault to enable data-monitor push alerts via mc-send.
+
+**Next phase:** Phase 4 — /leads command + inline keyboard buttons
+
+---
+
+## 2026-02-23 — TELEGRAM-001 Phase 2 Built & Deployed
+
+**Action:** /build Phase 2 — Session Management complete  
+**Files created/updated:**
+- `supabase/migrations/20260223002_telegram_tables.sql` (NEW, 73 lines) — telegram_sessions, telegram_messages, outbound_queue extension
+- `supabase/functions/telegram-webhook/index.ts` (UPDATED, 216 lines) — full router replacing echo bot
+
+**Deployed:** `telegram-webhook` v2 live on project tfdxlhkaziskkwwohtwd
+
+**Implementation:**
+- `getOrCreateSession()` — upserts telegram_sessions row, updates last_active_at
+- `logMessage()` — writes to telegram_messages (inbound + outbound)
+- `handleStart()` — sets pending_action: 'await_email' in session context
+- `handleEmailLink()` — looks up contacts by email, links contact_id to session
+- Router handles: /start, /help, pending email input, unknown commands
+
+**DB migration note:** CLI push blocked by migration history mismatch (20260221 file naming).  
+Apply `supabase/migrations/20260223002_telegram_tables.sql` via Supabase Dashboard SQL Editor.  
+Then run: `supabase migration repair --status applied 20260223002`
+
+**Next step:** Apply DB migration → test Phase 2 → /build Phase 3 (/status + push notifications)
+
+---
+
+## 2026-02-23 — TELEGRAM-001 Phase 1 Built
+
+**Action:** /build Phase 1 — Foundation complete  
+**Files created:**
+- `supabase/functions/_shared/telegram.ts` (79 lines) — Telegram Bot API helpers
+- `supabase/functions/telegram-webhook/index.ts` (101 lines) — webhook handler
+
+**Implementation:**
+- Auth: `X-Telegram-Bot-Api-Secret-Token` header with `timingSafeEqual` (mirrors `_shared/security.ts` pattern)
+- Echo bot: echoes all text messages back to sender
+- Non-text updates (stickers, photos) acknowledged silently
+- Pattern follows `vapi-webhook/index.ts` structure exactly
+
+**Next step:** Set Vault secrets → deploy → register webhook → run Phase 1 tests  
+**Gate:** Phase 2 begins only after Phase 1 test checklist passes
+
+---
+
+## 2026-02-23 — TELEGRAM-001 Initialized
+
+**Action:** /van initialized TELEGRAM-001 (Telegram Bot Integration)  
+**Complexity:** Level 4  
+**Status:** 🔵 Planning phase — awaiting /plan and user credential setup  
+
+**Scope:**
+- 6 implementation phases
+- New Edge Function: telegram-webhook
+- New shared helper: _shared/telegram.ts  
+- New DB tables: telegram_sessions, telegram_messages
+- Modified: mc-send (Telegram delivery), agent-registry.md, architecture.md
+- Total est. effort: 16–22 hrs
+
+**Blockers:**
+- User must create Telegram bot and set 3 env vars (TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, TELEGRAM_ADMIN_CHAT_ID) before Phase 1 build can begin
+
+---
 
 ## 2026-02-22 — NAV-001 Navigation Dropdowns ✅
 
@@ -114,4 +259,4 @@ Next: /reflect
 | SPRINT2-POST-DEPLOY | `memory-bank/archive/SPRINT2-POST-DEPLOY/archive-SPRINT2-POST-DEPLOY.md` |
 
 ## Next Milestone
-**Next:** N8N-ACTIVATE (user action) or VERCEL-MC — Deploy Mission Control to Vercel
+**Next:** VERCEL-MC — Deploy Mission Control to Vercel

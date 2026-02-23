@@ -1,0 +1,104 @@
+---
+description: "n8n custom node development — applies when building custom n8n nodes in TypeScript"
+globs:
+  - "nodes/**/*.ts"
+  - "credentials/**/*.ts"
+  - "**/*.node.ts"
+  - "**/*.credentials.ts"
+alwaysApply: false
+---
+
+# n8n Custom Node Development Rules
+
+Read `f:\Prime\n8n\MASTER_KNOWLEDGE.md` §6 for full node development reference.
+
+---
+
+## Stack
+
+| Component | Version |
+|-----------|---------|
+| Runtime | Node.js v22+ (LTS required) |
+| Language | TypeScript 5.x (strict mode) |
+| Framework | n8n Node SDK (INodeType, ICredentialType) |
+| CLI | @n8n/node-cli (dev, build, lint, release) |
+
+---
+
+## Architecture Decision (§6)
+
+```
+REST API with standard CRUD?          → DECLARATIVE style
+Has official SDK / client library?    → PROGRAMMATIC style
+GraphQL, WebSocket, or non-REST?      → PROGRAMMATIC style
+Complex auth (signing, multi-step)?   → PROGRAMMATIC style
+```
+
+---
+
+## Critical Patterns (§6)
+
+1. **Initialize SDK/credentials ONCE** before the item loop — never inside it
+2. **Always include `pairedItem: { item: i }`** in return data for data lineage
+3. **Use `this.continueOnFail()`** for graceful per-item error handling
+4. **Use `this.getCredentials('credentialName')`** — NEVER hardcode secrets
+5. **Register ALL nodes and credentials** in `package.json` under `n8n.nodes` + `n8n.credentials`
+
+---
+
+## File Structure (§6)
+
+**Declarative node:**
+```
+nodes/MyService/
+├── MyService.node.ts        # requestDefaults + properties
+├── MyService.node.json      # displayName, icon, group
+├── myservice.svg
+└── resources/user/
+    ├── index.ts, create.ts, get.ts, getAll.ts, update.ts, delete.ts
+```
+
+**Programmatic node:**
+```
+nodes/MyService/
+├── MyService.node.ts        # execute() method
+├── MyService.node.json
+└── myservice.svg
+```
+
+---
+
+## Routing Types (Declarative — §6)
+
+| Type | Example |
+|------|---------|
+| Body property | `{send: {type: 'body', property: 'name'}}` |
+| Query param | `{send: {type: 'query', property: 'limit'}}` |
+| Header | `{send: {type: 'header', property: 'X-Key'}}` |
+
+---
+
+## Commands (§6)
+
+```bash
+npm run dev      # Hot reload dev server at http://localhost:5678
+npm run build    # Compile TypeScript → dist/
+npm run lint     # Check code quality
+npm run lint:fix # Auto-fix lint issues
+npm run release  # Create release
+```
+
+---
+
+## Common Mistakes (§8)
+
+| ❌ Wrong | ✅ Correct |
+|---------|-----------|
+| Init SDK inside item loop | Init SDK ONCE before loop |
+| No `pairedItem` | Always include `pairedItem: {item: i}` |
+| Hardcoded API key | `this.getCredentials('myApi')` |
+| Skip `continueOnFail` | Always handle with `this.continueOnFail()` |
+| Single large file | Split into resources/operations |
+| `any` TypeScript type | Define proper interfaces |
+
+See `f:\Prime\n8n\MASTER_KNOWLEDGE.md` §6 for complete code examples and TypeScript patterns.

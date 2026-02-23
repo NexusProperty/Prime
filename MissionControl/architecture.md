@@ -1,7 +1,7 @@
 # Mission Control — System Architecture
 
-> **Status:** Initialized — sites registered, schema gap identified, 1 of 4 agents partially live
-> **Last Updated:** 2026-02-22
+> **Status:** Active — 3 of 5 agents fully live, Telegram bot integrated
+> **Last Updated:** 2026-02-23
 > **Owner:** Engineering Lead
 
 ---
@@ -24,6 +24,7 @@
 | Email responder agent | ❌ Pending — email provider not configured |
 | Lead qualifier agent | ✅ Live — `lead-qualifier` Edge Fn, fires on every `form_submit` |
 | Data monitor agent | ✅ Live — `data-monitor` Edge Fn, schedule `*/15 * * * *` (set in dashboard) |
+| Telegram bot agent | ✅ Live — `telegram-webhook` Edge Fn. Commands: /start, /status, /leads, /help. Freeform LLM chat via OpenRouter. Rate limited (10/min). |
 
 ---
 
@@ -75,6 +76,7 @@ graph LR
     LQ[Lead Qualifier]
     DM[Data Monitor]
     VA[Voice Agent\nVapi.ai]
+    TB[Telegram Bot\nOpenRouter LLM]
   end
 
   S1 -->|POST /webhooks/site1| W1
@@ -98,6 +100,8 @@ graph LR
   LQ -->|updates| CONTACTS
   LQ -->|writes| ACTIONS
   DM -->|writes| ACTIONS
+  TB -->|reads| CONTACTS
+  TB -->|writes| ACTIONS
 ```
 
 ---
@@ -109,6 +113,7 @@ graph LR
 | Email inbound | Resend / Postmark | Webhook → `emails` table | [ ] To configure |
 | Email outbound | Resend / Postmark | Edge Function → provider API | [ ] To configure |
 | Voice (Vapi) | Vapi.ai | Webhook → `vapi-webhook` Edge Fn | [✅] Prime live (+6498734191) — AKF/CleanJet pending phone numbers |
+| Telegram Bot | Telegram Bot API | Webhook → `telegram-webhook` Edge Fn | [✅] Live — rate limited, LLM chat enabled |
 | SMS / notifications | [TBD] | [TBD] | [ ] To decide |
 
 ---

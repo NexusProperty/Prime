@@ -4,11 +4,20 @@
 
 | Task | Description | Status |
 |------|-------------|--------|
+| TELEGRAM-001 | Telegram Bot Integration for Mission Control & AI Agents | ✅ ARCHIVED — 2026-02-23 |
+
+## TELEGRAM-001 — Telegram Bot Integration ✅ ARCHIVED
+**Status:** ✅ Archived 2026-02-23  
+**Archive:** `memory-bank/archive/TELEGRAM-001/archive-TELEGRAM-001.md`  
+**Summary:** Full Telegram bot integration for Mission Control — 6 phases, 5 files modified/created, deployed to Supabase Edge Functions. Commands: /start, /status, /leads, /help. Freeform LLM chat via OpenRouter (gpt-4o-mini). Push alerts via outbound_queue. Rate limited.
+
+---
 
 ## Recently Completed
 
 | Task | Description | Date |
 |------|-------------|------|
+| N8N-ACTIVATE | n8n Lead Enrichment Pipeline — OpenRouter GPT-4o mini analysis on every lead, ai_notes written to Supabase, end-to-end verified | 2026-02-23 |
 | NAV-001 | Navigation Dropdowns — desktop dropdowns + mobile grouped links for all 3 brand sites; 3 new AKF service pages | 2026-02-22 |
 | QUOTE-ACCEPT | Quote Accept Edge Function + RLS policies — 4/4 smoke tests passed, deployed live | 2026-02-23 |
 | QUOTES-001 | AI Quote Generation — 17 Edge Functions (Deno), 3-brand frontend integration, OpenRouter LLM, Resend email, cross-sell bridge | 2026-02-22 |
@@ -19,6 +28,7 @@
 
 | Task | Description | Date |
 |------|-------------|------|
+| N8N-ACTIVATE | n8n Lead Enrichment Pipeline — OpenRouter GPT-4o mini, ai_notes written to Supabase, 6-node workflow on primenz.app.n8n.cloud, end-to-end verified | 2026-02-23 |
 | NAV-001 | Navigation Dropdowns — 3 Header.tsx files updated, 3 new AKF service pages, @headlessui/react Popovers, Tailwind v4 data-open syntax | 2026-02-22 |
 | QUOTE-ACCEPT | Quote Accept Edge Function — status-transition pattern, idempotent accept, RLS SELECT policies, 4/4 smoke tests, deployed live | 2026-02-23 |
 | QUOTES-001 | AI Quote Generation System — 17 Edge Functions, quotes/quote_line_items tables, 3-brand frontend integration, 4 smoke tests passed | 2026-02-22 |
@@ -50,12 +60,55 @@
 | AI-UX-001 | AI component library + per-site features (ARCHIVED) | 2026-02-21 |
 | QA-SPRINT-001 | Production build validation + Supabase live wiring (ARCHIVED) | 2026-02-21 |
 
+## N8N-ACTIVATE — n8n Lead Enrichment Pipeline Activation
+**Status:** ✅ COMPLETE — 2026-02-23  
+**Complexity:** Level 2  
+**Created:** 2026-02-23  
+
+### Objective
+Activate the n8n lead enrichment pipeline so every form/voice submission triggers GPT-4o analysis and writes `ai_notes` back to the `leads` table. Application code is complete — this task recreates the lost workflow JSON, sets env vars, and validates end-to-end.
+
+### Pipeline Flow
+```
+Lead submitted → ingest-prime/akf/cleanjet Edge Fn → fires N8N_WEBHOOK_URL (fire-and-forget)
+n8n: Webhook → GPT-4o Analysis → Parse → POST /api/leads/enrich → Respond
+/api/leads/enrich → UPDATE leads.ai_notes + INSERT cross_sell_events
+```
+
+### Checklist
+- [x] Recreate `united-trades-lead-enrichment.workflow.json` (5-node n8n workflow)
+- [x] Recreate `IMPORT-INSTRUCTIONS.md` (7-step activation guide)
+- [x] User: Import workflow JSON into https://primenz.app.n8n.cloud
+- [x] User: Connect OpenAI credential on GPT-4o Analysis node
+- [x] User: Set `ENRICH_SECRET` in n8n Variables (Settings → Variables → New)
+- [x] User: Activate workflow → copy Production Webhook URL
+- [x] User: Set `N8N_WEBHOOK_URL` in Supabase Vault (for all 3 ingest functions)
+- [x] User: Set `N8N_WEBHOOK_URL` + `ENRICH_SECRET` in Vercel prime-electrical
+- [x] User: Redeploy supabase Edge Functions + prime-electrical
+- [x] Test: Submit lead → verify `leads.ai_notes` populated within 30s
+
+### Key Files
+- `memory-bank/build/N8N-ACTIVATE/united-trades-lead-enrichment.workflow.json`
+- `memory-bank/build/N8N-ACTIVATE/IMPORT-INSTRUCTIONS.md`
+- `supabase/functions/ingest-prime/index.ts` — fires n8n (line 51)
+- `supabase/functions/ingest-akf/index.ts` — fires n8n (line 50)
+- `supabase/functions/ingest-cleanjet/index.ts` — fires n8n (line 50)
+- `prime-electrical/src/app/api/leads/enrich/route.ts` — receives n8n POST
+- `prime-electrical/src/app/api/voice/webhook/route.ts` — also fires n8n
+
+### Env Vars Required
+| Var | Where | Value |
+|-----|-------|-------|
+| `N8N_WEBHOOK_URL` | Supabase Vault | Production webhook URL from n8n (after step 4) |
+| `N8N_WEBHOOK_URL` | Vercel — prime-electrical | Same value |
+| `ENRICH_SECRET` | Vercel — prime-electrical | Random 64-char hex string |
+| `ENRICH_SECRET` | n8n Variables | Same value (so n8n can sign requests) |
+
 ## Next Sprint Candidates
 
 | Priority | Task | Description |
 |----------|------|-------------|
-| 1 | N8N-ACTIVATE | Activate n8n workflow (user action — see IMPORT-INSTRUCTIONS.md) |
-| 2 | VERCEL-MC | Deploy Mission Control to Vercel |
+| 1 | VERCEL-MC | ✅ DONE 2026-02-23 — https://mission-control-six-fawn.vercel.app |
 
 ---
 
