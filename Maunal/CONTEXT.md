@@ -11,6 +11,8 @@
 |----------|------|--------|--------|---------|------------------|
 | ORION-001 | 2026-02-19 | `C:\Users\Jackc\.cursor\skills-cursor\`, `f:\Prime\.cursor\skills\`, `f:\Prime\.agent\skills\skills\` | Complete | FINDINGS, SOLUTIONS, TASKS, PLAN | — |
 | ORION-002 | 2026-02-22 | `F:/Prime` (full root) | Complete | REPORT, TASKS | Complementary to ORION-001 |
+| ORION-003 | 2026-02-23 | `memory-bank/archive/QUOTES-001/archive-QUOTES-001.md` | Complete | FINDINGS, REPORT, TASKS | First dedicated QUOTES-001 analysis |
+| ORION-004 | 2026-02-23 | QUOTES-001 frontend flow (user observation: quote preview not visible) | Complete | FINDINGS, SOLUTIONS, REPORT | Follow-up to ORION-003 |
 
 ### Status Values
 - **Complete** — Analysis finished, outputs generated
@@ -23,6 +25,32 @@
 ## Active Threads
 
 > Ongoing investigations or unresolved findings.
+
+### QUOTES-001 — Deferred Items
+- **Origin Session**: ORION-003
+- **Target**: `memory-bank/archive/QUOTES-001/archive-QUOTES-001.md`
+- **Unresolved Findings**:
+  1. `quote-accept` edge function missing — Critical (broken accept link in quote emails)
+  2. RLS SELECT policies missing for `quotes` and `quote_line_items` — Medium
+  3. AKF_WEBHOOK_SECRET is placeholder — Low
+  4. n8n trigger for quote-enrichment not wired — Low
+  5. AKF/CleanJet KB embeddings pending — Low
+- **Last Updated**: 2026-02-23
+- **Next Action**: Implement quote-accept (TASKS-ORION-003.md)
+
+---
+
+### QUOTES-001 — Quote Preview Flow Verification
+- **Origin Session**: ORION-004
+- **Target**: Prime Electrical + AKF + CleanJet lead form submission flows
+- **Unresolved Findings**:
+  1. AKF Construction route.ts URL bug (`select=id?id`) — confirmed, needs 5-min fix — HIGH
+  2. Prime Electrical end-to-end flow not verified locally — needs manual test — MEDIUM
+  3. Silent failure mode hides all quote errors — no user feedback if AI fails — MEDIUM
+- **Last Updated**: 2026-02-23
+- **Next Action**: Fix AKF URL bug, then test Prime Electrical form submission end-to-end
+
+---
 
 ### United Trades — Sprint 2 Planning
 - **Origin Session**: ORION-002
@@ -63,3 +91,5 @@
 
 - ORION-001 → **new thread** (skills review; first Orion session)
 - ORION-002 → **complementary to** ORION-001 (skills review → full project audit)
+- ORION-003 → **new thread** (QUOTES-001 UI & function verification; first dedicated QUOTES analysis)
+- ORION-004 → **follow-up to** ORION-003 (quote preview visibility; user observation; AKF URL bug confirmed)

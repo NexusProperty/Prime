@@ -24,6 +24,10 @@
 | pg_net trigger for outbound HTTP from Postgres | Supabase webhooks without the Dashboard UI | `PERFORM net.http_post(url := '...', body := payload, headers := jsonb_build_object(...))` inside a PL/pgSQL trigger function |
 | Playwright `#id` scoping to avoid strict mode violations | E2E tests where same text appears in multiple elements | `page.locator('#booking').getByRole('button', { name: '1–2 Beds' })` instead of `page.getByRole('button', { name: '1–2 Beds' })` |
 | role="dialog" for modal/overlay detection in tests | CrossSellPromptCard uses `role="dialog"` — use it in Playwright to avoid strict mode on generic text | `page.getByRole('dialog', { name: /ai recommendation/i })` |
+| Return computed sub-arrays in Edge Function responses | Supabase quote generation — line_items in response payload prevents anon-key RLS barrier on sub-table reads | Include `line_items` in generate-quote response; never require client to fetch sub-table data separately |
+| Make `contact_id` optional in client-facing Edge Functions | Client may not have contactId at form submission time (before ingest runs) | Always use `z.string().uuid().optional()` for contactId in functions called from browsers |
+| Tailwind v4 boolean data attribute variants drop brackets | headlessui `data-open` state in Tailwind v4 | `group-data-open:rotate-180` NOT `group-data-[open]:rotate-180` — v4 drops brackets for boolean attrs |
+| Status-transition edge functions need only Zod + createClient (no shared LLM helpers) | Accept/reject/cancel Edge Functions | quote-accept uses only Zod, createClient; no _shared/quotes.ts helpers — simpler than generate functions |
 
 ## Communication Preferences
 

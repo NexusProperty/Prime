@@ -6,8 +6,24 @@ import {
   PopoverButton,
   PopoverBackdrop,
   PopoverPanel,
+  PopoverGroup,
 } from '@headlessui/react'
 import clsx from 'clsx'
+
+function ChevronDown({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={2}
+      stroke="currentColor"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+    </svg>
+  )
+}
 
 function MobileNavLink({
   href,
@@ -17,7 +33,11 @@ function MobileNavLink({
   children: React.ReactNode
 }) {
   return (
-    <PopoverButton as={Link} href={href} className="block w-full p-4 border-b border-slate-200 text-sm font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-colors">
+    <PopoverButton
+      as={Link}
+      href={href}
+      className="block w-full p-4 border-b border-slate-200 text-sm font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+    >
       {children}
     </PopoverButton>
   )
@@ -68,12 +88,34 @@ function MobileNavigation() {
         className="absolute inset-x-4 top-20 z-50 flex origin-top flex-col bg-white border border-slate-200 shadow-xl rounded-lg data-closed:scale-95 data-closed:opacity-0 data-enter:duration-150 data-enter:ease-out data-leave:duration-100 data-leave:ease-in"
       >
         <div className="p-2">
-          <MobileNavLink href="#services">Services</MobileNavLink>
-          <MobileNavLink href="#solar">Solar & Heat Pumps</MobileNavLink>
-          <MobileNavLink href="#smart-home">Smart Home</MobileNavLink>
-          <MobileNavLink href="#testimonials">Reviews</MobileNavLink>
+          <div className="px-4 pt-3 pb-1">
+            <p className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
+              Services
+            </p>
+          </div>
+          <MobileNavLink href="/electrical-services">Electrical Services</MobileNavLink>
+          <MobileNavLink href="/solar-service">Solar Panels</MobileNavLink>
+          <MobileNavLink href="/heat-pump-installation-service">Heat Pump Installation</MobileNavLink>
+          <MobileNavLink href="/smart-home-automation">Smart Home Automation</MobileNavLink>
+
+          <div className="px-4 pt-3 pb-1">
+            <p className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
+              Company
+            </p>
+          </div>
+          <MobileNavLink href="/about-us">About Us</MobileNavLink>
+          <MobileNavLink href="/mission-values">Mission &amp; Values</MobileNavLink>
+          <MobileNavLink href="/why-choose-us">Why Choose Us</MobileNavLink>
+          <MobileNavLink href="/testimonials">Testimonials</MobileNavLink>
+          <MobileNavLink href="/career">Careers</MobileNavLink>
+          <MobileNavLink href="/blog">Blog</MobileNavLink>
+
           <div className="mt-4 p-4">
-            <PopoverButton as={Link} href="#contact" className="flex w-full h-12 items-center justify-center bg-blue-600 font-sans text-sm font-semibold text-white rounded-full transition-colors hover:bg-blue-700">
+            <PopoverButton
+              as={Link}
+              href="/contact-us"
+              className="flex w-full h-12 items-center justify-center bg-blue-600 font-sans text-sm font-semibold text-white rounded-full transition-colors hover:bg-blue-700"
+            >
               Get a Free Quote
             </PopoverButton>
           </div>
@@ -91,6 +133,37 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
     >
       {children}
     </Link>
+  )
+}
+
+function NavDropdown({
+  label,
+  items,
+}: {
+  label: string
+  items: Array<{ href: string; label: string }>
+}) {
+  return (
+    <Popover className="relative group">
+      <PopoverButton className="inline-flex items-center gap-1 px-4 text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors focus:outline-none">
+        {label}
+        <ChevronDown className="h-3.5 w-3.5 transition-transform duration-150 group-data-open:rotate-180" />
+      </PopoverButton>
+      <PopoverPanel
+        transition
+        className="absolute left-0 top-full z-50 mt-1 w-56 origin-top-left bg-white border border-slate-200 shadow-lg rounded-md overflow-hidden data-closed:opacity-0 data-closed:-translate-y-1 transition data-enter:duration-150 data-enter:ease-out data-leave:duration-100 data-leave:ease-in"
+      >
+        {items.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="block px-4 py-3 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors border-b border-slate-100 last:border-0"
+          >
+            {item.label}
+          </Link>
+        ))}
+      </PopoverPanel>
+    </Popover>
   )
 }
 
@@ -154,17 +227,34 @@ export function Header() {
             </Link>
 
             {/* Desktop links */}
-            <div className="hidden md:flex md:items-center">
-              <NavLink href="#services">Services</NavLink>
-              <NavLink href="#solar">Solar & Heat Pumps</NavLink>
-              <NavLink href="#smart-home">Smart Home</NavLink>
-              <NavLink href="#testimonials">Reviews</NavLink>
-            </div>
+            <PopoverGroup className="hidden md:flex md:items-center">
+              <NavDropdown
+                label="Services"
+                items={[
+                  { href: '/electrical-services', label: 'Electrical Services' },
+                  { href: '/solar-service', label: 'Solar Panels' },
+                  { href: '/heat-pump-installation-service', label: 'Heat Pump Installation' },
+                  { href: '/smart-home-automation', label: 'Smart Home Automation' },
+                ]}
+              />
+              <NavDropdown
+                label="Company"
+                items={[
+                  { href: '/about-us', label: 'About Us' },
+                  { href: '/mission-values', label: 'Mission & Values' },
+                  { href: '/why-choose-us', label: 'Why Choose Us' },
+                  { href: '/testimonials', label: 'Testimonials' },
+                  { href: '/career', label: 'Careers' },
+                ]}
+              />
+              <NavLink href="/blog">Blog</NavLink>
+              <NavLink href="/contact-us">Contact</NavLink>
+            </PopoverGroup>
 
             {/* Desktop CTA */}
             <div className="hidden md:flex md:items-center">
               <Link
-                href="#contact"
+                href="/contact-us"
                 className="inline-flex h-9 items-center justify-center bg-slate-900 px-5 font-mono text-xs font-bold uppercase tracking-widest text-blue-400 transition-colors hover:bg-slate-800"
               >
                 Get a Free Quote

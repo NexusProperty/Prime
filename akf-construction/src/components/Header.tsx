@@ -6,8 +6,24 @@ import {
   PopoverButton,
   PopoverBackdrop,
   PopoverPanel,
+  PopoverGroup,
 } from '@headlessui/react'
 import clsx from 'clsx'
+
+function ChevronDown({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={2}
+      stroke="currentColor"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+    </svg>
+  )
+}
 
 function MobileNavLink({
   href,
@@ -17,7 +33,11 @@ function MobileNavLink({
   children: React.ReactNode
 }) {
   return (
-    <PopoverButton as={Link} href={href} className="block w-full p-4 border-b border-slate-800 text-sm font-bold uppercase tracking-widest text-slate-300 hover:text-white hover:bg-slate-800 transition-colors">
+    <PopoverButton
+      as={Link}
+      href={href}
+      className="block w-full p-4 border-b border-slate-800 text-sm font-bold uppercase tracking-widest text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
+    >
       {children}
     </PopoverButton>
   )
@@ -68,12 +88,30 @@ function MobileNavigation() {
         className="absolute inset-x-4 top-24 z-50 flex origin-top flex-col bg-slate-900 border-l-4 border-amber-500 shadow-2xl data-closed:scale-95 data-closed:opacity-0 data-enter:duration-150 data-enter:ease-out data-leave:duration-100 data-leave:ease-in rounded-none"
       >
         <div className="p-2">
-          <MobileNavLink href="/#projects">Projects</MobileNavLink>
-          <MobileNavLink href="/our-services">Our Services</MobileNavLink>
-          <MobileNavLink href="/about-us">About Us</MobileNavLink>
+          <div className="px-4 pt-3 pb-1">
+            <p className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-500">
+              Services
+            </p>
+          </div>
+          <MobileNavLink href="/our-services">All Services</MobileNavLink>
+          <MobileNavLink href="/deck-building">Deck Building</MobileNavLink>
+          <MobileNavLink href="/renovations">Renovations</MobileNavLink>
+          <MobileNavLink href="/fencing-landscaping">Fencing &amp; Landscaping</MobileNavLink>
+
+          <div className="px-4 pt-3 pb-1">
+            <p className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-500">
+              Company
+            </p>
+          </div>
+          <MobileNavLink href="/about-us">About AKF</MobileNavLink>
           <MobileNavLink href="/contact-us">Contact Us</MobileNavLink>
+
           <div className="mt-4 p-4">
-            <PopoverButton as={Link} href="/contact-us" className="flex w-full h-12 items-center justify-center bg-slate-900 font-sans text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-slate-800 rounded-full">
+            <PopoverButton
+              as={Link}
+              href="/contact-us"
+              className="flex w-full h-12 items-center justify-center bg-amber-500 font-sans text-sm font-bold uppercase tracking-widest text-slate-900 transition-colors hover:bg-amber-400 rounded-none"
+            >
               Get a Quote
             </PopoverButton>
           </div>
@@ -91,6 +129,37 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
     >
       {children}
     </Link>
+  )
+}
+
+function NavDropdown({
+  label,
+  items,
+}: {
+  label: string
+  items: Array<{ href: string; label: string }>
+}) {
+  return (
+    <Popover className="relative">
+      <PopoverButton className="inline-flex items-center gap-1 px-4 py-2 text-sm font-bold uppercase tracking-widest text-slate-600 hover:text-slate-900 transition-colors focus:outline-none group">
+        {label}
+        <ChevronDown className="h-3.5 w-3.5 transition-transform duration-150 group-data-open:rotate-180" />
+      </PopoverButton>
+      <PopoverPanel
+        transition
+        className="absolute left-0 top-full z-50 mt-0 w-56 origin-top-left bg-slate-900 border-l-2 border-amber-500 shadow-2xl overflow-hidden data-closed:opacity-0 data-closed:-translate-y-1 transition data-enter:duration-150 data-enter:ease-out data-leave:duration-100 data-leave:ease-in rounded-none"
+      >
+        {items.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="block px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-slate-300 hover:text-white hover:bg-slate-800 transition-colors border-b border-slate-800 last:border-0"
+          >
+            {item.label}
+          </Link>
+        ))}
+      </PopoverPanel>
+    </Popover>
   )
 }
 
@@ -123,7 +192,7 @@ export function Header() {
           className="flex h-20 items-center justify-between"
           aria-label="Main navigation"
         >
-          {/* Logo - Structural block */}
+          {/* Logo */}
           <Link
             href="/"
             aria-label="AKF Construction Home"
@@ -150,12 +219,24 @@ export function Header() {
           </Link>
 
           {/* Desktop links */}
-          <div className="hidden items-center md:flex">
-            <NavLink href="/#projects">Projects</NavLink>
-            <NavLink href="/our-services">Our Services</NavLink>
-            <NavLink href="/about-us">About Us</NavLink>
-            <NavLink href="/contact-us">Contact Us</NavLink>
-          </div>
+          <PopoverGroup className="hidden items-center md:flex">
+            <NavDropdown
+              label="Services"
+              items={[
+                { href: '/our-services', label: 'All Services' },
+                { href: '/deck-building', label: 'Deck Building' },
+                { href: '/renovations', label: 'Renovations' },
+                { href: '/fencing-landscaping', label: 'Fencing & Landscaping' },
+              ]}
+            />
+            <NavDropdown
+              label="Company"
+              items={[
+                { href: '/about-us', label: 'About AKF' },
+                { href: '/contact-us', label: 'Contact Us' },
+              ]}
+            />
+          </PopoverGroup>
 
           {/* Desktop CTAs */}
           <div className="hidden items-center gap-x-6 md:flex">

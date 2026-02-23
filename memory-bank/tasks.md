@@ -4,12 +4,14 @@
 
 | Task | Description | Status |
 |------|-------------|--------|
-| QUOTES-001 | AI Quote Generation System — Prime Group (3 Brands) | IN_PROGRESS (all functions deployed — reflect pending) |
 
 ## Recently Completed
 
 | Task | Description | Date |
 |------|-------------|------|
+| NAV-001 | Navigation Dropdowns — desktop dropdowns + mobile grouped links for all 3 brand sites; 3 new AKF service pages | 2026-02-22 |
+| QUOTE-ACCEPT | Quote Accept Edge Function + RLS policies — 4/4 smoke tests passed, deployed live | 2026-02-23 |
+| QUOTES-001 | AI Quote Generation — 17 Edge Functions (Deno), 3-brand frontend integration, OpenRouter LLM, Resend email, cross-sell bridge | 2026-02-22 |
 | MC-001 | Mission Control — 13-route Next.js app, 3 Edge Functions deployed, 2 DB migrations, pg_cron queue processor | 2026-02-22 |
 | VAPI-001 | Vapi voice agent — 3 assistants, Supabase Edge Function, pgvector RAG, Telnyx NZ — Live in Production | 2026-02-22 |
 
@@ -17,6 +19,9 @@
 
 | Task | Description | Date |
 |------|-------------|------|
+| NAV-001 | Navigation Dropdowns — 3 Header.tsx files updated, 3 new AKF service pages, @headlessui/react Popovers, Tailwind v4 data-open syntax | 2026-02-22 |
+| QUOTE-ACCEPT | Quote Accept Edge Function — status-transition pattern, idempotent accept, RLS SELECT policies, 4/4 smoke tests, deployed live | 2026-02-23 |
+| QUOTES-001 | AI Quote Generation System — 17 Edge Functions, quotes/quote_line_items tables, 3-brand frontend integration, 4 smoke tests passed | 2026-02-22 |
 | MC-001 | Mission Control — Next.js 16 app (13 routes, 85 TS files), 3 Edge Functions (ACTIVE), 4 DB tables, RLS, pg_cron queue | 2026-02-22 |
 | VAPI-001 | Vapi voice agent — 3 assistants (Max/Alex/Jess), pgvector RAG, Supabase Edge Function v8, Telnyx +6498734191, 13 KB chunks. Live. | 2026-02-22 |
 | INFRA-003 | Root tsconfig.json + E2E type imports from @prime/ui-ai — 3 files, 0 lint errors | 2026-02-22 |
@@ -50,6 +55,7 @@
 | Priority | Task | Description |
 |----------|------|-------------|
 | 1 | N8N-ACTIVATE | Activate n8n workflow (user action — see IMPORT-INSTRUCTIONS.md) |
+| 2 | VERCEL-MC | Deploy Mission Control to Vercel |
 
 ---
 
@@ -59,7 +65,7 @@
 |-------|-------|
 | **Task ID** | QUOTES-001 |
 | **Title** | AI Quote Generation System — Prime Group (3 Brands) |
-| **Status** | IN_PROGRESS (all functions deployed — reflect pending) |
+| **Status** | ✅ ARCHIVED |
 | **Complexity** | Level 3 |
 | **Priority** | HIGH |
 | **Date Created** | 2026-02-22 |
@@ -104,7 +110,7 @@ Build a shared AI quoting system for all three Prime Group brands (Prime Electri
 - `quotes` table: MISSING — must create in Phase 1
 - `quote_line_items` table: MISSING — must create in Phase 1
 
-**Next Action:** Run `/reflect` to close out QUOTES-001 — all 17 functions deployed
+**Next Action:** See `memory-bank/archive/QUOTES-001/archive-QUOTES-001.md`
 
 **Plan Document:** `memory-bank/plan/QUOTES-001/plan-QUOTES-001.md`
 **Planning Completed:** 2026-02-22
@@ -116,3 +122,5 @@ Build a shared AI quoting system for all three Prime Group brands (Prime Electri
 - Email Templates: Option B — Branded Card Layout with shared `buildQuoteEmail()` helper in `_shared/email.ts`
 - LeadCaptureForm: Option B — New `quote_preview` state (amber) between ai_processing and cross_sell
 - BookingWizard: Option B — Enhanced Step 1 with Custom Quote tab (zero impact on standard flow)
+
+---

@@ -6,8 +6,24 @@ import {
   PopoverButton,
   PopoverBackdrop,
   PopoverPanel,
+  PopoverGroup,
 } from '@headlessui/react'
 import clsx from 'clsx'
+
+function ChevronDown({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className={className}
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={2}
+      stroke="currentColor"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+    </svg>
+  )
+}
 
 function MobileNavLink({
   href,
@@ -17,7 +33,11 @@ function MobileNavLink({
   children: React.ReactNode
 }) {
   return (
-    <PopoverButton as={Link} href={href} className="block w-full p-4 border-b border-slate-100 text-sm font-bold uppercase tracking-widest text-slate-500 hover:text-sky-600 hover:bg-sky-50 transition-colors">
+    <PopoverButton
+      as={Link}
+      href={href}
+      className="block w-full p-4 border-b border-slate-100 text-sm font-bold uppercase tracking-widest text-slate-500 hover:text-sky-600 hover:bg-sky-50 transition-colors"
+    >
       {children}
     </PopoverButton>
   )
@@ -68,12 +88,33 @@ function MobileNavigation() {
         className="absolute inset-x-4 top-24 z-50 flex origin-top flex-col bg-white border-t-4 border-sky-500 shadow-2xl data-closed:scale-95 data-closed:opacity-0 data-enter:duration-150 data-enter:ease-out data-leave:duration-100 data-leave:ease-in rounded-none"
       >
         <div className="p-2">
-          <MobileNavLink href="/#services">Services</MobileNavLink>
+          <div className="px-4 pt-3 pb-1">
+            <p className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
+              Services
+            </p>
+          </div>
+          <MobileNavLink href="/regular-clean">Regular Clean</MobileNavLink>
+          <MobileNavLink href="/deep-clean">Deep Clean</MobileNavLink>
+          <MobileNavLink href="/end-of-tenancy">End of Tenancy</MobileNavLink>
+          <MobileNavLink href="/post-build-clean">Post-Build Clean</MobileNavLink>
+
+          <div className="px-4 pt-3 pb-1">
+            <p className="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">
+              Info
+            </p>
+          </div>
           <MobileNavLink href="/pricing">Pricing</MobileNavLink>
           <MobileNavLink href="/how-it-works">How It Works</MobileNavLink>
-          <MobileNavLink href="/#testimonials">Reviews</MobileNavLink>
+          <MobileNavLink href="/faq">FAQ</MobileNavLink>
+          <MobileNavLink href="/great-clean-guarantee">Our Guarantee</MobileNavLink>
+          <MobileNavLink href="/about-us">About Us</MobileNavLink>
+
           <div className="mt-4 p-4">
-            <PopoverButton as={Link} href="#booking" className="flex w-full h-12 items-center justify-center bg-sky-600 font-sans text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-sky-500 rounded-full">
+            <PopoverButton
+              as={Link}
+              href="#booking"
+              className="flex w-full h-12 items-center justify-center bg-sky-600 font-sans text-sm font-bold uppercase tracking-widest text-white transition-colors hover:bg-sky-500 rounded-full"
+            >
               Book Now
             </PopoverButton>
           </div>
@@ -94,6 +135,37 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
   )
 }
 
+function NavDropdown({
+  label,
+  items,
+}: {
+  label: string
+  items: Array<{ href: string; label: string }>
+}) {
+  return (
+    <Popover className="relative h-full flex items-center">
+      <PopoverButton className="inline-flex h-full items-center gap-1 px-6 text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-sky-600 hover:bg-slate-50 border-l border-slate-100 transition-colors focus:outline-none group">
+        {label}
+        <ChevronDown className="h-3 w-3 transition-transform duration-150 group-data-open:rotate-180" />
+      </PopoverButton>
+      <PopoverPanel
+        transition
+        className="absolute left-0 top-full z-50 mt-0 w-56 origin-top-left bg-white border-t-2 border-sky-500 shadow-lg overflow-hidden data-closed:opacity-0 data-closed:-translate-y-1 transition data-enter:duration-150 data-enter:ease-out data-leave:duration-100 data-leave:ease-in rounded-none"
+      >
+        {items.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="block px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-sky-600 hover:bg-sky-50 transition-colors border-b border-slate-100 last:border-0"
+          >
+            {item.label}
+          </Link>
+        ))}
+      </PopoverPanel>
+    </Popover>
+  )
+}
+
 export function Header() {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
@@ -104,10 +176,10 @@ export function Header() {
             <span className="h-1.5 w-1.5 bg-sky-500 rounded-none" />
             First service deployment: 20% discount active
           </div>
-            <Link
-              href="/pricing"
-              className="text-[10px] font-bold tracking-widest text-sky-600 uppercase hover:text-sky-800 transition-colors"
-            >
+          <Link
+            href="/pricing"
+            className="text-[10px] font-bold tracking-widest text-sky-600 uppercase hover:text-sky-800 transition-colors"
+          >
             Review Pricing Matrix →
           </Link>
         </div>
@@ -143,12 +215,27 @@ export function Header() {
           </Link>
 
           {/* Desktop links */}
-          <div className="hidden h-full items-center border-r border-slate-100 md:flex">
-            <NavLink href="/#services">Services</NavLink>
+          <PopoverGroup className="hidden h-full items-center border-r border-slate-100 md:flex">
+            <NavDropdown
+              label="Services"
+              items={[
+                { href: '/regular-clean', label: 'Regular Clean' },
+                { href: '/deep-clean', label: 'Deep Clean' },
+                { href: '/end-of-tenancy', label: 'End of Tenancy' },
+                { href: '/post-build-clean', label: 'Post-Build Clean' },
+              ]}
+            />
             <NavLink href="/pricing">Pricing</NavLink>
-            <NavLink href="/how-it-works">How It Works</NavLink>
-            <NavLink href="/#testimonials">Reviews</NavLink>
-          </div>
+            <NavDropdown
+              label="Info"
+              items={[
+                { href: '/how-it-works', label: 'How It Works' },
+                { href: '/faq', label: 'FAQ' },
+                { href: '/great-clean-guarantee', label: 'Our Guarantee' },
+                { href: '/about-us', label: 'About Us' },
+              ]}
+            />
+          </PopoverGroup>
 
           {/* Desktop CTAs */}
           <div className="hidden items-center gap-x-6 pl-6 md:flex">

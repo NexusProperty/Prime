@@ -5,6 +5,26 @@
 - **Health:** 🟢 Green
 - **Last Updated:** 2026-02-22
 
+## 2026-02-22 — NAV-001 Navigation Dropdowns ✅
+
+**Status:** Complete
+
+### Changes
+- `prime-electrical/src/components/Header.tsx` — Services dropdown (4 items) + Company dropdown (5 items) + Blog + Contact flat links. Mobile: grouped sections.
+- `akf-construction/src/components/Header.tsx` — Services dropdown (4 items including 3 new pages) + Company dropdown (2 items). Mobile: grouped sections.
+- `cleanjet/src/components/Header.tsx` — Services dropdown (4 service pages) + Pricing flat link + Info dropdown (4 items). Mobile: grouped sections.
+- `akf-construction/src/app/deck-building/page.tsx` — NEW: Deck building service page with hero + 6-item service grid + CTA
+- `akf-construction/src/app/renovations/page.tsx` — NEW: Renovations service page with hero + 6-item service grid + CTA
+- `akf-construction/src/app/fencing-landscaping/page.tsx` — NEW: Fencing & landscaping service page with hero + 6-item service grid + CTA
+
+### Technical
+- All dropdowns use `@headlessui/react` `Popover`/`PopoverGroup` (already installed)
+- `PopoverGroup` ensures only one dropdown open at a time
+- `ChevronDown` icon rotates 180° when dropdown open via `group-data-open:rotate-180` (Tailwind v4 syntax)
+- 0 lint errors across all files
+
+---
+
 ## 2026-02-22 — QUOTES-001 Phase 7 — P2 Functions Complete
 
 4 P2 Edge Functions created and deployed:
@@ -79,11 +99,14 @@ Next: /reflect
 | 2026-02-22 | MC-001 Session 1: Mission Control web app built — 13 routes, 85 TS files, 4 DB tables, 3 Edge Functions scaffolded |
 | 2026-02-22 | MC-001 Session 2: Hotfix — RLS policies (6), Edge Functions deployed (3 ACTIVE), pg_cron scheduled, optimistic UI |
 | 2026-02-22 | QUOTES-001 Phase 6: Frontend Integration — LeadCaptureForm + BookingWizard AI quote previews, 14 files, 4 functions re-deployed |
+| 2026-02-23 | QUOTE-ACCEPT: quote-accept Edge Function deployed + RLS SELECT policies applied — 4/4 smoke tests passed on first run |
 
 ## Archive References
 
 | Task | Archive Location |
 |------|-----------------|
+| QUOTE-ACCEPT | `memory-bank/archive/QUOTE-ACCEPT/archive-QUOTE-ACCEPT.md` |
+| NAV-001 | `memory-bank/archive/NAV-001/archive-NAV-001.md` |
 | MC-001 | `memory-bank/archive/MC-001/archive-MC-001.md` |
 | SPRINT3 | memory-bank/archive/SPRINT3/archive-SPRINT3.md |
 | AI-UX-001 | `memory-bank/archive/AI-UX-001/archive-AI-UX-001.md` |
@@ -91,4 +114,4 @@ Next: /reflect
 | SPRINT2-POST-DEPLOY | `memory-bank/archive/SPRINT2-POST-DEPLOY/archive-SPRINT2-POST-DEPLOY.md` |
 
 ## Next Milestone
-**Next:** INFRA-003 — Update Playwright E2E tests to import from @prime/ui-ai
+**Next:** N8N-ACTIVATE (user action) or VERCEL-MC — Deploy Mission Control to Vercel
