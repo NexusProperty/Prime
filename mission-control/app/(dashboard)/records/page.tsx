@@ -1,14 +1,14 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { useSite } from '@/lib/site-context'
 import { useRecords } from '@/hooks/useRecords'
 import type { RecordFilters, RecordType, RecordStatus } from '@/hooks/useRecords'
 import { RecordTable } from '@/components/records/RecordTable'
+import { RecordsShell } from '@/components/records/RecordsShell'
 import { Select } from '@/components/catalyst/select'
 import { Input } from '@/components/catalyst/input'
-import { Button } from '@/components/catalyst/button'
 import {
   Pagination,
   PaginationPrevious,
@@ -17,7 +17,6 @@ import {
   PaginationPage,
   PaginationGap,
 } from '@/components/catalyst/pagination'
-import Link from 'next/link'
 import { PlusIcon } from '@heroicons/react/24/outline'
 
 const RECORD_TYPES: { value: RecordType; label: string }[] = [
@@ -41,6 +40,7 @@ const PAGE_SIZE = 50
 
 export default function RecordsPage() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const { activeSite, sites } = useSite()
 
   const [type, setType] = useState<RecordType | ''>(
@@ -92,27 +92,12 @@ export default function RecordsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-zinc-950 dark:text-white">
-            Records
-          </h1>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            {activeSite ? activeSite.name : 'All Sites'} · Quotes, jobs, invoices,
-            bookings
-          </p>
-        </div>
-        <Link
-          href="/records/new"
-          className="inline-flex items-center justify-center gap-x-2 rounded-lg border border-transparent bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800 focus:outline-2 focus:outline-offset-2 focus:outline-blue-500 dark:bg-zinc-600 dark:hover:bg-zinc-500"
-        >
-          <PlusIcon className="size-5" aria-hidden />
-          New Record
-        </Link>
-      </div>
-
+    <RecordsShell
+      title="Records"
+      breadcrumb={`${activeSite ? activeSite.name : 'All Sites'} · Quotes, jobs, invoices, bookings`}
+      onNewRecord={() => router.push('/records/new')}
+    >
+      <div className="space-y-5">
       {/* Filter bar */}
       <div className="flex flex-wrap items-end gap-4 rounded-xl border border-zinc-950/10 dark:border-white/10 bg-white dark:bg-zinc-900/50 p-4">
         <div className="min-w-[140px]">
@@ -286,6 +271,7 @@ export default function RecordsPage() {
           />
         </Pagination>
       )}
-    </div>
+      </div>
+    </RecordsShell>
   )
 }

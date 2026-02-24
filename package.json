@@ -6,7 +6,8 @@
     "packages/*",
     "prime-electrical",
     "akf-construction",
-    "cleanjet"
+    "cleanjet",
+    "Demo"
   ],
   "scripts": {
     "test:e2e": "playwright test",

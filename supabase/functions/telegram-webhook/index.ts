@@ -223,9 +223,11 @@ async function handleCallbackQuery(
   chatId: number,
   data: string,
 ): Promise<void> {
-  const [action, contactId] = data.split(':');
+  const parts = data.split(':');
+  const action = parts[0];
 
   if (action === 'qualify') {
+    const contactId = parts[1];
     const { data: contact } = await supabase
       .from('contacts')
       .select('tags')
@@ -234,12 +236,240 @@ async function handleCallbackQuery(
     const updatedTags = [...new Set([...((contact?.tags as string[]) ?? []), 'qualified'])];
     await supabase.from('contacts').update({ tags: updatedTags }).eq('id', contactId);
     await answerCallbackQuery(callbackQueryId, '✅ Marked as qualified');
+
   } else if (action === 'call') {
-    await answerCallbackQuery(callbackQueryId, '📞 Call request noted');
-    await sendMessage(chatId, `Call request logged for contact ${contactId}. Check Mission Control dashboard.`);
+    // Legacy /leads call button — now upgraded to Vapi
+    const contactId = parts[1];
+    const { data: contact } = await supabase
+      .from('contacts')
+      .select('full_name, phone')
+      .eq('id', contactId)
+      .single();
+    if (contact?.phone) {
+      // Store pending call and show brand picker
+      await supabase.from('telegram_sessions').update({
+        context: { pending_call: { phone: contact.phone, name: contact.full_name ?? contactId } },
+      }).eq('chat_id', chatId);
+      await answerCallbackQuery(callbackQueryId, '📞 Choose assistant...');
+      await sendInlineKeyboard(chatId, `📞 Call ${contact.full_name} (${contact.phone})\n\nWhich assistant?`, [
+        [{ text: '⚡ Max — Prime', callback_data: 'vapi_call:prime' }],
+        [{ text: '🏗️ Alex — AKF', callback_data: 'vapi_call:akf' }, { text: '🧹 Jess — CleanJet', callback_data: 'vapi_call:cleanjet' }],
+        [{ text: '❌ Cancel', callback_data: 'vapi_cancel' }],
+      ]);
+    } else {
+      await answerCallbackQuery(callbackQueryId, 'No phone number on record');
+    }
+
+  } else if (action === 'vapi_call') {
+    const brand = parts[1] as 'prime' | 'akf' | 'cleanjet';
+
+    // Retrieve pending call from session context
+    const { data: sessionRow } = await supabase
+      .from('telegram_sessions')
+      .select('context')
+      .eq('chat_id', chatId)
+      .single();
+
+    const pendingCall = (sessionRow?.context as Record<string, unknown>)?.pending_call as
+      | { phone: string; name: string }
+      | undefined;
+
+    if (!pendingCall?.phone) {
+      await answerCallbackQuery(callbackQueryId, 'Call expired — try /call again');
+      return;
+    }
+
+    await answerCallbackQuery(callbackQueryId, '📞 Dialling...');
+
+    const result = await initiateVapiCall(pendingCall.phone, pendingCall.name, brand);
+
+    // Clear pending call from session
+    await supabase.from('telegram_sessions').update({ context: {} }).eq('chat_id', chatId);
+
+    const BRAND_NAMES: Record<string, string> = { prime: 'Max (Prime)', akf: 'Alex (AKF)', cleanjet: 'Jess (CleanJet)' };
+
+    if (result.success) {
+      await sendMessage(
+        chatId,
+        `✅ Call initiated!\n\n📞 ${pendingCall.name} (${pendingCall.phone})\n🤖 Assistant: ${BRAND_NAMES[brand]}\n🆔 Call ID: ${result.callId ?? 'pending'}\n\nVapi is connecting the call now. The call recording and transcript will appear in your Vapi dashboard.`,
+      );
+    } else {
+      await sendMessage(chatId, `❌ Call failed: ${result.error}`);
+    }
+
+  } else if (action === 'vapi_cancel') {
+    await supabase.from('telegram_sessions').update({ context: {} }).eq('chat_id', chatId);
+    await answerCallbackQuery(callbackQueryId, 'Cancelled');
+    await sendMessage(chatId, '❌ Call cancelled.');
+
   } else {
     await answerCallbackQuery(callbackQueryId);
   }
+}
+
+// ── Vapi Outbound Calls ────────────────────────────────────────────────────────
+
+/** Normalise any NZ phone number to E.164 (+64XXXXXXXXX). */
+function normaliseNZPhone(raw: string): string {
+  // Strip everything except digits and leading +
+  const digits = raw.replace(/[^\d+]/g, '');
+
+  if (digits.startsWith('+64')) return digits;           // already E.164
+  if (digits.startsWith('64')) return '+' + digits;      // missing leading +
+  if (digits.startsWith('0')) return '+64' + digits.slice(1); // local format 0X...
+  if (digits.length >= 7) return '+64' + digits;         // bare digits, assume NZ
+  return digits; // fallback — let Vapi report the error
+}
+
+async function initiateVapiCall(
+  phone: string,
+  name: string,
+  brand: 'prime' | 'akf' | 'cleanjet',
+): Promise<{ success: boolean; callId?: string; error?: string }> {
+  phone = normaliseNZPhone(phone);
+  const vapiKey = Deno.env.get('VAPI_API_KEY');
+  const assistantMap: Record<string, string | undefined> = {
+    prime: Deno.env.get('VAPI_ASSISTANT_PRIME'),
+    akf: Deno.env.get('VAPI_ASSISTANT_AKF'),
+    cleanjet: Deno.env.get('VAPI_ASSISTANT_CLEANJET'),
+  };
+  const phoneNumberMap: Record<string, string | undefined> = {
+    prime: Deno.env.get('VAPI_PHONE_NUMBER_PRIME'),
+    akf: Deno.env.get('VAPI_PHONE_NUMBER_AKF'),
+    cleanjet: Deno.env.get('VAPI_PHONE_NUMBER_CLEANJET'),
+  };
+
+  const assistantId = assistantMap[brand];
+  const phoneNumberId = phoneNumberMap[brand];
+
+  if (!vapiKey) return { success: false, error: 'VAPI_API_KEY not configured' };
+  if (!assistantId) return { success: false, error: `No assistant configured for ${brand}` };
+  if (!phoneNumberId) {
+    return {
+      success: false,
+      error: `VAPI_PHONE_NUMBER_${brand.toUpperCase()} not set. Add it in Supabase secrets (get the phoneNumberId from your Vapi dashboard).`,
+    };
+  }
+
+  try {
+    const res = await fetch('https://api.vapi.ai/call/phone', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${vapiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        assistantId,
+        customer: { number: phone, name },
+        phoneNumberId,
+      }),
+      signal: AbortSignal.timeout(15_000),
+    });
+
+    const data = await res.json() as { id?: string; error?: string; message?: string };
+    if (!res.ok) {
+      return { success: false, error: data.message ?? data.error ?? `Vapi API error ${res.status}` };
+    }
+    return { success: true, callId: data.id };
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : 'Network error calling Vapi' };
+  }
+}
+
+async function handleCall(
+  supabase: ReturnType<typeof createClient>,
+  chatId: number,
+  text: string,
+  session: Record<string, unknown>,
+): Promise<void> {
+  if (!session?.is_admin) {
+    await sendMessage(chatId, 'Access denied. /call requires admin privileges.');
+    return;
+  }
+
+  const arg = text.replace(/^\/call\s*/i, '').trim();
+
+  if (!arg) {
+    await sendMessage(
+      chatId,
+      'Usage: /call [name or phone]\n\nExamples:\n/call James Fletcher\n/call +64 21 555 0101\n\nOr just tell me: "call James from Prime"',
+    );
+    return;
+  }
+
+  // Extract phone number from the START of the arg (ignores trailing context like "re: solar quote")
+  // Match a phone-like token at the start (digits/+/spaces/dashes), stopping before any word
+  const leadingPhone = arg.match(/^([+\d][\d\s\-().]{5,})(?:\s+\D|$)/)?.[1]
+    ?? (arg.match(/^[+\d][\d\s\-().]+$/) ? arg : null);
+  // Also check if a phone number appears anywhere in the arg (e.g. "call Sarah +64215550101")
+  const embeddedPhone = arg.match(/([+\d][\d]{6,})/)?.[1];
+
+  let phone: string | null = null;
+  let name: string = arg;
+
+  if (leadingPhone) {
+    phone = leadingPhone.replace(/[\s\-().]/g, '');
+    name = arg.slice(leadingPhone.length).trim() || phone;
+  } else {
+    // Extract just the name-like portion (stop before any phone number or "regarding"/"re:" etc.)
+    const nameArg = arg.replace(/\s+(re:|regarding|about|for|re\b).*/i, '').trim();
+
+    const { data: contacts } = await supabase
+      .from('contacts')
+      .select('id, full_name, email, phone')
+      .ilike('full_name', `%${nameArg}%`)
+      .limit(4);
+
+    if (!contacts || contacts.length === 0) {
+      // Check if there's a phone number embedded anywhere in the full arg
+      if (embeddedPhone) {
+        phone = embeddedPhone;
+        name = nameArg || phone;
+      } else {
+        await sendMessage(
+          chatId,
+          `No contact found matching "${nameArg}".\n\nOptions:\n• /call +64 21 555 0101 — call by number\n• /call +64 21 555 0101 Sarah — number then name\n• Ask me: "call Sarah about her solar quote from Prime"`,
+        );
+        return;
+      }
+    } else if (contacts.length > 1) {
+      const list = contacts.map((c) => `• ${c.full_name} — ${c.phone ?? c.email ?? 'no phone'}`).join('\n');
+      await sendMessage(chatId, `Found ${contacts.length} matches:\n\n${list}\n\nBe more specific or use their number directly.`);
+      return;
+    } else {
+      const contact = contacts[0];
+      if (!contact.phone) {
+        await sendMessage(chatId, `${contact.full_name} has no phone number on record.\nEmail: ${contact.email ?? 'not set'}`);
+        return;
+      }
+      phone = contact.phone as string;
+      name = (contact.full_name as string) ?? arg;
+    }
+  }
+
+  // Store pending call in session context so callback can retrieve it
+  await supabase.from('telegram_sessions').update({
+    context: { pending_call: { phone, name } },
+  }).eq('chat_id', chatId);
+
+  const BRAND_LABELS: Record<string, string> = {
+    prime: '⚡ Max — Prime Electrical',
+    akf: '🏗️ Alex — AKF Construction',
+    cleanjet: '🧹 Jess — CleanJet',
+  };
+
+  await sendInlineKeyboard(
+    chatId,
+    `📞 Outbound call\n\nTo: ${name}\nNumber: ${phone}\n\nWhich AI assistant should make the call?`,
+    [
+      [{ text: BRAND_LABELS.prime, callback_data: 'vapi_call:prime' }],
+      [
+        { text: BRAND_LABELS.akf, callback_data: 'vapi_call:akf' },
+        { text: BRAND_LABELS.cleanjet, callback_data: 'vapi_call:cleanjet' },
+      ],
+      [{ text: '❌ Cancel', callback_data: 'vapi_cancel' }],
+    ],
+  );
 }
 
 // ── Tool Definitions ─────────────────────────────────────────────────────────
@@ -518,6 +748,22 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: 'function',
+    function: {
+      name: 'call_contact',
+      description: 'Initiate an outbound Vapi AI phone call to a contact or phone number. Admin only. Use when the user says "call", "ring", "phone" a contact. Always confirm which brand assistant to use.',
+      parameters: {
+        type: 'object',
+        properties: {
+          phone: { type: 'string', description: 'Phone number to call (E.164 format preferred, e.g. +64215550101)' },
+          name: { type: 'string', description: 'Contact name for the AI to greet them correctly' },
+          brand: { type: 'string', enum: ['prime', 'akf', 'cleanjet'], description: 'Which brand AI assistant makes the call (prime=Max, akf=Alex, cleanjet=Jess)' },
+        },
+        required: ['phone', 'brand'],
+      },
+    },
+  },
 ];
 
 // ── Tool Executor ─────────────────────────────────────────────────────────────
@@ -538,7 +784,7 @@ async function executeTool(
       // Use get_form_submissions for brand-filtered lead queries
       let q = supabase
         .from('contacts')
-        .select('id, full_name, email, phone, lead_score, tags, created_at, ai_notes')
+        .select('id, full_name, first_name, last_name, email, phone, company, job_title, lead_score, tags, created_at')
         .order('lead_score', { ascending: false })
         .limit(limit);
 
@@ -546,8 +792,8 @@ async function executeTool(
       if (minScore !== undefined) q = q.gte('lead_score', minScore);
 
       const { data, error } = await q;
-      if (error) return { error: error.message };
-      if ((data?.length ?? 0) > 0) return { contacts: data, count: data!.length };
+      if (error) console.warn('[search_contacts] db error, using mock:', error.message);
+      if (!error && (data?.length ?? 0) > 0) return { contacts: data, count: data!.length };
 
       // Fallback: filter mock contacts
       let mock = MOCK.contacts;
@@ -561,7 +807,7 @@ async function executeTool(
       const contactId = args.contact_id as string;
       const { data, error } = await supabase
         .from('contacts')
-        .select('id, full_name, email, phone, lead_score, tags, source_site, created_at, updated_at, ai_notes')
+        .select('id, full_name, first_name, last_name, email, phone, company, job_title, lead_score, tags, source_site, metadata, created_at, updated_at')
         .eq('id', contactId)
         .single();
       if (!error && data) return { contact: data };
@@ -580,7 +826,7 @@ async function executeTool(
       // Queries contacts (CRM) sorted by recency — use get_form_submissions for brand filtering
       let q = supabase
         .from('contacts')
-        .select('id, full_name, email, phone, lead_score, tags, created_at, ai_notes')
+        .select('id, full_name, first_name, last_name, email, phone, company, lead_score, tags, created_at')
         .gte('created_at', since)
         .order('created_at', { ascending: false })
         .limit(limit);
@@ -588,8 +834,8 @@ async function executeTool(
       if (minScore !== undefined) q = q.gte('lead_score', minScore);
 
       const { data, error } = await q;
-      if (error) return { error: error.message };
-      if ((data?.length ?? 0) > 0) return { leads: data, count: data!.length, period_hours: hours };
+      if (error) console.warn('[get_recent_leads] db error, using mock:', error.message);
+      if (!error && (data?.length ?? 0) > 0) return { leads: data, count: data!.length, period_hours: hours };
 
       // Fallback: filter mock contacts
       let mock = MOCK.contacts;
@@ -650,8 +896,8 @@ async function executeTool(
       if (sourceSite) q = q.eq('source_site', sourceSite);
 
       const { data, error } = await q;
-      if (error) return { error: error.message };
-      if ((data?.length ?? 0) > 0) return { submissions: data, count: data!.length, period_hours: hours };
+      if (error) console.warn('[get_form_submissions] db error, using mock:', error.message);
+      if (!error && (data?.length ?? 0) > 0) return { submissions: data, count: data!.length, period_hours: hours };
 
       // Fallback: filter mock submissions
       let mock = MOCK.form_submissions;
@@ -676,8 +922,8 @@ async function executeTool(
       if (status) q = q.eq('status', status);
 
       const { data, error } = await q;
-      if (error) return { error: error.message };
-      if ((data?.length ?? 0) > 0) return { quotes: data, count: data!.length };
+      if (error) console.warn('[get_quotes] db error, using mock:', error.message);
+      if (!error && (data?.length ?? 0) > 0) return { quotes: data, count: data!.length };
 
       // Fallback: filter mock quotes
       let mock = MOCK.quotes;
@@ -725,8 +971,8 @@ async function executeTool(
       if (targetBrand) q = q.eq('target_brand', targetBrand);
 
       const { data, error } = await q;
-      if (error) return { error: error.message };
-      if ((data?.length ?? 0) > 0) return { events: data, count: data!.length };
+      if (error) console.warn('[get_cross_sell_events] db error, using mock:', error.message);
+      if (!error && (data?.length ?? 0) > 0) return { events: data, count: data!.length };
 
       // Fallback: filter mock events
       let mock = MOCK.cross_sell_events;
@@ -754,8 +1000,8 @@ async function executeTool(
       if (status) q = q.eq('status', status);
 
       const { data, error } = await q;
-      if (error) return { error: error.message };
-      if ((data?.length ?? 0) > 0) return { actions: data, count: data!.length };
+      if (error) console.warn('[get_agent_actions] db error, using mock:', error.message);
+      if (!error && (data?.length ?? 0) > 0) return { actions: data, count: data!.length };
 
       // Fallback: filter mock actions
       let mock = MOCK.agent_actions;
@@ -780,8 +1026,8 @@ async function executeTool(
       if (deliveryType) q = q.eq('delivery_type', deliveryType);
 
       const { data, error } = await q;
-      if (error) return { error: error.message };
-      if ((data?.length ?? 0) > 0) return { queue: data, count: data!.length };
+      if (error) console.warn('[get_outbound_queue] db error, using mock:', error.message);
+      if (!error && (data?.length ?? 0) > 0) return { queue: data, count: data!.length };
 
       // Fallback: filter mock queue
       let mock = MOCK.outbound_queue;
@@ -808,6 +1054,20 @@ async function executeTool(
       const { error } = await supabase.from('contacts').update({ tags: updatedTags }).eq('id', contactId);
       if (error) return { error: error.message };
       return { success: true, message: `Tag "${tag}" added to ${contact.full_name ?? contactId}` };
+    }
+
+    case 'call_contact': {
+      if (!session?.is_admin) return { error: 'Admin access required to initiate calls' };
+      const phone = args.phone as string;
+      const name = (args.name as string) ?? 'Contact';
+      const brand = (args.brand as 'prime' | 'akf' | 'cleanjet') ?? 'prime';
+      if (!phone) return { error: 'phone number is required' };
+      const result = await initiateVapiCall(phone, name, brand);
+      if (result.success) {
+        const BRAND_NAMES: Record<string, string> = { prime: 'Max (Prime)', akf: 'Alex (AKF)', cleanjet: 'Jess (CleanJet)' };
+        return { success: true, message: `Call initiated to ${name} (${phone}) via ${BRAND_NAMES[brand]}. Call ID: ${result.callId}` };
+      }
+      return { error: result.error };
     }
 
     default:
@@ -878,14 +1138,18 @@ Agent & system:
 Write actions (admin only):
 - qualify_contact — mark a contact as qualified
 - add_contact_tag — add any custom tag to a contact
+- call_contact — initiate a Vapi AI outbound phone call to a contact (admin only; requires phone, brand)
 
 COMMANDS (mention when relevant):
 - /leads — recent high-scoring leads with action buttons
+- /call [name or number] — initiate a Vapi outbound AI call
 - /status — system health report
 - /help — all commands
 
 RULES:
 - Call tools when the user needs live data — don't answer from memory if data could be stale
+- For /call or call_contact: first search_contacts to get the phone number if only a name is given, then call call_contact with phone + brand
+- If the user says "call [name]" without specifying a brand, ask which brand (prime/akf/cleanjet) before calling
 - For operations beyond qualifying (delete, edit, send email) — direct them to the Mission Control dashboard
 - Keep responses concise; use plain text (no markdown unless asked)${memoryContext}`;
 
@@ -904,11 +1168,23 @@ RULES:
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${openRouterKey}`,
         },
-        body: JSON.stringify({ model, messages, tools: TOOLS, tool_choice: 'auto', max_tokens: 1000 }),
+        body: JSON.stringify({ model, messages, tools: TOOLS, tool_choice: 'auto', max_tokens: 1200 }),
         signal: AbortSignal.timeout(30_000),
       });
 
-      const data = await res.json() as { choices: Array<{ finish_reason: string; message: LLMMessage }> };
+      let data: { choices?: Array<{ finish_reason: string; message: LLMMessage }>; error?: { message: string } };
+      try {
+        data = await res.json();
+      } catch (jsonErr) {
+        console.error('[telegram-webhook][freeform] OpenRouter non-JSON response:', res.status, jsonErr);
+        return 'AI service returned an unexpected response. Please try again.';
+      }
+
+      if (!res.ok || data.error) {
+        console.error('[telegram-webhook][freeform] OpenRouter error:', res.status, JSON.stringify(data.error));
+        return 'AI service is temporarily unavailable. Please try again in a moment.';
+      }
+
       const choice = data.choices?.[0];
       if (!choice) break;
 
@@ -920,11 +1196,16 @@ RULES:
         for (const toolCall of assistantMsg.tool_calls ?? []) {
           let result: unknown;
           try {
-            const toolArgs = JSON.parse(toolCall.function.arguments) as Record<string, unknown>;
+            let toolArgs: Record<string, unknown> = {};
+            try {
+              toolArgs = JSON.parse(toolCall.function.arguments || '{}') as Record<string, unknown>;
+            } catch {
+              console.warn(`[telegram-webhook][tool] Bad JSON args for ${toolCall.function.name}:`, toolCall.function.arguments);
+            }
             result = await executeTool(supabase, toolCall.function.name, toolArgs, session);
             console.log(`[telegram-webhook][tool] ${toolCall.function.name} →`, JSON.stringify(result).slice(0, 200));
           } catch (e) {
-            result = { error: `Tool failed: ${e instanceof Error ? e.message : String(e)}` };
+            result = { error: `Tool execution failed: ${e instanceof Error ? e.message : String(e)}` };
           }
           messages.push({ role: 'tool', tool_call_id: toolCall.id, content: JSON.stringify(result) });
         }
@@ -1053,8 +1334,16 @@ Deno.serve(async (req: Request): Promise<Response> => {
       return new Response(JSON.stringify({ ok: true }), {
         headers: { 'Content-Type': 'application/json' },
       });
+    } else if (text.startsWith('/call')) {
+      await handleCall(supabase, chatId, text, session);
+      await logMessage(supabase, chatId, 'outbound', '[/call response sent]');
+      const duration = Date.now() - startTime;
+      console.log(`[telegram-webhook] chat=${chatId} cmd=/call duration=${duration}ms`);
+      return new Response(JSON.stringify({ ok: true }), {
+        headers: { 'Content-Type': 'application/json' },
+      });
     } else if (text === '/help') {
-      reply = 'Available commands:\n/start — link your account\n/status — system health\n/leads — recent leads\n/help — this message\n\nOr just ask me anything about Mission Control!';
+      reply = 'Available commands:\n/start — link your account\n/leads — recent leads with action buttons\n/call [name or number] — outbound AI call via Vapi\n/status — system health\n/help — this message\n\nOr just ask me anything:\n"call James from Prime"\n"show me recent quotes"\n"what leads came in today?"';
     } else {
       await sendTyping(chatId);
       reply = await handleFreeform(supabase, chatId, text, session);

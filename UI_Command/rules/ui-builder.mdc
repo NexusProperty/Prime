@@ -1,0 +1,52 @@
+---
+description: "UI Builder rule — enforces Tailwind Plus design system standards (Templates, UI Kit, UI Blocks) for all UI generation tasks"
+alwaysApply: false
+---
+
+# UI Builder Rule
+
+When the `/ui` command is active, enforce these standards on ALL generated UI code.
+
+## Tailwind Plus Design System Standards
+
+### 1. Utility-First Architecture
+- Use Tailwind CSS utility classes for ALL styling. No inline styles. No custom CSS unless no Tailwind equivalent exists.
+- Class order: layout → spacing → sizing → typography → color → border → shadow → transition → responsive → dark mode
+
+### 2. Responsive Design (Mobile-First Mandatory)
+- ALWAYS start with mobile layout. Add `sm:`, `md:`, `lg:`, `xl:` progressively.
+- Container: `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8` — use this for all page-width containers.
+- Section padding: `py-16 sm:py-24 lg:py-32` — always responsive vertical padding.
+- Grid: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6` — responsive column counts.
+
+### 3. Dark Mode
+- Every color utility MUST have a dark mode variant.
+- Background: `bg-white dark:bg-gray-900`
+- Text primary: `text-gray-900 dark:text-white`
+- Text secondary: `text-gray-600 dark:text-gray-400`
+- Borders: `border-gray-200 dark:border-gray-700`
+- Cards: `bg-white dark:bg-gray-800`
+
+### 4. Accessibility
+- Semantic HTML: `<nav>`, `<main>`, `<section>`, `<article>`, `<aside>`, `<header>`, `<footer>`
+- Buttons: always `type="button"` unless submitting a form (`type="submit"`)
+- Images: always `alt` attribute — descriptive, not empty (unless decorative)
+- Focus states: `focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`
+- Interactive elements: `cursor-pointer` on buttons, `cursor-not-allowed opacity-50` on disabled
+
+### 5. Component Structure
+- Named exports only: `export function ComponentName() {}`
+- Props interface immediately before component: `interface ComponentNameProps { ... }`
+- One component per file
+- File name: PascalCase matching export name
+
+### 6. Tailwind Plus Source Attribution
+- Every generated component or block must include a `/* Source: Tailwind Plus [category] */` comment at the top of the file.
+
+### 7. Anti-Patterns (Violations)
+- NEVER hardcode pixel values (`w-[347px]`) without justification
+- NEVER use arbitrary color hex values without justification
+- NEVER skip dark mode variants
+- NEVER use `position: absolute` without documenting why
+- NEVER generate placeholder text like `// TODO` or `// implement later`
+- NEVER skip aria attributes on interactive or overlay elements

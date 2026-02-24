@@ -1,0 +1,40 @@
+{
+  "framework": "next",
+  "version": "15.5.10",
+  "styling": "tailwind",
+  "tailwindVersion": "4",
+  "typescript": true,
+  "componentLibrary": "headlessui",
+  "designTokens": {
+    "primaryColor": "brand-primary (oklch 0.52 0.26 255 — electric blue)",
+    "fontFamily": "Inter (--font-sans), Lexend (--font-display)",
+    "borderRadius": "lg",
+    "darkMode": true
+  },
+  "projectType": "saas",
+  "tailwindPlusTemplate": "Application shell + Marketing landing",
+  "srcDir": "src",
+  "componentDir": "src/components",
+  "pageDir": "src/app",
+  "projects": {
+    "prime-electrical": {
+      "root": "f:\\Prime\\prime-electrical",
+      "componentDir": "src/components",
+      "pageDir": "src/app",
+      "stylesFile": "src/styles/tailwind.css",
+      "primaryColor": "brand-primary (oklch 0.52 0.26 255)",
+      "accentColor": "brand-accent (oklch 0.82 0.19 90 — yellow)",
+      "fontDisplay": "Lexend"
+    },
+    "Demo": {
+      "root": "f:\\Prime\\Demo",
+      "componentDir": "src/components",
+      "pageDir": "src/app",
+      "stylesFile": "src/styles/tailwind.css",
+      "primaryColor": "brand-primary (oklch 0.55 0.22 240 — cobalt blue)",
+      "accentColor": "brand-accent (oklch 0.72 0.20 160 — teal)",
+      "fontDisplay": "Sora"
+    }
+  },
+  "detectedAt": "2026-02-25T00:00:00.000Z"
+}
